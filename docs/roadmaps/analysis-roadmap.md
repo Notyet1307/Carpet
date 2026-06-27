@@ -349,7 +349,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase | 目标 | 当前状态 |
 |---|---|---|
 | Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
-| Phase 1 | 产品语言与范围锁定 | 未完成 |
+| Phase 1 | 产品语言与范围锁定 | 部分完成：product language baseline 已完成；Matrix collaboration ADR 缺 |
 | Phase 2 | 架构边界与组件分解 | 未完成 |
 | Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created baseline 已完成；其余事件缺 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
@@ -381,12 +381,12 @@ MCR 编号按工作流领域分段，不等于 Phase 编号。
 
 ### 5.3 当前推荐顺序
 
-当前应先补齐 Phase 0 closeout，再进入 Phase 1：
+Phase 0 closeout 已完成。当前 Phase 1 状态：
 
 ```text
-1. docs/adr/0001-typescript-first-runtime.md
-2. docs/analysis/02-product-language.md
-3. docs/adr/0002-matrix-as-collaboration-surface.md
+1. docs/adr/0001-typescript-first-runtime.md 已完成
+2. docs/analysis/02-product-language.md 已完成
+3. docs/adr/0002-matrix-as-collaboration-surface.md 待完成
 ```
 
 Capability schema 这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
@@ -1376,7 +1376,7 @@ Codex 可以按 backlog 逐个 issue 开发
 进入 MVP 实现前，必须全部满足：
 
 ```text
-[ ] 产品语言已锁定，避免部门制
+[x] 产品语言已锁定，避免部门制
 [x] TypeScript-first ADR 已通过
 [ ] Matrix 作为协作层的 ADR 已通过
 [ ] Codex exec before SDK 的 ADR 已通过
