@@ -16,6 +16,7 @@ const schemas = [
   "schemas/matrix/task.rejected.schema.json",
   "schemas/matrix/capability.selected.schema.json",
   "schemas/matrix/proof.submitted.schema.json",
+  "schemas/matrix/verification.completed.schema.json",
   "schemas/matrix/approval.requested.schema.json",
   "schemas/matrix/approval.granted.schema.json",
   "schemas/matrix/approval.denied.schema.json",
@@ -113,6 +114,25 @@ const fixtureCases = [
     name: "proof submitted raw proof logs",
     schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
     fixture: "fixtures/matrix-events/invalid/proof.submitted.raw-proof-logs.invalid.json",
+    valid: false,
+  },
+  {
+    name: "verification completed valid",
+    schema: "https://notyet.dev/schemas/matrix/verification.completed.schema.json",
+    fixture: "fixtures/matrix-events/valid/verification.completed.valid.json",
+    valid: true,
+  },
+  {
+    name: "verification completed invalid result",
+    schema: "https://notyet.dev/schemas/matrix/verification.completed.schema.json",
+    fixture: "fixtures/matrix-events/invalid/verification.completed.invalid-result.invalid.json",
+    valid: false,
+  },
+  {
+    name: "verification completed raw validation logs",
+    schema: "https://notyet.dev/schemas/matrix/verification.completed.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/verification.completed.raw-validation-logs.invalid.json",
     valid: false,
   },
   {

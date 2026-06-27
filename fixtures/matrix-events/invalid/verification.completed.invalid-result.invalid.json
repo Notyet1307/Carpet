@@ -1,0 +1,25 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_019",
+  "source": "verifier://verifier_contract_001",
+  "type": "com.notyet.agent.verification.completed",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:19:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "run_id": "run_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "verifier",
+    "id": "verifier_contract_001"
+  },
+  "created_at": "2026-06-27T04:19:00Z",
+  "idempotency_key": "verification:artifact_20260627_001:invalid-result",
+  "data": {
+    "verifier_id": "verifier_contract_001",
+    "artifact_id": "artifact_20260627_001",
+    "result": "success",
+    "summary": "Result must use the event contract enum."
+  }
+}
