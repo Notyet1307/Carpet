@@ -14,6 +14,7 @@ const schemas = [
   "schemas/matrix/task.created.schema.json",
   "schemas/matrix/task.accepted.schema.json",
   "schemas/matrix/task.rejected.schema.json",
+  "schemas/matrix/proof.submitted.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -66,6 +67,24 @@ const fixtureCases = [
     name: "task rejected empty reason",
     schema: "https://notyet.dev/schemas/matrix/task.rejected.schema.json",
     fixture: "fixtures/matrix-events/invalid/task.rejected.empty-reason.invalid.json",
+    valid: false,
+  },
+  {
+    name: "proof submitted valid",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture: "fixtures/matrix-events/valid/proof.submitted.valid.json",
+    valid: true,
+  },
+  {
+    name: "proof submitted empty proof id",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture: "fixtures/matrix-events/invalid/proof.submitted.empty-proof-id.invalid.json",
+    valid: false,
+  },
+  {
+    name: "proof submitted raw proof logs",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture: "fixtures/matrix-events/invalid/proof.submitted.raw-proof-logs.invalid.json",
     valid: false,
   },
   {
