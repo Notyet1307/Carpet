@@ -325,7 +325,75 @@ File handoff          → artifact refs and proof refs
 
 ---
 
-## 5. Phase Roadmap
+## 5. 编号模型：Phase 与 MCR 不同
+
+本文使用两套编号，不能互相推导。
+
+```text
+Phase = 分析路线顺序
+MCR   = 可执行任务 / issue 编号
+```
+
+判断下一步时，优先级是：
+
+```text
+1. 先看 Analysis Phase 是否完成。
+2. 再看该 Phase 下有哪些产物缺口。
+3. 最后选择或创建对应 MCR task。
+```
+
+不要因为某个 MCR 编号更小或当前技术缺口更明显，就跳过未完成的前置 Phase。若确实要偏离 Phase 顺序，必须把偏离原因写入 handoff，并让 human owner 明确批准。
+
+### 5.1 Analysis Phase 顺序
+
+| Phase | 目标 | 当前状态 |
+|---|---|---|
+| Phase 0 | Repo Orientation 与资料基线 | 部分完成：docs baseline、inventory、asset map、worktree policy baseline 已完成；ADR 仍缺 |
+| Phase 1 | 产品语言与范围锁定 | 未完成 |
+| Phase 2 | 架构边界与组件分解 | 未完成 |
+| Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created baseline 已完成；其余事件缺 |
+| Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
+| Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
+| Phase 6 | Codex Worker Contract 分析 | 未完成 |
+| Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
+| Phase 8 | Proof Ledger 与 Approval 分析 | 部分完成：proof ledger baseline 已有；approval 缺 |
+| Phase 9 | Security Threat Model 与 Policy 分析 | 部分完成：worktree policy baseline 已有；threat model/deny-by-default matrix 缺 |
+| Phase 10 | Testing Strategy 与 Test Matrix | 未完成 |
+| Phase 11 | Prompt / Skill 设计分析 | 未完成 |
+| Phase 12 | MVP Backlog 与开发入口 | 未完成 |
+
+### 5.2 MCR 编号范围
+
+MCR 编号按工作流领域分段，不等于 Phase 编号。
+
+| MCR 范围 | 含义 | 典型 Phase |
+|---|---|---|
+| MCR-000 到 MCR-009 | repo/docs/analysis baseline | Phase 0-1 |
+| MCR-010 到 MCR-099 | event/schema/fixture baseline | Phase 3 |
+| MCR-100 到 MCR-199 | task state machine / runtime model | Phase 4 |
+| MCR-200 到 MCR-249 | Matrix gateway | Phase 7 |
+| MCR-250 到 MCR-299 | capability registry / routing | Phase 5 |
+| MCR-300 到 MCR-399 | Codex worker contract | Phase 6 |
+| MCR-400 到 MCR-499 | proof ledger / verifier | Phase 8 |
+| MCR-500 到 MCR-599 | approval / GitHub PR flow | Phase 8-9 |
+| MCR-600 到 MCR-699 | memory proposal / context pack | Phase 11 |
+| MCR-700 到 MCR-799 | E2E / dogfood / beta hardening | Phase 10-12 |
+
+### 5.3 当前推荐顺序
+
+当前应先补齐 Phase 0 closeout，再进入 Phase 1：
+
+```text
+1. docs/adr/0001-typescript-first-runtime.md
+2. docs/analysis/02-product-language.md
+3. docs/adr/0002-matrix-as-collaboration-surface.md
+```
+
+Capability schema 这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
+
+---
+
+## 6. Phase Roadmap
 
 ## Phase 0：Repo Orientation 与资料基线
 
@@ -1303,7 +1371,7 @@ Codex 可以按 backlog 逐个 issue 开发
 
 ---
 
-## 6. 分析阶段总检查清单
+## 7. 分析阶段总检查清单
 
 进入 MVP 实现前，必须全部满足：
 
@@ -1328,7 +1396,7 @@ Codex 可以按 backlog 逐个 issue 开发
 
 ---
 
-## 7. Development Entry Gate
+## 8. Development Entry Gate
 
 只有当下面的 gate 通过，才允许 Codex 开始实现 runtime：
 
@@ -1364,7 +1432,7 @@ Gate E: Backlog Lock
 
 ---
 
-## 8. MVP 实现顺序建议
+## 9. MVP 实现顺序建议
 
 分析阶段完成后，按以下顺序驱动 Codex：
 
@@ -1430,9 +1498,9 @@ Gate E: Backlog Lock
 
 ---
 
-## 9. 直接可用的 Codex Meta Prompt
+## 10. 直接可用的 Codex Meta Prompt
 
-### 9.1 分析任务启动 Prompt
+### 10.1 分析任务启动 Prompt
 
 ```text
 You are working on Matrix Codex Capability Runtime.
@@ -1462,7 +1530,7 @@ Required output:
 6. Suggested next task
 ```
 
-### 9.2 Verifier Prompt
+### 10.2 Verifier Prompt
 
 ```text
 You are the verifier for a Matrix Codex Capability Runtime analysis task.
@@ -1493,7 +1561,7 @@ Return:
 - recommended next action
 ```
 
-### 9.3 Test Designer Prompt
+### 10.3 Test Designer Prompt
 
 ```text
 You are the test designer for Matrix Codex Capability Runtime.
@@ -1522,7 +1590,7 @@ Specifically test:
 
 ---
 
-## 10. 第一批建议创建的 Issues
+## 11. 第一批建议创建的 Issues
 
 可直接转成 GitHub Issues 或 Matrix `task.created`。
 
@@ -1545,7 +1613,7 @@ Specifically test:
 
 ---
 
-## 11. 关键风险与控制
+## 12. 关键风险与控制
 
 | 风险 | 表现 | 分析阶段控制 |
 |---|---|---|
@@ -1561,7 +1629,7 @@ Specifically test:
 
 ---
 
-## 12. 参考资料
+## 13. 参考资料
 
 - Codex non-interactive mode: https://developers.openai.com/codex/noninteractive
 - Codex SDK: https://developers.openai.com/codex/sdk
@@ -1575,7 +1643,7 @@ Specifically test:
 
 ---
 
-## 13. 最终判断
+## 14. 最终判断
 
 分析阶段的真正产物不是文档数量，而是：
 

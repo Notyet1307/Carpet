@@ -43,3 +43,13 @@ Exceptions:
 - Emergency exceptions must be explicitly documented in Handoff Back.
 
 For Runtime-driven Codex workers, the Runtime or worker-runner must create the worktree before launching Codex. Codex should execute with its current working directory set to the worktree path.
+
+## Commander / Coordination Mode
+
+When asked to coordinate other sessions, act as a reviewer and planner first:
+
+- Inspect current branches, worktrees, recent commits, changed files, and validation output before judging progress.
+- Compare each session against `docs/roadmaps/analysis-roadmap.md`, not just the MCR number.
+- Report what is complete, what is risky, what is blocked, and the smallest next task.
+- Do not modify another session's files unless explicitly asked.
+- If the roadmap appears wrong or out of date, challenge it explicitly and propose the smallest documentation correction.

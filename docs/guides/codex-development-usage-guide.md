@@ -775,6 +775,19 @@ Codex 如果提出以下改动，必须停下来让 human 决策：
 
 ## 7. 分阶段 Codex 驱动方式
 
+### 7.0 Phase 与 MCR 编号关系
+
+Phase 是路线顺序，MCR 是 issue 编号。不要用 MCR 编号推断下一步。
+
+```text
+下一步判断顺序：
+1. 先看 docs/roadmaps/analysis-roadmap.md 的 Analysis Phase。
+2. 再看该 Phase 的产物缺口。
+3. 最后选择或创建对应 MCR task。
+```
+
+如果技术缺口和 Phase 顺序冲突，默认按 Phase 顺序走。要偏离时，Codex 必须明确说明偏离原因，并等 human owner 批准。
+
 ### Phase A：文档和仓库基线
 
 对应：
@@ -1746,7 +1759,9 @@ AGENTS.md 里写了不能做，所以就安全。
 
 ## 13. 第一批建议执行任务
 
-建议从这 10 个 issue 开始，不要跳到 Matrix gateway 或 Codex worker。
+这些是可执行 issue 模板，不是 Analysis Phase 顺序。选择下一步时先看 `docs/roadmaps/analysis-roadmap.md` 的 Phase 状态，再从这里拿对应任务卡。
+
+不要因为某个 MCR 编号更小、或某个技术缺口更顺手，就跳过未完成的前置 Analysis Phase。
 
 ### MCR-000：Docs Baseline
 
@@ -2180,25 +2195,27 @@ MVP 完成标准：
 
 ## 22. 最推荐的实际执行顺序
 
-如果你今天开始驱动 Codex，建议严格按这个顺序：
+如果你今天开始驱动 Codex，先按 Analysis Phase 补齐分析产物，再进入实现型 MCR。
+
+当前推荐顺序：
 
 ```text
-Step 1  MCR-000：文档入库与 AGENTS.md 更新
-Step 2  MCR-001：repo inventory
-Step 3  MCR-002：codex-multica assets map
-Step 4  MCR-030：pnpm monorepo baseline
-Step 5  MCR-010：event envelope schema
-Step 6  MCR-011：task.created schema + fixtures
-Step 7  MCR-020：proof schema + fixtures
-Step 8  MCR-100：state machine spec
-Step 9  MCR-101：state machine implementation
-Step 10 MCR-200：Matrix gateway skeleton
-Step 11 MCR-250：capability registry seed
-Step 12 MCR-300：Codex JSONL parser
-Step 13 MCR-400：proof ledger builder
-Step 14 MCR-500：approval gate fake flow
-Step 15 MCR-700：fake E2E
+Step 1  Phase 0 closeout：ADR 0001 TypeScript-first runtime
+Step 2  Phase 1：product language and anti-department terminology
+Step 3  Phase 2：bounded contexts and diagrams
+Step 4  Phase 3：complete Matrix event schemas and fixtures
+Step 5  Phase 4：task state machine and task graph analysis
+Step 6  Phase 5：capability registry and routing rules
+Step 7  Phase 6：Codex worker contract analysis
+Step 8  Phase 7：Matrix AppService gateway analysis
+Step 9  Phase 8：proof ledger and approval analysis
+Step 10 Phase 9：security threat model and policy matrix
+Step 11 Phase 10：testing strategy and MVP E2E scenario
+Step 12 Phase 11：prompt / skill pack
+Step 13 Phase 12：MVP backlog and development entry gate
 ```
+
+Only after the relevant analysis gate is complete should Codex execute implementation MCRs such as `MCR-101`, `MCR-200`, `MCR-250`, `MCR-300`, `MCR-400`, or `MCR-700`.
 
 不要提前做：
 
