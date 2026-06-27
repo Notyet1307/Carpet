@@ -1,0 +1,25 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_015",
+  "source": "worker://worker_codex_001",
+  "type": "com.notyet.agent.worker.progress",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:14:30Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "run_id": "run_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "worker",
+    "id": "worker_codex_001"
+  },
+  "created_at": "2026-06-27T04:14:30Z",
+  "idempotency_key": "worker-progress:run_20260627_001:percent-too-high",
+  "data": {
+    "worker_id": "worker_codex_001",
+    "status": "running",
+    "message": "Worker reported impossible progress.",
+    "progress_percent": 101
+  }
+}

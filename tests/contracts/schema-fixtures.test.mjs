@@ -21,6 +21,7 @@ const schemas = [
   "schemas/matrix/approval.denied.schema.json",
   "schemas/matrix/memory.update.proposed.schema.json",
   "schemas/matrix/worker.dispatched.schema.json",
+  "schemas/matrix/worker.progress.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -172,6 +173,31 @@ const fixtureCases = [
     schema: "https://notyet.dev/schemas/matrix/worker.dispatched.schema.json",
     fixture:
       "fixtures/matrix-events/invalid/worker.dispatched.main-checkout-path.invalid.json",
+    valid: false,
+  },
+  {
+    name: "worker progress valid",
+    schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
+    fixture: "fixtures/matrix-events/valid/worker.progress.valid.json",
+    valid: true,
+  },
+  {
+    name: "worker progress invalid status",
+    schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
+    fixture: "fixtures/matrix-events/invalid/worker.progress.invalid-status.invalid.json",
+    valid: false,
+  },
+  {
+    name: "worker progress raw stdout",
+    schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
+    fixture: "fixtures/matrix-events/invalid/worker.progress.raw-stdout.invalid.json",
+    valid: false,
+  },
+  {
+    name: "worker progress percent too high",
+    schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/worker.progress.percent-too-high.invalid.json",
     valid: false,
   },
   {

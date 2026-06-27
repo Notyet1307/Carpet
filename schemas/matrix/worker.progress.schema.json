@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
+  "title": "Matrix Worker Progress Event",
+  "allOf": [
+    {
+      "$ref": "https://notyet.dev/schemas/matrix/event-envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["task_id", "run_id", "trace_id", "actor", "data"],
+      "properties": {
+        "type": {
+          "const": "com.notyet.agent.worker.progress"
+        },
+        "subject": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^run_[A-Za-z0-9_-]+$"
+        },
+        "trace_id": {
+          "type": "string",
+          "pattern": "^trace_[A-Za-z0-9_-]+$"
+        },
+        "actor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "worker"
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "required": ["worker_id", "status", "message"],
+          "properties": {
+            "worker_id": {
+              "type": "string",
+              "pattern": "^worker_[A-Za-z0-9_-]+$"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["started", "running", "blocked", "completed", "failed"]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            },
+            "progress_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

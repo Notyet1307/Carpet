@@ -181,6 +181,7 @@ baseline:
 | `task.rejected` | `task.rejected.schema.json` | valid rejection; empty `reason` invalid |
 | `capability.selected` | `capability.selected.schema.json` | valid selection; empty `selection_reason` and missing `capability_version` invalid |
 | `worker.dispatched` | `worker.dispatched.schema.json` | valid dispatch; main checkout path invalid |
+| `worker.progress` | `worker.progress.schema.json` | valid progress; invalid `status`, raw stdout, and out-of-range `progress_percent` invalid |
 | `proof.submitted` | `proof.submitted.schema.json` | valid proof summary; empty `proof_id` and raw proof logs invalid |
 | `approval.requested` | `approval.requested.schema.json` | valid action-scoped request; ambiguous `task.approve` invalid |
 | `approval.granted` | `approval.granted.schema.json` | valid action-scoped grant; missing `proof_id` invalid |
@@ -192,11 +193,10 @@ The current contract test is `tests/contracts/schema-fixtures.test.mjs`. Both
 
 ## Remaining Phase 3 Event Gaps
 
-After the `capability.selected` contract baseline, comparing the Phase 3
+After the `worker.progress` contract baseline, comparing the Phase 3
 namespace in the roadmap with the current schema files, strict schemas and
 valid/invalid fixtures are still missing for:
 
-- `com.notyet.agent.worker.progress`
 - `com.notyet.agent.artifact.submitted`
 - `com.notyet.agent.verification.completed`
 - `com.notyet.agent.incident.created`
