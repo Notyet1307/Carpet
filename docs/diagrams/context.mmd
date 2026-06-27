@@ -1,0 +1,27 @@
+flowchart LR
+  Human["Human operator"]
+  Matrix["Matrix Homeserver<br/>collaboration and projections"]
+  Gateway["Matrix AppService Gateway<br/>auth, validation, idempotency"]
+  Runtime["TypeScript Runtime<br/>source of truth for task orchestration"]
+  Store[("Task Store<br/>runtime state")]
+  ObjectStore[("Object Store<br/>logs and artifacts")]
+  GitHub["GitHub<br/>PRs, checks, comments"]
+  Codex["Codex Worker<br/>scoped execution"]
+  MemoryReview["Human memory review<br/>proposal only"]
+
+  Human -->|"intent, approval decision"| Matrix
+  Matrix -->|"untrusted events"| Gateway
+  Gateway -->|"validated runtime commands"| Runtime
+  Runtime -->|"status, proof summary, approval request"| Gateway
+  Gateway -->|"projection events"| Matrix
+
+  Runtime <--> Store
+  Runtime -->|"work cell launch"| Codex
+  Codex -->|"result, artifact refs"| Runtime
+  Codex -->|"logs, diffs, outputs"| ObjectStore
+  Runtime -->|"proof refs"| ObjectStore
+  Runtime -->|"approved PR action"| GitHub
+  Runtime -->|"memory proposal"| MemoryReview
+
+  Matrix -. no runtime state .-> Store
+  Matrix -. no raw proof logs .-> ObjectStore

@@ -1,0 +1,54 @@
+sequenceDiagram
+  actor Human
+  participant Matrix as Matrix Homeserver
+  participant Gateway as Matrix AppService Gateway
+  participant API as Runtime API
+  participant Store as Task Store
+  participant Router as Capability Router
+  participant Policy as Policy Engine
+  participant WCM as Work Cell Manager
+  participant Runner as Codex Worker Runner
+  participant Obj as Object Store Adapter
+  participant Proof as Proof Ledger
+  participant Approval as Approval Service
+  participant GitHub as GitHub Adapter
+  participant Memory as Memory Proposal Service
+
+  Human->>Matrix: Submit task intent
+  Matrix->>Gateway: Deliver untrusted task.created event
+  Gateway->>Gateway: Authenticate, dedupe, validate JSON Schema
+  Gateway->>API: Create runtime task command
+  API->>Store: Persist task and source Matrix event reference
+  API->>Router: Select capability for task node
+  Router->>Policy: Check capability permissions
+  Policy-->>Router: allow with policy version and reason
+  Router-->>API: Selected repo.patch.codex version
+  API->>WCM: Create Work Cell
+  WCM->>Store: Persist worktree path, branch, base SHA, policy envelope
+  WCM->>Runner: Launch Codex with cwd set to Work Cell worktree
+  Runner->>Obj: Store stdout, stderr, JSONL, diff, validation logs
+  Obj-->>Runner: Return artifact URIs and sha256 hashes
+  Runner->>API: Submit structured result and artifact refs
+  API->>Proof: Create proof entry
+  Proof->>Store: Persist proof fields and verification status
+  Proof->>Obj: Verify artifact refs and hashes
+  Proof-->>API: Verified proof summary
+  API->>Gateway: Project proof summary and artifact refs
+  Gateway->>Matrix: Send proof summary, not raw proof logs
+  API->>Policy: Check pr.create action
+  Policy-->>API: approval_required
+  API->>Approval: Request approval for pr.create and proof_id
+  Approval->>Gateway: Project action-scoped approval request
+  Gateway->>Matrix: Send approval request
+  Human->>Matrix: Approve specific pr.create action
+  Matrix->>Gateway: Deliver approval decision event
+  Gateway->>API: Submit validated approval decision
+  API->>Approval: Record decision for task_id, action, proof_id
+  Approval-->>API: Approved exact action
+  API->>GitHub: Create PR with approved proof reference
+  GitHub-->>API: Return PR URL
+  API->>Store: Persist PR artifact reference and task status
+  API->>Memory: Propose memory update from verified proof
+  Memory->>Store: Persist memory proposal, not live memory write
+  API->>Gateway: Project completion and memory proposal summary
+  Gateway->>Matrix: Send visible status projection

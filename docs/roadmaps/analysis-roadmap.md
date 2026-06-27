@@ -350,7 +350,7 @@ MCR   = 可执行任务 / issue 编号
 |---|---|---|
 | Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
-| Phase 2 | 架构边界与组件分解 | 未完成 |
+| Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created baseline 已完成；其余事件缺 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
@@ -381,15 +381,20 @@ MCR 编号按工作流领域分段，不等于 Phase 编号。
 
 ### 5.3 当前推荐顺序
 
-Phase 0 closeout 已完成。当前 Phase 1 状态：
+Phase 0-2 closeout 已完成。当前 Phase 2 状态：
 
 ```text
 1. docs/adr/0001-typescript-first-runtime.md 已完成
 2. docs/analysis/02-product-language.md 已完成
 3. docs/adr/0002-matrix-as-collaboration-surface.md 已完成
+4. docs/analysis/03-bounded-contexts.md 已完成
+5. docs/diagrams/context.mmd 已完成
+6. docs/diagrams/runtime-container.mmd 已完成
+7. docs/diagrams/mvp-sequence.mmd 已完成
 ```
 
-Capability schema 这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
+下一步默认推荐是 Phase 3：Matrix Event Contract 分析。Capability schema
+这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
 
 ---
 

@@ -1,0 +1,55 @@
+flowchart TB
+  subgraph Collaboration["Collaboration Context"]
+    Matrix["Matrix Homeserver"]
+    Gateway["Matrix AppService Gateway"]
+  end
+
+  subgraph Runtime["Runtime Orchestration Context"]
+    Api["Runtime API"]
+    TaskStore[("Task Store")]
+    Router["Capability Router"]
+    Policy["Policy Engine"]
+    WorkCell["Work Cell Manager"]
+  end
+
+  subgraph Execution["Worker Execution Context"]
+    Runner["Codex Worker Runner"]
+  end
+
+  subgraph Evidence["Evidence And Approval Context"]
+    Proof["Proof Ledger"]
+    Approval["Approval Service"]
+    Memory["Memory Proposal Service"]
+  end
+
+  subgraph Adapters["External Adapter Context"]
+    Github["GitHub Adapter"]
+    ObjectStore[("Object Store Adapter")]
+  end
+
+  Matrix -->|"room events"| Gateway
+  Gateway -->|"validated command"| Api
+  Api -->|"projection request"| Gateway
+  Gateway -->|"summary event"| Matrix
+
+  Api <--> TaskStore
+  Api --> Router
+  Router --> Policy
+  Api --> Policy
+  Policy -->|"allow or deny or approval_required"| Api
+  Api --> WorkCell
+  WorkCell -->|"launch request"| Runner
+  Runner -->|"worker run result"| Api
+  Runner -->|"stdout, stderr, JSONL, diff"| ObjectStore
+
+  Api --> Proof
+  Proof <--> TaskStore
+  Proof -->|"artifact refs and hashes"| ObjectStore
+  Proof -->|"verified proof status"| Approval
+  Approval -->|"approval request"| Api
+  Approval -->|"approved PR action"| Github
+  Proof --> Memory
+  Memory -->|"proposal projection"| Api
+
+  Github -->|"PR/check/comment refs"| Api
+  ObjectStore -->|"artifact URI and sha256"| Proof
