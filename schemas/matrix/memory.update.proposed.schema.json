@@ -25,6 +25,14 @@
           "type": "string",
           "pattern": "^trace_[A-Za-z0-9_-]+$"
         },
+        "actor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "runtime"
+            }
+          }
+        },
         "data": {
           "type": "object",
           "required": [

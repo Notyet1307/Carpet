@@ -25,6 +25,14 @@
           "type": "string",
           "pattern": "^trace_[A-Za-z0-9_-]+$"
         },
+        "actor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "human"
+            }
+          }
+        },
         "data": {
           "type": "object",
           "required": ["approval_id", "action", "proof_id"],

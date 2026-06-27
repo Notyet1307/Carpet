@@ -112,6 +112,27 @@ const fixtureCases = [
     valid: false,
   },
   {
+    name: "proof submitted missing artifact refs",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/proof.submitted.missing-artifact-refs.invalid.json",
+    valid: false,
+  },
+  {
+    name: "proof submitted missing validation summary",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/proof.submitted.missing-validation-summary.invalid.json",
+    valid: false,
+  },
+  {
+    name: "proof submitted empty artifact refs",
+    schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/proof.submitted.empty-artifact-refs.invalid.json",
+    valid: false,
+  },
+  {
     name: "proof submitted raw proof logs",
     schema: "https://notyet.dev/schemas/matrix/proof.submitted.schema.json",
     fixture: "fixtures/matrix-events/invalid/proof.submitted.raw-proof-logs.invalid.json",
@@ -149,6 +170,12 @@ const fixtureCases = [
     valid: false,
   },
   {
+    name: "approval requested wrong actor",
+    schema: "https://notyet.dev/schemas/matrix/approval.requested.schema.json",
+    fixture: "fixtures/matrix-events/invalid/approval.requested.wrong-actor.invalid.json",
+    valid: false,
+  },
+  {
     name: "approval granted valid",
     schema: "https://notyet.dev/schemas/matrix/approval.granted.schema.json",
     fixture: "fixtures/matrix-events/valid/approval.granted.valid.json",
@@ -158,6 +185,12 @@ const fixtureCases = [
     name: "approval granted missing proof id",
     schema: "https://notyet.dev/schemas/matrix/approval.granted.schema.json",
     fixture: "fixtures/matrix-events/invalid/approval.granted.missing-proof-id.invalid.json",
+    valid: false,
+  },
+  {
+    name: "approval granted wrong actor",
+    schema: "https://notyet.dev/schemas/matrix/approval.granted.schema.json",
+    fixture: "fixtures/matrix-events/invalid/approval.granted.wrong-actor.invalid.json",
     valid: false,
   },
   {
@@ -173,6 +206,12 @@ const fixtureCases = [
     valid: false,
   },
   {
+    name: "approval denied wrong actor",
+    schema: "https://notyet.dev/schemas/matrix/approval.denied.schema.json",
+    fixture: "fixtures/matrix-events/invalid/approval.denied.wrong-actor.invalid.json",
+    valid: false,
+  },
+  {
     name: "memory update proposed valid",
     schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
     fixture: "fixtures/matrix-events/valid/memory.update.proposed.valid.json",
@@ -182,6 +221,12 @@ const fixtureCases = [
     name: "memory update proposed live write",
     schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
     fixture: "fixtures/matrix-events/invalid/memory.update.proposed.live-write.invalid.json",
+    valid: false,
+  },
+  {
+    name: "memory update proposed wrong actor",
+    schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
+    fixture: "fixtures/matrix-events/invalid/memory.update.proposed.wrong-actor.invalid.json",
     valid: false,
   },
   {
