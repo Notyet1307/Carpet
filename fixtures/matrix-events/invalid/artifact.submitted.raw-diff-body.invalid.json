@@ -1,0 +1,27 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_017",
+  "source": "worker://worker_codex_001",
+  "type": "com.notyet.agent.artifact.submitted",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:15:20Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "run_id": "run_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "worker",
+    "id": "worker_codex_001"
+  },
+  "created_at": "2026-06-27T04:15:20Z",
+  "idempotency_key": "artifact:artifact_20260627_raw_diff",
+  "data": {
+    "worker_id": "worker_codex_001",
+    "artifact_id": "artifact_20260627_raw_diff",
+    "artifact_type": "patch",
+    "artifact_ref": "https://object.local/artifacts/run_20260627_001.diff.patch",
+    "artifact_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "diff_body": "diff --git a/schemas/matrix/example b/schemas/matrix/example"
+  }
+}

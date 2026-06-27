@@ -22,6 +22,7 @@ const schemas = [
   "schemas/matrix/memory.update.proposed.schema.json",
   "schemas/matrix/worker.dispatched.schema.json",
   "schemas/matrix/worker.progress.schema.json",
+  "schemas/matrix/artifact.submitted.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -198,6 +199,26 @@ const fixtureCases = [
     schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
     fixture:
       "fixtures/matrix-events/invalid/worker.progress.percent-too-high.invalid.json",
+    valid: false,
+  },
+  {
+    name: "artifact submitted valid",
+    schema: "https://notyet.dev/schemas/matrix/artifact.submitted.schema.json",
+    fixture: "fixtures/matrix-events/valid/artifact.submitted.valid.json",
+    valid: true,
+  },
+  {
+    name: "artifact submitted missing artifact ref",
+    schema: "https://notyet.dev/schemas/matrix/artifact.submitted.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/artifact.submitted.missing-artifact-ref.invalid.json",
+    valid: false,
+  },
+  {
+    name: "artifact submitted raw diff body",
+    schema: "https://notyet.dev/schemas/matrix/artifact.submitted.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/artifact.submitted.raw-diff-body.invalid.json",
     valid: false,
   },
   {

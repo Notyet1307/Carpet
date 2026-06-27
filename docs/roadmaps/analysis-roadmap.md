@@ -351,7 +351,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
-| Phase 3 | Matrix Event Contract 分析 | 部分完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、proof.submitted、approval.requested、approval.granted、approval.denied、memory.update.proposed baseline 已完成；artifact.submitted、verification.completed、incident.created 缺 |
+| Phase 3 | Matrix Event Contract 分析 | 部分完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、approval.requested、approval.granted、approval.denied、memory.update.proposed baseline 已完成；verification.completed、incident.created 缺 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
@@ -394,7 +394,7 @@ Phase 0-2 closeout 已完成。当前 Phase 2 状态：
 ```
 
 下一步默认推荐仍是 Phase 3：补齐剩余 Matrix event schema / fixture gaps
-（artifact.submitted、verification.completed、incident.created）。Capability schema
+（verification.completed、incident.created）。Capability schema
 这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
 
 ---
