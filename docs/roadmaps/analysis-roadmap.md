@@ -348,7 +348,7 @@ MCR   = 可执行任务 / issue 编号
 
 | Phase | 目标 | 当前状态 |
 |---|---|---|
-| Phase 0 | Repo Orientation 与资料基线 | 部分完成：docs baseline、inventory、asset map、worktree policy baseline 已完成；ADR 仍缺 |
+| Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
 | Phase 1 | 产品语言与范围锁定 | 未完成 |
 | Phase 2 | 架构边界与组件分解 | 未完成 |
 | Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created baseline 已完成；其余事件缺 |
@@ -1377,7 +1377,7 @@ Codex 可以按 backlog 逐个 issue 开发
 
 ```text
 [ ] 产品语言已锁定，避免部门制
-[ ] TypeScript-first ADR 已通过
+[x] TypeScript-first ADR 已通过
 [ ] Matrix 作为协作层的 ADR 已通过
 [ ] Codex exec before SDK 的 ADR 已通过
 [ ] 所有 MVP Matrix event 有 JSON Schema
