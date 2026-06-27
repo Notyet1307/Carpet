@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
+  "title": "Matrix Memory Update Proposed Event",
+  "allOf": [
+    {
+      "$ref": "https://notyet.dev/schemas/matrix/event-envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["task_id", "trace_id", "actor", "data"],
+      "properties": {
+        "type": {
+          "const": "com.notyet.agent.memory.update.proposed"
+        },
+        "subject": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "trace_id": {
+          "type": "string",
+          "pattern": "^trace_[A-Za-z0-9_-]+$"
+        },
+        "data": {
+          "type": "object",
+          "required": [
+            "proposal_id",
+            "proof_id",
+            "scope",
+            "summary",
+            "proposed_change"
+          ],
+          "properties": {
+            "proposal_id": {
+              "type": "string",
+              "pattern": "^memory_proposal_[A-Za-z0-9_-]+$"
+            },
+            "proof_id": {
+              "type": "string",
+              "pattern": "^proof_[A-Za-z0-9_-]+$"
+            },
+            "scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "proposed_change": {
+              "type": "object",
+              "required": ["operation", "target", "statement"],
+              "properties": {
+                "operation": {
+                  "const": "propose"
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "statement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "rationale": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

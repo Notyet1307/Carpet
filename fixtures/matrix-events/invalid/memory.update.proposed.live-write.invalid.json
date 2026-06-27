@@ -1,0 +1,30 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_019",
+  "source": "runtime://memory-proposal-service",
+  "type": "com.notyet.agent.memory.update.proposed",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:21:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "runtime",
+    "id": "memory_proposal_service"
+  },
+  "created_at": "2026-06-27T04:21:00Z",
+  "idempotency_key": "memory-proposal:memory_proposal_20260627_live_write",
+  "data": {
+    "proposal_id": "memory_proposal_20260627_live_write",
+    "proof_id": "proof_20260627_001",
+    "scope": "repo:Carpet",
+    "summary": "Attempt to bypass review and update live memory.",
+    "proposed_change": {
+      "operation": "write_live",
+      "target": "memory:repo-planning-guidance",
+      "statement": "Write this directly into live memory.",
+      "live_memory_path": "/Users/yet/.codex/memories/MEMORY.md"
+    }
+  }
+}

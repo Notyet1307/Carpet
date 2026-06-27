@@ -18,6 +18,7 @@ const schemas = [
   "schemas/matrix/approval.requested.schema.json",
   "schemas/matrix/approval.granted.schema.json",
   "schemas/matrix/approval.denied.schema.json",
+  "schemas/matrix/memory.update.proposed.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -124,6 +125,18 @@ const fixtureCases = [
     name: "approval denied empty reason",
     schema: "https://notyet.dev/schemas/matrix/approval.denied.schema.json",
     fixture: "fixtures/matrix-events/invalid/approval.denied.empty-reason.invalid.json",
+    valid: false,
+  },
+  {
+    name: "memory update proposed valid",
+    schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
+    fixture: "fixtures/matrix-events/valid/memory.update.proposed.valid.json",
+    valid: true,
+  },
+  {
+    name: "memory update proposed live write",
+    schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
+    fixture: "fixtures/matrix-events/invalid/memory.update.proposed.live-write.invalid.json",
     valid: false,
   },
   {

@@ -351,7 +351,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
-| Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created、task.accepted、task.rejected、proof.submitted、approval.requested、approval.granted、approval.denied baseline 已完成；其余事件缺 |
+| Phase 3 | Matrix Event Contract 分析 | 部分完成：event envelope、task.created、task.accepted、task.rejected、proof.submitted、approval.requested、approval.granted、approval.denied、memory.update.proposed baseline 已完成；其余事件缺 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
