@@ -1347,6 +1347,7 @@ Gate B: State Lock
 
 Gate C: Policy Lock
   - deny-by-default policy 完成
+  - worktree policy 完成
   - high-risk actions 明确
   - approval schema 完成
 
@@ -1527,6 +1528,7 @@ Specifically test:
 
 ```text
 [Analysis P0] Inventory current repo assets for Matrix Runtime migration
+[Analysis P0] Define worktree policy baseline
 [Analysis P1] Define product language and anti-department terminology
 [Analysis P2] Decompose architecture into bounded contexts and diagrams
 [Analysis P3] Define MVP Matrix event schemas and fixtures

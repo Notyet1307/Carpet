@@ -12,6 +12,7 @@ const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const schemas = [
   "schemas/matrix/event-envelope.schema.json",
   "schemas/matrix/task.created.schema.json",
+  "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
 ];
@@ -42,6 +43,18 @@ const fixtureCases = [
     valid: false,
   },
   {
+    name: "work cell valid",
+    schema: "https://notyet.dev/schemas/runtime/work-cell.schema.json",
+    fixture: "fixtures/runtime/valid/work-cell.valid.json",
+    valid: true,
+  },
+  {
+    name: "work cell main checkout edit denied",
+    schema: "https://notyet.dev/schemas/runtime/work-cell.schema.json",
+    fixture: "fixtures/runtime/invalid/work-cell.allows-main-checkout.invalid.json",
+    valid: false,
+  },
+  {
     name: "proof ledger entry valid",
     schema: "https://notyet.dev/schemas/proof/proof-ledger-entry.schema.json",
     fixture: "fixtures/proof/valid/proof-ledger-entry.valid.json",
@@ -51,6 +64,12 @@ const fixtureCases = [
     name: "proof ledger entry missing validation",
     schema: "https://notyet.dev/schemas/proof/proof-ledger-entry.schema.json",
     fixture: "fixtures/proof/invalid/proof-ledger-entry.missing-validation.invalid.json",
+    valid: false,
+  },
+  {
+    name: "proof ledger entry missing worktree",
+    schema: "https://notyet.dev/schemas/proof/proof-ledger-entry.schema.json",
+    fixture: "fixtures/proof/invalid/proof-ledger-entry.missing-worktree.invalid.json",
     valid: false,
   },
   {

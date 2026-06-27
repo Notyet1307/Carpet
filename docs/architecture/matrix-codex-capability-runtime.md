@@ -126,7 +126,7 @@ Codex 适合作为工程执行 worker，而不是公司级总控 agent。
 MVP 阶段优先使用：
 
 ```bash
-codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/repo_patch_result.schema.json -
+codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/repo-patch-result.schema.json -
 ```
 
 后续需要持续线程、resume、streamed events、产品内深度集成时，再切换到 Codex SDK。
@@ -281,6 +281,8 @@ Prompt 不重要，Proof 重要。
 └─────────────────────────────────────────────────────────────┘
 ```
 
+Worktree 是开发隔离边界，不是安全边界。Runtime-driven worker 必须由 Runtime / worker-runner 先创建 worktree，再用 `cwd = worktree_path` 启动 Codex；安全边界仍由 sandbox、policy、allowed paths、forbidden paths、secret isolation 和 human gate 提供。
+
 ---
 
 ## 4. TypeScript 主语言方案
@@ -419,9 +421,9 @@ advanced web UI
 │   ├── capability/
 │   │   └── capability.schema.json
 │   ├── codex/
-│   │   └── repo_patch_result.schema.json
+│   │   └── repo-patch-result.schema.json
 │   └── proof/
-│       └── proof_ledger_entry.schema.json
+│       └── proof-ledger-entry.schema.json
 ├── workers/
 │   ├── codex-exec-worker/
 │   ├── verifier-worker/
@@ -710,7 +712,7 @@ capabilities:
     risk_level: medium
     description: Produce a minimal code patch in an isolated worktree.
     input_schema: schemas/codex/repo_patch_input.schema.json
-    output_schema: schemas/codex/repo_patch_result.schema.json
+    output_schema: schemas/codex/repo-patch-result.schema.json
     permissions:
       allow: [repo.read, worktree.write, test.run, patch.create]
       deny: [main.push, pr.merge, deploy.run, secret.read, external.write]
@@ -975,7 +977,7 @@ Diagnose and fix the failing readiness check.
 - Proof JSON matches schema
 
 ## Output Schema
-schemas/codex/repo_patch_result.schema.json
+schemas/codex/repo-patch-result.schema.json
 ```
 
 #### D. Final output contract
@@ -1245,6 +1247,12 @@ task_id
 run_id
 worker_id
 capability_id
+worktree_path
+worktree_branch
+worktree_base_branch
+worktree_base_sha
+worktree_head_sha
+worktree_cleanup_status
 artifact_refs
 changed_files
 diff_summary
@@ -1519,18 +1527,19 @@ intake.validate → spec.scope → ci.recovery → repo.patch.codex → proof.ve
 ```text
 workers/codex-exec-worker
 apps/worker-runner
-schemas/codex/repo_patch_result.schema.json
+schemas/codex/repo-patch-result.schema.json
 ```
 
 功能：
 
 ```text
-1. clone repo 或创建 worktree。
-2. 挂载 AGENTS.md、task brief、required skills。
-3. 调用 codex exec --json --sandbox workspace-write --output-schema。
-4. 保存 stdout/stderr/jsonl 到 object storage。
-5. 捕获 final JSON。
-6. 生成 diff artifact。
+1. Runtime / worker-runner clone repo 或创建 worktree。
+2. Runtime / worker-runner 以 worktree_path 作为 cwd 启动 Codex。
+3. 挂载 AGENTS.md、task brief、required skills。
+4. 调用 codex exec --json --sandbox workspace-write --output-schema。
+5. 保存 stdout/stderr/jsonl 到 object storage。
+6. 捕获 final JSON。
+7. 生成 diff artifact。
 ```
 
 验收：
@@ -1549,7 +1558,7 @@ make verify 或指定命令结果被写入 proof。
 ```text
 packages/proof-ledger
 workers/verifier-worker
-schemas/proof/proof_ledger_entry.schema.json
+schemas/proof/proof-ledger-entry.schema.json
 ```
 
 功能：

@@ -5,7 +5,7 @@
 > 配套文档：  
 > - `docs/architecture/matrix-codex-capability-runtime.md`  
 > - `docs/roadmaps/analysis-roadmap.md`  
-> - `docs/roadmap/matrix-codex-capability-runtime-roadmap.md`  
+> - `docs/guides/codex-worktree-policy.md`  
 > 目标：把架构文档和 roadmap 转换成一套可执行的 Codex 沟通、开发、测试、review、handoff 操作手册。
 
 ---
@@ -278,16 +278,44 @@ scope 漂移
 错误方案被持续继承
 ```
 
-### 3.2 每个任务一个 worktree 或 feature branch
+### 3.2 每个实现类任务一个 dedicated worktree
+
+实现类任务默认使用 dedicated git worktree，而不是直接在 main checkout 或普通 feature branch 上改。
+
+适用范围：
+
+```text
+code_change
+test_change
+schema_change
+fixture_change
+refactor
+security_fix
+```
+
+例外：
+
+```text
+read_only_analysis 可以不创建 worktree。
+docs_only 可以不创建 worktree，但多个 Codex session 并行时推荐创建 docs worktree。
+紧急例外必须写入 Handoff Back。
+```
+
+交互式 Codex 可以创建或使用 worktree。Runtime-driven worker 不应让 Codex 自己决定 worktree；Runtime / worker-runner 必须先创建 worktree，再用 `cwd = worktree_path` 启动 Codex。
 
 推荐分支命名：
 
 ```text
-analysis/p0-repo-inventory
-contracts/mcr-010-event-envelope-schema
-runtime/mcr-120-task-state-machine
-worker/mcr-300-codex-exec-parser
-proof/mcr-410-proof-ledger-entry
+mcr/MCR-010/event-envelope-schema
+mcr/MCR-120/task-state-machine
+mcr/MCR-300/codex-exec-parser
+mcr/MCR-410/proof-ledger-entry
+```
+
+推荐 worktree 路径：
+
+```text
+../.worktrees/<repo-name>/<TASK_ID>-<short-slug>
 ```
 
 提交格式：
@@ -350,8 +378,8 @@ Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
 - docs/roadmaps/analysis-roadmap.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - docs/guides/codex-development-usage-guide.md
+- docs/guides/codex-worktree-policy.md
 
 Task ID: <MCR-XXX>
 Role: <Analyst | Implementer | Verifier | Test Designer>
@@ -361,6 +389,14 @@ Goal:
 
 Context:
 <why this task exists, related files, related phase>
+
+Worktree requirement:
+- Use a dedicated git worktree for implementation, test, schema, fixture, refactor, or security-fix tasks.
+- Branch: mcr/<TASK_ID>/<short-slug>
+- Path: ../.worktrees/<repo-name>/<TASK_ID>-<short-slug>
+- Do not modify the main checkout.
+- Do not merge or push to main.
+- Include worktree path, branch, base SHA, head SHA, and cleanup status in Handoff Back.
 
 Allowed files:
 - <path>
@@ -396,6 +432,7 @@ Required output:
 ## Files Changed
 ## Tests Added or Updated
 ## Validation Results
+## Worktree
 ## Risk Notes
 ## Rollback Notes
 ## Follow-up Tasks
@@ -418,7 +455,6 @@ Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
 - docs/roadmaps/analysis-roadmap.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 
 Goal:
 Analyze the current repository and produce the requested analysis artifact. Do not implement runtime logic.
@@ -470,8 +506,8 @@ Implement exactly this task and nothing else.
 Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - docs/guides/codex-development-usage-guide.md
+- docs/guides/codex-worktree-policy.md
 - Any files listed in Context
 
 Allowed files:
@@ -522,8 +558,8 @@ You are reviewing a completed patch. Do not modify files.
 Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - docs/guides/codex-development-usage-guide.md
+- docs/guides/codex-worktree-policy.md
 - The changed files in this branch
 
 Review criteria:
@@ -569,7 +605,6 @@ Convert the relevant specification into tests, fixtures, and validation cases. D
 
 Read first:
 - docs/architecture/matrix-codex-capability-runtime.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - schemas/** relevant to this task
 - fixtures/** relevant to this task
 
@@ -631,7 +666,6 @@ Phase: <Phase name>
 Read first:
 - docs/architecture/matrix-codex-capability-runtime.md
 - docs/roadmaps/analysis-roadmap.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - All files changed in this phase
 
 Goal:
@@ -776,7 +810,6 @@ Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
 - docs/roadmaps/analysis-roadmap.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 
 Allowed files:
 - docs/analysis/00-repo-inventory.md
@@ -1104,6 +1137,15 @@ MCR-305 worker timeout and failure model
 MCR-306 codex worker contract tests
 ```
 
+Worker-runner requirement:
+
+```text
+Runtime / worker-runner creates the worktree before launching Codex.
+Codex runs with cwd = worktree_path.
+Codex receives --sandbox workspace-write.
+Runtime records worktree path, branch, base SHA, head SHA, and cleanup status into proof.
+```
+
 给 Codex 的任务示例：
 
 ```markdown
@@ -1148,7 +1190,7 @@ MVP 先用 fake Codex runner 通过测试，再接真实 codex exec
 codex exec \
   --json \
   --sandbox workspace-write \
-  --output-schema ./schemas/codex/repo_patch_result.schema.json \
+  --output-schema ./schemas/codex/repo-patch-result.schema.json \
   -
 ```
 
@@ -1671,6 +1713,14 @@ AGENTS.md 里写了不能做，所以就安全。
 - `command`: passed / failed / not run
 - If failed, explain why and whether failure is in scope.
 
+## Worktree
+- `worktree_path`:
+- `branch`:
+- `base_branch`:
+- `base_sha`:
+- `head_sha`:
+- `cleanup_status`:
+
 ## Risk Notes
 - Runtime risk
 - Security risk
@@ -2174,8 +2224,8 @@ Read first:
 - AGENTS.md
 - docs/architecture/matrix-codex-capability-runtime.md
 - docs/roadmaps/analysis-roadmap.md
-- docs/roadmap/matrix-codex-capability-runtime-roadmap.md
 - docs/guides/codex-development-usage-guide.md
+- docs/guides/codex-worktree-policy.md
 
 Goal:
 Inventory the current repository assets and map them to the Matrix Codex Capability Runtime direction.

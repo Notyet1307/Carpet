@@ -1,0 +1,30 @@
+{
+  "proof_id": "proof_20260627_003",
+  "task_id": "task_20260627_003",
+  "run_id": "run_20260627_003",
+  "trace_id": "trace_20260627_003",
+  "created_at": "2026-06-27T04:12:00Z",
+  "capability": "proof.verify",
+  "summary": "Invalid proof without worktree provenance.",
+  "artifacts": [
+    {
+      "kind": "schema",
+      "uri": "https://object.local/artifacts/schema-baseline.json",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "validation": [
+    {
+      "command": "pnpm test:contracts",
+      "exit_code": 0,
+      "status": "passed",
+      "log_ref": "https://object.local/logs/run_20260627_003.txt"
+    }
+  ],
+  "risk_notes": [
+    "Missing worktree should be rejected."
+  ],
+  "rollback_notes": [
+    "Add worktree provenance."
+  ]
+}

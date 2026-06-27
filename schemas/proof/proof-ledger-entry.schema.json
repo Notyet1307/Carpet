@@ -10,6 +10,7 @@
     "trace_id",
     "created_at",
     "capability",
+    "worktree",
     "summary",
     "artifacts",
     "validation",
@@ -40,6 +41,49 @@
     "capability": {
       "type": "string",
       "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+    },
+    "worktree": {
+      "type": "object",
+      "required": [
+        "path",
+        "branch",
+        "base_branch",
+        "base_sha",
+        "head_sha",
+        "cleanup_status"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^\\.\\./\\.worktrees/[^/]+/[A-Z]+-[0-9]+-[a-z0-9-]+$"
+        },
+        "branch": {
+          "type": "string",
+          "pattern": "^mcr/[A-Z]+-[0-9]+/[a-z0-9-]+$"
+        },
+        "base_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "cleanup_status": {
+          "type": "string",
+          "enum": [
+            "kept_for_review",
+            "removed_after_merge",
+            "removed_after_cancel",
+            "removed_after_failure"
+          ]
+        }
+      },
+      "additionalProperties": false
     },
     "summary": {
       "type": "string",

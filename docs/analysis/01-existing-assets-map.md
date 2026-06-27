@@ -20,6 +20,7 @@ Assets are classified as:
 | `docs/architecture/matrix-codex-capability-runtime.md` | keep | `docs/architecture/matrix-codex-capability-runtime.md` | Canonical architecture and boundary document. |
 | `docs/roadmaps/analysis-roadmap.md` | keep | `docs/roadmaps/analysis-roadmap.md` | Canonical analysis-stage roadmap and development entry gate. |
 | `docs/guides/codex-development-usage-guide.md` | keep | `docs/guides/codex-development-usage-guide.md` | Canonical Codex operating guide. |
+| `docs/guides/codex-worktree-policy.md` | keep | `docs/guides/codex-worktree-policy.md` | Canonical worktree isolation policy for interactive and Runtime-driven Codex work. |
 | `.gitignore` | keep | `.gitignore` | Ignores `.DS_Store`, Node dependencies, coverage, and `.mcr/` scratch state. |
 | `.DS_Store` | ignore | none | macOS Finder metadata, not project material. |
 | GitHub private repo `Notyet1307/Carpet` | keep | GitHub remote `origin` | Repository source of record for committed project artifacts. |
@@ -41,6 +42,9 @@ These baseline assets now exist:
 | `schemas/matrix/task.created.schema.json` | architecture and roadmap | Define MVP task intake event. |
 | `schemas/proof/proof-ledger-entry.schema.json` | architecture proof ledger | Define minimum proof entry. |
 | `schemas/codex/repo-patch-result.schema.json` | Codex worker contract | Define final structured Codex worker output. |
+| `schemas/runtime/work-cell.schema.json` | worktree policy baseline | Define isolated Work Cell worktree provenance. |
+| `runtime/policies/default.yaml` | worktree policy baseline | Define worktree requirements by task type. |
+| `runtime/capabilities.yaml` | worktree policy baseline | Mark implementation-class capabilities as requiring isolated worktrees. |
 | `fixtures/**` | schema baseline | Provide valid and invalid examples. |
 | `tests/contracts/schema-fixtures.test.mjs` | test strategy | Enforce that fixtures match schemas. |
 
@@ -55,9 +59,8 @@ The next assets to create are:
 | `schemas/runtime/task.schema.json` | roadmap Phase 4 | Define persisted task state shape. |
 | `schemas/runtime/task-state-transition.schema.json` | roadmap Phase 4 | Define legal and illegal task transitions. |
 | `schemas/runtime/capability.schema.json` | roadmap Phase 5 | Define capability registry entries. |
-| `schemas/runtime/work-cell.schema.json` | roadmap Phase 6 | Define isolated worker execution inputs. |
-| `runtime/capabilities.yaml` | roadmap Phase 5 | Seed MVP capability registry. |
-| `runtime/policies/default.yaml` | roadmap Phase 9 | Add deny-by-default policy baseline. |
+| `runtime/workflows/repo-patch.yaml` | roadmap Phase 5 and Phase 6 | Define repo patch workflow graph. |
+| `runtime/workflows/ci-recovery.yaml` | roadmap Phase 5 and Phase 6 | Define CI recovery workflow graph. |
 
 ## Explicit Non-Migrations
 

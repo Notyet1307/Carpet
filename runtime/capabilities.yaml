@@ -1,0 +1,32 @@
+capabilities:
+  - id: repo.patch.codex
+    task_types:
+      - code_change
+      - test_change
+      - schema_change
+      - fixture_change
+      - refactor
+    execution:
+      requires_isolated_worktree: true
+      worktree_created_by: runtime
+      codex_cwd: worktree_path
+      allow_main_checkout_edits: false
+
+  - id: ci.recovery
+    task_types:
+      - code_change
+      - test_change
+    execution:
+      requires_isolated_worktree: true
+      worktree_created_by: runtime
+      codex_cwd: worktree_path
+      allow_main_checkout_edits: false
+
+  - id: security.review
+    task_types:
+      - security_fix
+    execution:
+      requires_isolated_worktree: true
+      worktree_created_by: runtime
+      codex_cwd: worktree_path
+      allow_main_checkout_edits: false

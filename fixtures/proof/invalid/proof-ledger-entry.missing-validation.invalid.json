@@ -5,6 +5,14 @@
   "trace_id": "trace_20260627_002",
   "created_at": "2026-06-27T04:11:00Z",
   "capability": "proof.verify",
+  "worktree": {
+    "path": "../.worktrees/Carpet/MCR-004-worktree-policy-baseline",
+    "branch": "mcr/MCR-004/worktree-policy-baseline",
+    "base_branch": "main",
+    "base_sha": "8958e929f1340f9872d845ad2b2e6ba88c243ab0",
+    "head_sha": "8958e929f1340f9872d845ad2b2e6ba88c243ab0",
+    "cleanup_status": "kept_for_review"
+  },
   "summary": "Invalid proof without validation evidence.",
   "artifacts": [
     {

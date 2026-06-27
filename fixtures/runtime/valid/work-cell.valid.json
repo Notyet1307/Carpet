@@ -1,0 +1,18 @@
+{
+  "work_cell_id": "wc_20260627_001",
+  "task_id": "task_20260627_001",
+  "run_id": "run_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "capability": "repo.patch.codex",
+  "worktree": {
+    "required": true,
+    "created_by": "runtime",
+    "base_branch": "main",
+    "base_sha": "8958e929f1340f9872d845ad2b2e6ba88c243ab0",
+    "branch": "mcr/MCR-004/worktree-policy-baseline",
+    "path": "../.worktrees/Carpet/MCR-004-worktree-policy-baseline",
+    "codex_cwd": "worktree_path",
+    "allow_main_checkout_edits": false,
+    "cleanup_policy": "keep_until_merged_or_failed_reviewed"
+  }
+}

@@ -12,7 +12,7 @@ Evidence:
 branch: codex/docs-schema-contracts
 remote: https://github.com/Notyet1307/Carpet.git
 visibility: private
-current stage: docs, analysis, schema baseline, fixtures, contract tests
+current stage: docs, analysis, schema baseline, worktree policy baseline, fixtures, contract tests
 ```
 
 ## Current Assets
@@ -50,6 +50,10 @@ current stage: docs, analysis, schema baseline, fixtures, contract tests
 - `docs/guides/codex-development-usage-guide.md`
   - Operating manual for Codex-driven development.
   - Defines task packets, roles, allowed files, forbidden files, validation commands, review gates, handoff format, and recommended first tasks.
+- `docs/guides/codex-worktree-policy.md`
+  - Worktree policy addendum.
+  - Defines interactive Codex worktree rules and Runtime-driven worker-runner responsibilities.
+  - Separates worktree isolation from sandbox and approval boundaries.
 
 ### Git Hygiene
 
@@ -82,9 +86,20 @@ current stage: docs, analysis, schema baseline, fixtures, contract tests
   - Requires goal, context, scope, acceptance criteria, proof requirements, and risk.
 - `schemas/proof/proof-ledger-entry.schema.json`
   - Minimum proof ledger entry.
-  - Requires artifact references and validation evidence.
+  - Requires worktree provenance, artifact references, and validation evidence.
 - `schemas/codex/repo-patch-result.schema.json`
   - Structured result expected from a future Codex repo-patch worker.
+- `schemas/runtime/work-cell.schema.json`
+  - Minimum Work Cell contract for isolated worktree execution.
+  - Requires Runtime/Human worktree creator, base branch/SHA, task branch, path, Codex cwd, and cleanup policy.
+
+### Runtime Policy Baseline
+
+- `runtime/policies/default.yaml`
+  - Defines the worktree policy baseline.
+  - Marks code, test, schema, fixture, refactor, and security-fix tasks as requiring isolated worktrees.
+- `runtime/capabilities.yaml`
+  - Seeds implementation-class capabilities with `requires_isolated_worktree: true`.
 
 ### Fixtures
 
@@ -100,13 +115,15 @@ current stage: docs, analysis, schema baseline, fixtures, contract tests
   - Valid Codex repo patch result example.
 - `fixtures/codex/invalid/**`
   - Invalid Codex result without summary.
+- `fixtures/runtime/valid/**`
+  - Valid Work Cell worktree provenance example.
+- `fixtures/runtime/invalid/**`
+  - Invalid Work Cell example that attempts to allow main-checkout edits.
 
 ## Missing Assets
 
 The repository does not yet contain:
 
-- `runtime/capabilities.yaml`
-- `runtime/policies/**`
 - `runtime/workflows/**`
 - `docs/adr/**`
 - `docs/diagrams/**`
@@ -126,12 +143,12 @@ The architecture documents reference `Notyet1307/codex-multica`, Superpowers, Ma
 
 - The repository can be mistaken for an implementation repo even though it is currently documentation-only.
 - The architecture references external assets that have not been vendored or mapped into this repository.
-- Current schemas are a baseline only; approval events, state-machine schemas, capability schemas, and work-cell schemas are still missing.
-- No development entry gate can pass until state-machine notes, policy notes, broader contract tests, and MVP backlog slices exist.
+- Current schemas are a baseline only; approval events, state-machine schemas, capability schemas, and broader work-cell semantics are still missing.
+- No development entry gate can pass until state-machine notes, broader policy notes, broader contract tests, and MVP backlog slices exist.
 
 ## Recommended Next Work
 
 1. Add state-machine analysis and transition tables.
-2. Add capability and work-cell schema baseline.
+2. Add capability schema baseline.
 3. Add approval event schemas and fixtures.
 4. Add policy baseline with deny-by-default rules.
