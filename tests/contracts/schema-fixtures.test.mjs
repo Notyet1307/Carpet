@@ -14,6 +14,7 @@ const schemas = [
   "schemas/matrix/task.created.schema.json",
   "schemas/matrix/task.accepted.schema.json",
   "schemas/matrix/task.rejected.schema.json",
+  "schemas/matrix/capability.selected.schema.json",
   "schemas/matrix/proof.submitted.schema.json",
   "schemas/matrix/approval.requested.schema.json",
   "schemas/matrix/approval.granted.schema.json",
@@ -72,6 +73,26 @@ const fixtureCases = [
     name: "task rejected empty reason",
     schema: "https://notyet.dev/schemas/matrix/task.rejected.schema.json",
     fixture: "fixtures/matrix-events/invalid/task.rejected.empty-reason.invalid.json",
+    valid: false,
+  },
+  {
+    name: "capability selected valid",
+    schema: "https://notyet.dev/schemas/matrix/capability.selected.schema.json",
+    fixture: "fixtures/matrix-events/valid/capability.selected.valid.json",
+    valid: true,
+  },
+  {
+    name: "capability selected empty selection reason",
+    schema: "https://notyet.dev/schemas/matrix/capability.selected.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/capability.selected.empty-selection-reason.invalid.json",
+    valid: false,
+  },
+  {
+    name: "capability selected missing version",
+    schema: "https://notyet.dev/schemas/matrix/capability.selected.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/capability.selected.missing-version.invalid.json",
     valid: false,
   },
   {
