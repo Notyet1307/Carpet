@@ -1,0 +1,24 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_017",
+  "source": "matrix://notyet.local/#agent-approvals/$evt_20260627_017",
+  "type": "com.notyet.agent.approval.denied",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:20:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "human",
+    "id": "@yet:notyet.local"
+  },
+  "created_at": "2026-06-27T04:20:00Z",
+  "idempotency_key": "matrix:$evt_20260627_017",
+  "data": {
+    "approval_id": "approval_20260627_001",
+    "action": "pr.create",
+    "proof_id": "proof_20260627_001",
+    "reason": ""
+  }
+}
