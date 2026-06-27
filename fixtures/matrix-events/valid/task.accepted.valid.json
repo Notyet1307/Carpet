@@ -1,0 +1,19 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_005",
+  "source": "matrix://notyet.local/#agent-runtime/$evt_20260627_005",
+  "type": "com.notyet.agent.task.accepted",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:07:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "actor": {
+    "type": "runtime",
+    "id": "runtime_intake"
+  },
+  "created_at": "2026-06-27T04:07:00Z",
+  "idempotency_key": "matrix:$evt_20260627_005",
+  "data": {}
+}

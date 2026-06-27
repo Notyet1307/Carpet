@@ -12,6 +12,8 @@ const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const schemas = [
   "schemas/matrix/event-envelope.schema.json",
   "schemas/matrix/task.created.schema.json",
+  "schemas/matrix/task.accepted.schema.json",
+  "schemas/matrix/task.rejected.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -40,6 +42,30 @@ const fixtureCases = [
     name: "task created empty goal",
     schema: "https://notyet.dev/schemas/matrix/task.created.schema.json",
     fixture: "fixtures/matrix-events/invalid/task.created.empty-goal.invalid.json",
+    valid: false,
+  },
+  {
+    name: "task accepted valid",
+    schema: "https://notyet.dev/schemas/matrix/task.accepted.schema.json",
+    fixture: "fixtures/matrix-events/valid/task.accepted.valid.json",
+    valid: true,
+  },
+  {
+    name: "task accepted missing task id",
+    schema: "https://notyet.dev/schemas/matrix/task.accepted.schema.json",
+    fixture: "fixtures/matrix-events/invalid/task.accepted.missing-task-id.invalid.json",
+    valid: false,
+  },
+  {
+    name: "task rejected valid",
+    schema: "https://notyet.dev/schemas/matrix/task.rejected.schema.json",
+    fixture: "fixtures/matrix-events/valid/task.rejected.valid.json",
+    valid: true,
+  },
+  {
+    name: "task rejected empty reason",
+    schema: "https://notyet.dev/schemas/matrix/task.rejected.schema.json",
+    fixture: "fixtures/matrix-events/invalid/task.rejected.empty-reason.invalid.json",
     valid: false,
   },
   {

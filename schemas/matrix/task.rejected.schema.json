@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/matrix/task.rejected.schema.json",
+  "title": "Matrix Task Rejected Event",
+  "allOf": [
+    {
+      "$ref": "https://notyet.dev/schemas/matrix/event-envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["task_id", "data"],
+      "properties": {
+        "type": {
+          "const": "com.notyet.agent.task.rejected"
+        },
+        "subject": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "actor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "runtime"
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "required": ["reason"],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}
