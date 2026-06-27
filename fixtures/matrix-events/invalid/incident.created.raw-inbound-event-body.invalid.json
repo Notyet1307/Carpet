@@ -1,0 +1,29 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_023",
+  "source": "runtime://incident-monitor",
+  "type": "com.notyet.agent.incident.created",
+  "subject": "incident_20260627_003",
+  "time": "2026-06-27T04:23:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "trace_id": "trace_20260627_003",
+  "actor": {
+    "type": "system",
+    "id": "runtime_incident_monitor"
+  },
+  "created_at": "2026-06-27T04:23:00Z",
+  "idempotency_key": "incident:incident_20260627_003",
+  "data": {
+    "incident_id": "incident_20260627_003",
+    "severity": "critical",
+    "category": "malformed_matrix_event",
+    "summary": "Raw inbound Matrix event body must stay outside Matrix incident projections.",
+    "raw_inbound_event_body": {
+      "type": "m.room.message",
+      "content": {
+        "body": "full untrusted event payload"
+      }
+    }
+  }
+}

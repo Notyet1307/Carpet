@@ -162,12 +162,13 @@ Expected failure handling:
   task identity is available and safe to expose.
 - Unauthorized actor, room/workspace mismatch, unsupported event type, replay
   conflict, projection impersonation, or malformed event without a safe task
-  identity: produce an incident projection once `incident.created` is defined.
+  identity: produce an `incident.created` projection with a summary, category,
+  severity, and safe event references.
 - Runtime API unavailable: record gateway delivery or command failure for retry;
   do not assume the Runtime accepted the command.
 
-Because `incident.created` has no schema baseline yet, generic gateway incidents
-remain a Phase 3 event gap.
+`incident.created` projections must not embed raw inbound Matrix event bodies,
+secrets, worker stdout, full logs, or durable Runtime records.
 
 ## Implemented Schema Baseline
 
@@ -190,17 +191,16 @@ baseline:
 | `approval.granted` | `approval.granted.schema.json` | valid action-scoped grant; missing `proof_id` invalid |
 | `approval.denied` | `approval.denied.schema.json` | valid denial; empty `reason` invalid |
 | `memory.update.proposed` | `memory.update.proposed.schema.json` | valid proposal; live memory write invalid |
+| `incident.created` | `incident.created.schema.json` | valid incident summary; missing `incident_id` and raw inbound event body invalid |
 
 The current contract test is `tests/contracts/schema-fixtures.test.mjs`. Both
 `pnpm test:contracts` and `pnpm schemas:validate` run that contract test.
 
 ## Remaining Phase 3 Event Gaps
 
-After the `verification.completed` contract baseline, comparing the Phase 3
-namespace in the roadmap with the current schema files, strict schemas and
-valid/invalid fixtures are still missing for:
-
-- `com.notyet.agent.incident.created`
+After the `incident.created` contract baseline, comparing the Phase 3 namespace
+in the roadmap with the current schema files shows no remaining Phase 3 Matrix
+event schema or fixture gap.
 
 The architecture document also mentions `com.notyet.agent.task.scoped`, but that
 event is not in the current Phase 3 roadmap namespace. It should not be added by
@@ -229,7 +229,6 @@ Runtime records.
 
 ## Phase 3 Exit Note
 
-This document completes the Phase 3 Matrix integration analysis artifact, but it
-does not complete all Phase 3 event contracts. Phase 3 remains partially complete
-until the remaining event gaps have JSON Schemas, valid/invalid fixtures, and
-contract test coverage.
+This document and the current Matrix event contract files complete the Phase 3
+Matrix Event Contract baseline. Phase 4 Runtime State Machine and Task Graph work
+remains separate and should start only through a dedicated Phase 4 task.

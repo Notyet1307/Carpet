@@ -351,7 +351,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 0 | Repo Orientation 与资料基线 | 已完成：docs baseline、inventory、asset map、worktree policy baseline、TypeScript-first ADR 已完成 |
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
-| Phase 3 | Matrix Event Contract 分析 | 部分完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed baseline 已完成；incident.created 缺 |
+| Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
@@ -393,9 +393,9 @@ Phase 0-2 closeout 已完成。当前 Phase 2 状态：
 7. docs/diagrams/mvp-sequence.mmd 已完成
 ```
 
-下一步默认推荐仍是 Phase 3：补齐剩余 Matrix event schema / fixture gap
-（incident.created）。Capability schema
-这类技术缺口属于后续 Phase 5，除非 human owner 明确批准偏离 roadmap，否则不应作为下一步默认推荐。
+Phase 3 的 Matrix event schema / fixture gap 已清零。Phase 4 仍未启动，
+后续进入 Runtime State Machine 与 Task Graph 需要单独任务卡；不要在
+Phase 3 closeout 中顺手推进 Phase 4。
 
 ---
 
@@ -1388,7 +1388,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] TypeScript-first ADR 已通过
 [x] Matrix 作为协作层的 ADR 已通过
 [ ] Codex exec before SDK 的 ADR 已通过
-[ ] 所有 MVP Matrix event 有 JSON Schema
+[x] 所有 MVP Matrix event 有 JSON Schema
 [ ] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
 [ ] task state machine 已定义合法/非法转换
 [ ] capability registry 有 schema 和 MVP capabilities

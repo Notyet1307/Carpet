@@ -21,6 +21,7 @@ const schemas = [
   "schemas/matrix/approval.granted.schema.json",
   "schemas/matrix/approval.denied.schema.json",
   "schemas/matrix/memory.update.proposed.schema.json",
+  "schemas/matrix/incident.created.schema.json",
   "schemas/matrix/worker.dispatched.schema.json",
   "schemas/matrix/worker.progress.schema.json",
   "schemas/matrix/artifact.submitted.schema.json",
@@ -181,6 +182,24 @@ const fixtureCases = [
     name: "memory update proposed live write",
     schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
     fixture: "fixtures/matrix-events/invalid/memory.update.proposed.live-write.invalid.json",
+    valid: false,
+  },
+  {
+    name: "incident created valid",
+    schema: "https://notyet.dev/schemas/matrix/incident.created.schema.json",
+    fixture: "fixtures/matrix-events/valid/incident.created.valid.json",
+    valid: true,
+  },
+  {
+    name: "incident created missing incident id",
+    schema: "https://notyet.dev/schemas/matrix/incident.created.schema.json",
+    fixture: "fixtures/matrix-events/invalid/incident.created.missing-incident-id.invalid.json",
+    valid: false,
+  },
+  {
+    name: "incident created raw inbound event body",
+    schema: "https://notyet.dev/schemas/matrix/incident.created.schema.json",
+    fixture: "fixtures/matrix-events/invalid/incident.created.raw-inbound-event-body.invalid.json",
     valid: false,
   },
   {
