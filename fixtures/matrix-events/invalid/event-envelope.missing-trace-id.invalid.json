@@ -1,0 +1,20 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_002",
+  "source": "matrix://notyet.local/#agent-runtime/$evt_20260627_002",
+  "type": "com.notyet.agent.worker.progress",
+  "subject": "task_20260627_001",
+  "time": "2026-06-27T04:00:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_001",
+  "actor": {
+    "type": "worker",
+    "id": "worker_codex_001"
+  },
+  "created_at": "2026-06-27T04:00:00Z",
+  "idempotency_key": "matrix:$evt_20260627_002",
+  "data": {
+    "message": "missing trace id"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "specversion": "1.0",
+  "id": "evt_20260627_004",
+  "source": "matrix://notyet.local/#agent-intake/$evt_20260627_004",
+  "type": "com.notyet.agent.task.created",
+  "subject": "task_20260627_002",
+  "time": "2026-06-27T04:06:00Z",
+  "datacontenttype": "application/json",
+  "workspace_id": "ws_carpet",
+  "task_id": "task_20260627_002",
+  "trace_id": "trace_20260627_002",
+  "actor": {
+    "type": "human",
+    "id": "@yet:notyet.local"
+  },
+  "created_at": "2026-06-27T04:06:00Z",
+  "idempotency_key": "matrix:$evt_20260627_004",
+  "data": {
+    "goal": "",
+    "context": "Invalid task with empty goal.",
+    "scope": {
+      "allowed_paths": [
+        "schemas/**"
+      ],
+      "forbidden_paths": []
+    },
+    "acceptance_criteria": [
+      "Goal must be non-empty."
+    ],
+    "proof_requirements": [
+      "Schema validation fails."
+    ],
+    "risk": "low"
+  }
+}

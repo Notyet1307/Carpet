@@ -12,7 +12,7 @@ Evidence:
 branch: codex/docs-schema-contracts
 remote: https://github.com/Notyet1307/Carpet.git
 visibility: private
-current stage: docs, analysis, schemas, fixtures, contract tests
+current stage: docs, analysis, schema baseline, fixtures, contract tests
 ```
 
 ## Current Assets
@@ -54,19 +54,57 @@ current stage: docs, analysis, schemas, fixtures, contract tests
 ### Git Hygiene
 
 - `.gitignore`
-  - Ignores `.DS_Store`.
-  - Needs Node and local runtime ignores before package installation and test setup.
+  - Ignores `.DS_Store`, `node_modules/`, `coverage/`, and `.mcr/`.
+  - Keeps generated dependencies and local runtime scratch state out of git.
+
+### Contract Test Baseline
+
+- `package.json`
+  - Defines the private package and minimum scripts for contract validation.
+  - Uses Node's built-in test runner.
+- `pnpm-workspace.yaml`
+  - Establishes a pnpm workspace without creating runtime packages yet.
+- `pnpm-lock.yaml`
+  - Locks the schema validation dependencies.
+- `tsconfig.base.json`
+  - Reserves a strict TypeScript baseline for later runtime packages.
+- `tests/contracts/schema-fixtures.test.mjs`
+  - Loads schemas with Ajv.
+  - Verifies that valid fixtures pass and invalid fixtures fail.
+
+### Schemas
+
+- `schemas/matrix/event-envelope.schema.json`
+  - Shared Matrix runtime event envelope.
+  - Requires trace, workspace, actor, idempotency, and JSON payload metadata.
+- `schemas/matrix/task.created.schema.json`
+  - MVP task intake event.
+  - Requires goal, context, scope, acceptance criteria, proof requirements, and risk.
+- `schemas/proof/proof-ledger-entry.schema.json`
+  - Minimum proof ledger entry.
+  - Requires artifact references and validation evidence.
+- `schemas/codex/repo-patch-result.schema.json`
+  - Structured result expected from a future Codex repo-patch worker.
+
+### Fixtures
+
+- `fixtures/matrix-events/valid/**`
+  - Valid event-envelope and task-created examples.
+- `fixtures/matrix-events/invalid/**`
+  - Invalid examples for missing trace ID and empty task goal.
+- `fixtures/proof/valid/**`
+  - Valid proof ledger entry example.
+- `fixtures/proof/invalid/**`
+  - Invalid proof without validation evidence.
+- `fixtures/codex/valid/**`
+  - Valid Codex repo patch result example.
+- `fixtures/codex/invalid/**`
+  - Invalid Codex result without summary.
 
 ## Missing Assets
 
 The repository does not yet contain:
 
-- `package.json`
-- `pnpm-workspace.yaml`
-- `tsconfig.base.json`
-- `schemas/**`
-- `fixtures/**`
-- `tests/contracts/**`
 - `runtime/capabilities.yaml`
 - `runtime/policies/**`
 - `runtime/workflows/**`
@@ -88,12 +126,12 @@ The architecture documents reference `Notyet1307/codex-multica`, Superpowers, Ma
 
 - The repository can be mistaken for an implementation repo even though it is currently documentation-only.
 - The architecture references external assets that have not been vendored or mapped into this repository.
-- No schema or fixture validation exists yet, so event/proof contracts are not enforceable.
-- No development entry gate can pass until schemas, fixtures, state-machine notes, policy notes, and contract tests exist.
+- Current schemas are a baseline only; approval events, state-machine schemas, capability schemas, and work-cell schemas are still missing.
+- No development entry gate can pass until state-machine notes, policy notes, broader contract tests, and MVP backlog slices exist.
 
 ## Recommended Next Work
 
-1. Add Node/pnpm contract-test baseline.
-2. Add JSON Schemas for Matrix event envelope, `task.created`, proof ledger entries, and Codex patch results.
-3. Add valid and invalid fixtures.
-4. Add contract tests that fail invalid fixtures and pass valid fixtures.
+1. Add state-machine analysis and transition tables.
+2. Add capability and work-cell schema baseline.
+3. Add approval event schemas and fixtures.
+4. Add policy baseline with deny-by-default rules.

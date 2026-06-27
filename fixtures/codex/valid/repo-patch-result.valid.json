@@ -1,0 +1,26 @@
+{
+  "summary": "Added schema baseline and contract fixtures.",
+  "files_changed": [
+    {
+      "path": "schemas/matrix/event-envelope.schema.json",
+      "action": "added"
+    }
+  ],
+  "tests_added_or_updated": [
+    "tests/contracts/schema-fixtures.test.mjs"
+  ],
+  "validation_results": [
+    {
+      "command": "pnpm test:contracts",
+      "exit_code": 0,
+      "summary": "Contract fixtures passed schema validation."
+    }
+  ],
+  "risk_notes": [
+    "No runtime integration is included."
+  ],
+  "rollback_notes": [
+    "Revert the schema baseline commit."
+  ],
+  "follow_up_tasks": []
+}

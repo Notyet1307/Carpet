@@ -1,0 +1,30 @@
+{
+  "proof_id": "proof_20260627_001",
+  "task_id": "task_20260627_001",
+  "run_id": "run_20260627_001",
+  "trace_id": "trace_20260627_001",
+  "created_at": "2026-06-27T04:10:00Z",
+  "capability": "proof.verify",
+  "summary": "Contract schema fixtures validated.",
+  "artifacts": [
+    {
+      "kind": "schema",
+      "uri": "https://object.local/artifacts/schema-baseline.json",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "validation": [
+    {
+      "command": "pnpm test:contracts",
+      "exit_code": 0,
+      "status": "passed",
+      "log_ref": "https://object.local/logs/run_20260627_001.txt"
+    }
+  ],
+  "risk_notes": [
+    "Contract-only change."
+  ],
+  "rollback_notes": [
+    "Revert the schema baseline commit."
+  ]
+}

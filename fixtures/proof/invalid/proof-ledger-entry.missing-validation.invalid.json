@@ -1,0 +1,22 @@
+{
+  "proof_id": "proof_20260627_002",
+  "task_id": "task_20260627_002",
+  "run_id": "run_20260627_002",
+  "trace_id": "trace_20260627_002",
+  "created_at": "2026-06-27T04:11:00Z",
+  "capability": "proof.verify",
+  "summary": "Invalid proof without validation evidence.",
+  "artifacts": [
+    {
+      "kind": "schema",
+      "uri": "https://object.local/artifacts/schema-baseline.json",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "risk_notes": [
+    "Missing validation should be rejected."
+  ],
+  "rollback_notes": [
+    "Add validation evidence."
+  ]
+}
