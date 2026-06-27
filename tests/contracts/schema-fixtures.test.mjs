@@ -19,6 +19,7 @@ const schemas = [
   "schemas/matrix/approval.granted.schema.json",
   "schemas/matrix/approval.denied.schema.json",
   "schemas/matrix/memory.update.proposed.schema.json",
+  "schemas/matrix/worker.dispatched.schema.json",
   "schemas/runtime/work-cell.schema.json",
   "schemas/proof/proof-ledger-entry.schema.json",
   "schemas/codex/repo-patch-result.schema.json",
@@ -137,6 +138,19 @@ const fixtureCases = [
     name: "memory update proposed live write",
     schema: "https://notyet.dev/schemas/matrix/memory.update.proposed.schema.json",
     fixture: "fixtures/matrix-events/invalid/memory.update.proposed.live-write.invalid.json",
+    valid: false,
+  },
+  {
+    name: "worker dispatched valid",
+    schema: "https://notyet.dev/schemas/matrix/worker.dispatched.schema.json",
+    fixture: "fixtures/matrix-events/valid/worker.dispatched.valid.json",
+    valid: true,
+  },
+  {
+    name: "worker dispatched main checkout path",
+    schema: "https://notyet.dev/schemas/matrix/worker.dispatched.schema.json",
+    fixture:
+      "fixtures/matrix-events/invalid/worker.dispatched.main-checkout-path.invalid.json",
     valid: false,
   },
   {
