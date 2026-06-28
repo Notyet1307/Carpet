@@ -17,6 +17,8 @@ importers:
 
   apps/matrix-appservice: {}
 
+  apps/worker-runner: {}
+
   packages/capability-router:
     dependencies:
       runtime-contracts:
