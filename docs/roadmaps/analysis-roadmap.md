@@ -368,7 +368,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 8 | Proof Ledger 与 Approval 分析 | 已完成：proof ledger baseline 与 approval gate contract baseline 已完成；runtime approval engine、GitHub automation、memory writer 未开始 |
 | Phase 9 | Security Threat Model 与 Policy 分析 | 已完成：worktree policy baseline、security threat model、deny-by-default policy matrix、policy decision fixtures/contract tests 已完成；runtime policy engine 未开始 |
 | Phase 10 | Testing Strategy 与 Test Matrix | 已完成：测试分层、contract baseline 映射、fixtures 规则、fake adapter 计划、MVP E2E 场景与 failure scenarios 已完成；真实 runtime / E2E runner 未开始 |
-| Phase 11 | Prompt / Skill 设计分析 | 未完成 |
+| Phase 11 | Prompt / Skill 设计分析 | 已完成：analyst、verifier、repo.patch.codex、proof.verify、memory.curator prompt baseline 与四个 reusable skill baseline 已完成；prompt 仍不作为权限 enforcement |
 | Phase 12 | MVP Backlog 与开发入口 | 未完成 |
 
 ### 5.2 MCR 编号范围
@@ -1376,6 +1376,7 @@ runtime/prompts/memory-curator.md
 .agents/skills/matrix-runtime-analysis/SKILL.md
 .agents/skills/proof-driven-development/SKILL.md
 .agents/skills/codex-worker-contracts/SKILL.md
+.agents/skills/security-boundary-review/SKILL.md
 ```
 
 ### Prompt 设计原则
@@ -1427,7 +1428,7 @@ Done when:
   - Prompts are versioned files.
   - Skills have frontmatter name and description.
   - Skills do not contain secrets or environment assumptions.
-  - Prompt pack separates analyst, implementer, verifier, memory curator.
+  - Prompt pack separates analyst, repo patch worker, verifier, proof verifier, memory curator.
 Verifier prompt:
   Check for prompt bloat, ambiguous instructions, missing proof requirements, and unsafe autonomy.
 ```
