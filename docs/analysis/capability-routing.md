@@ -49,13 +49,17 @@ Each capability defines:
 - policy ref
 - isolated worktree execution fields where Codex writes repository changes
 
-`repo.patch.codex`, `ci.recovery`, and `security.review` keep the existing
-worktree policy fields:
+`repo.patch.codex` and `ci.recovery` keep the existing worktree policy fields
+because they can produce repository patches:
 
 - `requires_isolated_worktree: true`
 - `worktree_created_by: runtime`
 - `codex_cwd: worktree_path`
 - `allow_main_checkout_edits: false`
+
+`security.review` is read-only: it matches only `security_review`, uses a
+`security_scanner` worker, and denies `repo:write_patch`. It may review artifacts
+from an isolated worktree, but it does not apply fixes itself.
 
 ## MVP Capability Set
 
@@ -83,10 +87,15 @@ Baseline routing is manifest-based:
 3. Prefer the narrowest capability that can produce the required output schema.
 4. For repository mutation, select only a capability with isolated worktree
    execution.
-5. For high-risk or external-action work, require proof plus a scoped human
+5. Route normal `code_change` and `test_change` work to `repo.patch.codex`, not
+   `ci.recovery`; `ci.recovery` is only for `ci_recovery` tasks with CI failure
+   evidence.
+6. Route security review to `security.review`; route any follow-up fix as a
+   separate patch task after review.
+7. For high-risk or external-action work, require proof plus a scoped human
    gate before the action node can proceed.
-6. For memory work, route to `memory.propose`; direct memory writes are denied.
-7. If no capability matches safely, route back to `spec.scope` or block with a
+8. For memory work, route to `memory.propose`; direct memory writes are denied.
+9. If no capability matches safely, route back to `spec.scope` or block with a
    readable reason.
 
 ## Workflow References

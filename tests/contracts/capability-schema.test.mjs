@@ -54,6 +54,65 @@ function workflowCapabilityRefs(workflowPath) {
     .filter(Boolean);
 }
 
+function capabilitiesForTaskType(registry, taskType) {
+  return registry.capabilities.filter((capability) =>
+    capability.task_types.includes(taskType),
+  );
+}
+
+function capabilityById(registry, capabilityId) {
+  return registry.capabilities.find((capability) => capability.id === capabilityId);
+}
+
+function readCapabilityPolicies() {
+  const policies = [];
+  let currentPolicy;
+  let inCapabilityPolicies = false;
+  let currentList;
+
+  for (const line of readText("runtime/policies/default.yaml").split(/\r?\n/)) {
+    if (line === "capability_policies:") {
+      inCapabilityPolicies = true;
+      continue;
+    }
+    if (!inCapabilityPolicies) {
+      continue;
+    }
+    if (/^\S/.test(line)) {
+      break;
+    }
+
+    const id = line.match(/^  - id: ([^\s]+)$/);
+    if (id) {
+      currentPolicy = { id: id[1] };
+      policies.push(currentPolicy);
+      currentList = undefined;
+      continue;
+    }
+
+    const capabilityId = line.match(/^    capability_id: ([^\s]+)$/);
+    if (capabilityId && currentPolicy) {
+      currentPolicy.capability_id = capabilityId[1];
+      currentList = undefined;
+      continue;
+    }
+
+    const listName = line.match(/^    (allowed_permissions|denied_permissions):$/);
+    if (listName && currentPolicy) {
+      currentList = listName[1];
+      currentPolicy[currentList] = [];
+      continue;
+    }
+
+    const listItem = line.match(/^      - ([^\s]+)$/);
+    if (listItem && currentPolicy && currentList) {
+      currentPolicy[currentList].push(listItem[1]);
+    }
+  }
+
+  return policies;
+}
+
 test("capability registry validates against schema", () => {
   const ajv = createAjv();
   const validateRegistry = ajv.getSchema(capabilitySchemaId);
@@ -108,6 +167,59 @@ test("implementation capabilities require isolated worktree", () => {
   }
 });
 
+test("security review is read-only", () => {
+  const securityReview = capabilityById(readRegistry(), "security.review");
+  const securityPolicy = readCapabilityPolicies().find(
+    (policy) => policy.id === securityReview.policy_ref,
+  );
+
+  assert.ok(securityReview);
+  assert.equal(securityReview.worker_type, "security_scanner");
+  assert.deepEqual(securityReview.task_types, ["security_review"]);
+  assert.equal(
+    securityReview.permissions.allow.includes("repo:write_patch"),
+    false,
+  );
+  assert.equal(securityReview.permissions.deny.includes("repo:write_patch"), true);
+  assert.ok(securityPolicy);
+  assert.equal(
+    securityPolicy.denied_permissions.includes("repo:write_patch"),
+    true,
+  );
+});
+
+test("generic repository changes do not route to ci recovery", () => {
+  const registry = readRegistry();
+  const repoPatchPolicy = readCapabilityPolicies().find(
+    (policy) => policy.id === "capability.repo.patch.codex.default",
+  );
+
+  for (const taskType of ["code_change", "test_change"]) {
+    const matchingCapabilityIds = capabilitiesForTaskType(registry, taskType).map(
+      (capability) => capability.id,
+    );
+
+    assert.equal(
+      matchingCapabilityIds.includes("ci.recovery"),
+      false,
+      taskType,
+    );
+    assert.equal(
+      matchingCapabilityIds.includes("repo.patch.codex"),
+      true,
+      taskType,
+    );
+  }
+
+  assert.deepEqual(capabilityById(registry, "ci.recovery").task_types, [
+    "ci_recovery",
+  ]);
+  assert.equal(
+    repoPatchPolicy.denied_permissions.includes("repo:write_patch"),
+    false,
+  );
+});
+
 test("high-risk and external-action capabilities require proof and human gate", () => {
   const gatedCapabilities = readRegistry().capabilities.filter(
     (capability) =>
@@ -128,10 +240,16 @@ test("high-risk and external-action capabilities require proof and human gate", 
 });
 
 test("capability policy references resolve in default policy", () => {
-  const policyText = readText("runtime/policies/default.yaml");
+  const policies = readCapabilityPolicies();
+  const policiesById = new Map(policies.map((policy) => [policy.id, policy]));
+
+  assert.equal(policiesById.size, policies.length);
 
   for (const capability of readRegistry().capabilities) {
-    assert.equal(policyText.includes(capability.policy_ref), true, capability.id);
+    const policy = policiesById.get(capability.policy_ref);
+
+    assert.ok(policy, capability.policy_ref);
+    assert.equal(policy.capability_id, capability.id, capability.id);
   }
 });
 
@@ -150,6 +268,20 @@ test("capability fixtures validate and invalid proof policy fixture rejects", ()
       readRegistry("fixtures/capabilities/invalid/capability-registry.missing-verifier.invalid.yaml"),
     ),
     false,
+  );
+  assert.deepEqual(
+    validateRegistry.errors.map(({ instancePath, keyword, params }) => ({
+      instancePath,
+      keyword,
+      params,
+    })),
+    [
+      {
+        instancePath: "/capabilities/0",
+        keyword: "required",
+        params: { missingProperty: "verifier" },
+      },
+    ],
   );
 });
 

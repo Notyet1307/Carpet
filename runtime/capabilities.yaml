@@ -90,7 +90,7 @@
       "id": "ci.recovery",
       "display_name": "CI recovery",
       "description": "Diagnoses a failing check and produces a narrow recovery patch with validation evidence.",
-      "task_types": ["code_change", "test_change", "ci_recovery"],
+      "task_types": ["ci_recovery"],
       "input_schema": {
         "schema_ref": "schema://runtime/capabilities/ci.recovery.input@v1",
         "required_fields": ["ci_failure", "allowed_paths", "worktree"]
@@ -245,7 +245,7 @@
       "id": "security.review",
       "display_name": "Security review",
       "description": "Reviews scoped artifacts for security risk and emits findings without applying fixes by itself.",
-      "task_types": ["security_fix", "security_review"],
+      "task_types": ["security_review"],
       "input_schema": {
         "schema_ref": "schema://runtime/capabilities/security.review.input@v1",
         "required_fields": ["artifact_refs", "scope", "threat_notes"]
@@ -254,15 +254,15 @@
         "schema_ref": "schema://runtime/capabilities/security.review.output@v1",
         "required_fields": ["security_findings", "risk_level", "recommended_gate"]
       },
-      "worker_type": "codex_exec",
+      "worker_type": "security_scanner",
       "permissions": {
-        "allow": ["repo:read", "repo:write_patch", "process:run_tests"],
-        "deny": ["repo:edit_main_checkout", "github:create_pr", "github:merge", "github:push_main", "secrets:read", "deploy:write"]
+        "allow": ["repo:read", "artifact:read", "process:run_tests"],
+        "deny": ["repo:write_patch", "repo:edit_main_checkout", "github:create_pr", "github:merge", "github:push_main", "secrets:read", "deploy:write"]
       },
       "proof_required": true,
       "verifier": {
         "capability_ref": "proof.verify",
-        "required_evidence": ["security_findings", "git_diff", "validation_log", "worktree_record"]
+        "required_evidence": ["security_findings", "risk_level", "recommended_gate"]
       },
       "human_gate": {
         "required": true,

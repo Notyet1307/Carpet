@@ -99,6 +99,7 @@ capability_policies:
     human_gate_required: true
     requires_isolated_worktree: true
     denied_permissions:
+      - repo:write_patch
       - repo:edit_main_checkout
       - github:create_pr
       - github:merge
