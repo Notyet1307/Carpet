@@ -326,7 +326,140 @@
       "if": {
         "type": "object",
         "properties": {
-          "to": { "enum": ["proof_submitted", "completed"] }
+          "to": { "const": "accepted" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.accepted" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "scoped" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.scoped" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "graph_compiled" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.graph_compiled" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "capability_selected" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.capability_selected" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "work_cell_created" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.work_cell_created" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "worker_dispatched" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.worker_dispatched" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "running" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.running" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "artifact_submitted" }
         }
       },
       "then": {
@@ -336,6 +469,290 @@
             "type": "object",
             "properties": {
               "artifact_ref": { "$ref": "#/definitions/artifact_ref" }
+            }
+          },
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.artifact_submitted" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "proof_submitted" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "artifact_ref": { "$ref": "#/definitions/artifact_ref" }
+            }
+          },
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.proof_submitted" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "verifying" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.verifying" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "waiting_approval" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.waiting_approval" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "approved" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.approved" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "pr_created" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.pr_created" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "completed" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "artifact_ref": { "$ref": "#/definitions/artifact_ref" }
+            }
+          },
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.completed" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "rejected" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.rejected" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "blocked" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.blocked" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "needs_human_input" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.needs_human_input" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "policy_denied" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.policy_denied" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "worker_failed" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.worker_failed" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "verification_failed" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.verification_failed" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "approval_denied" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.approval_denied" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "const": "cancelled" }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "audit_event": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "task.transition.cancelled" }
             }
           }
         }

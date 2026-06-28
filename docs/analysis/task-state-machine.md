@@ -84,7 +84,7 @@ action-scoped human `approval_ref`.
 | `capability_selected` | `work_cell_created` | `work_cell.created` | `runtime` | None | None | None | `task.transition.work_cell_created` |
 | `work_cell_created` | `worker_dispatched` | `worker.dispatched` | `runtime` | None | None | None | `task.transition.worker_dispatched` |
 | `worker_dispatched` | `running` | `worker.started` | `worker` | None | None | None | `task.transition.running` |
-| `running` | `artifact_submitted` | `artifact.submitted` | `worker` | None | None | None | `task.transition.artifact_submitted` |
+| `running` | `artifact_submitted` | `artifact.submitted` | `worker` | `artifact_ref` | None | None | `task.transition.artifact_submitted` |
 | `artifact_submitted` | `proof_submitted` | `proof.submitted` | `worker` | `artifact_ref` | None | None | `task.transition.proof_submitted` |
 | `proof_submitted` | `verifying` | `verification.started` | `verifier` | None | `proof_ref` | None | `task.transition.verifying` |
 | `verifying` | `waiting_approval` | `approval.requested` | `runtime` | None | `proof_ref` | None | `task.transition.waiting_approval` |
@@ -144,6 +144,8 @@ database, or worker-runner behavior.
 - illegal transition rejection;
 - wrong actor rejection;
 - high-risk PR creation rejection when approval is missing;
+- audit event mismatch rejection;
+- artifact submission rejection when `artifact_ref` is missing;
 - unknown state and unknown transition-pair rejection.
 
 Both `pnpm test:contracts` and `pnpm schemas:validate` run the contract tests in

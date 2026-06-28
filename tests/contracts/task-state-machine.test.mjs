@@ -105,7 +105,10 @@ function happyPathSequence() {
       triggerEvent,
     );
 
-    if (transition.to === "proof_submitted") {
+    if (
+      transition.to === "artifact_submitted" ||
+      transition.to === "proof_submitted"
+    ) {
       transition.requirements.artifact_ref = "artifact_demo";
     }
 
@@ -184,6 +187,33 @@ test("rejects illegal task transitions", () => {
   const wrongActor = baseTransition("work_cell_created", "worker_dispatched", "worker.dispatched");
   wrongActor.actor.type = "human";
   assert.equal(validateTransition(wrongActor), false);
+});
+
+test("rejects transition with mismatched audit event type", () => {
+  const ajv = createAjv();
+  const validateTransition = ajv.getSchema(
+    "https://notyet.dev/schemas/runtime/task-state-transition.schema.json",
+  );
+
+  const scoped = baseTransition("accepted", "scoped", "task.scoped");
+  scoped.audit_event.type = "task.transition.approved";
+
+  assert.equal(validateTransition(scoped), false);
+});
+
+test("rejects artifact submission without artifact ref", () => {
+  const ajv = createAjv();
+  const validateTransition = ajv.getSchema(
+    "https://notyet.dev/schemas/runtime/task-state-transition.schema.json",
+  );
+
+  const artifactSubmitted = baseTransition(
+    "running",
+    "artifact_submitted",
+    "artifact.submitted",
+  );
+
+  assert.equal(validateTransition(artifactSubmitted), false);
 });
 
 test("rejects high-risk irreversible action without explicit approval", () => {
