@@ -35,6 +35,12 @@ importers:
 
   packages/state-machine: {}
 
+  packages/work-cell-manager:
+    dependencies:
+      runtime-contracts:
+        specifier: workspace:*
+        version: link:../runtime-contracts
+
 packages:
 
   ajv-formats@3.0.1:
