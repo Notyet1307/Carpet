@@ -17,6 +17,12 @@ importers:
 
   apps/matrix-appservice: {}
 
+  packages/capability-router:
+    dependencies:
+      runtime-contracts:
+        specifier: workspace:*
+        version: link:../runtime-contracts
+
   packages/runtime-contracts: {}
 
   packages/runtime-store:
