@@ -361,7 +361,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
-| Phase 4 | Runtime State Machine 与 Task Graph | 部分完成：task state machine baseline、runtime task schemas、transition contract tests 已完成；task graph/workflow files 缺 |
+| Phase 4 | Runtime State Machine 与 Task Graph | 部分完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline 已完成；runtime workflow files 缺 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
 | Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
@@ -710,12 +710,16 @@ approval event 不能是自然语言“同意”
 
 ```text
 docs/analysis/task-state-machine.md
+docs/analysis/task-graph.md
 docs/diagrams/task-lifecycle.mmd
+docs/diagrams/task-graph.mmd
 runtime/workflows/repo-patch.yaml
 runtime/workflows/ci-recovery.yaml
 schemas/runtime/task.schema.json
 schemas/runtime/task-state-transition.schema.json
+schemas/runtime/task-graph.schema.json
 tests/contracts/task-state-machine.test.mjs
+tests/contracts/task-graph.test.mjs
 ```
 
 ### MVP 状态机
@@ -761,10 +765,15 @@ cancelled
 - schemas/runtime/task-state-transition.schema.json
 - tests/contracts/task-state-machine.test.mjs
 
+2026-06-28: task graph contract baseline 已完成：
+- docs/analysis/task-graph.md
+- docs/diagrams/task-graph.mmd
+- schemas/runtime/task-graph.schema.json
+- tests/contracts/task-graph.test.mjs
+
 仍未完成：
 - runtime/workflows/repo-patch.yaml
 - runtime/workflows/ci-recovery.yaml
-- Task Graph 细化
 ```
 
 ### Codex Task Card 4.1：状态机分析

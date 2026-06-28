@@ -1,0 +1,26 @@
+flowchart LR
+  subgraph MatrixInput["Matrix input"]
+    Event["event_ingest<br/>event_ref"]
+  end
+
+  subgraph Runtime["Runtime source of truth"]
+    Scope["runtime_decision<br/>scope"]
+    Execute["capability_execution<br/>artifact"]
+    Verify["proof_verification<br/>proof_required"]
+    Approval["approval_gate<br/>proof + approval"]
+    PR["external_action<br/>github_pr_create"]
+  end
+
+  subgraph MatrixProjection["Matrix projection"]
+    Projection["matrix_projection<br/>event_ref"]
+  end
+
+  Event -->|always| Scope
+  Scope -->|policy_allowed| Execute
+  Execute -->|artifact_ready| Verify
+  Verify -->|proof_verified| Approval
+  Approval -->|approval_granted| PR
+  PR -->|external_action_completed| Projection
+
+  Event -. "input only" .-> Runtime
+  Runtime -. "projection only" .-> Projection
