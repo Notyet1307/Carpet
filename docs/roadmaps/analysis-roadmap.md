@@ -1520,7 +1520,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] 产品语言已锁定，避免部门制
 [x] TypeScript-first ADR 已通过
 [x] Matrix 作为协作层的 ADR 已通过
-[ ] Codex exec before SDK 的 ADR 已通过
+[x] Codex exec before SDK 的 ADR 已通过
 [x] 所有 MVP Matrix event 有 JSON Schema
 [x] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
 [x] task state machine 已定义合法/非法转换
