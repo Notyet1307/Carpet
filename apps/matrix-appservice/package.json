@@ -1,0 +1,9 @@
+{
+  "name": "matrix-appservice",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts"
+  }
+}
