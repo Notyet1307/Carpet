@@ -1,32 +1,363 @@
-capabilities:
-  - id: repo.patch.codex
-    task_types:
-      - code_change
-      - test_change
-      - schema_change
-      - fixture_change
-      - refactor
-    execution:
-      requires_isolated_worktree: true
-      worktree_created_by: runtime
-      codex_cwd: worktree_path
-      allow_main_checkout_edits: false
-
-  - id: ci.recovery
-    task_types:
-      - code_change
-      - test_change
-    execution:
-      requires_isolated_worktree: true
-      worktree_created_by: runtime
-      codex_cwd: worktree_path
-      allow_main_checkout_edits: false
-
-  - id: security.review
-    task_types:
-      - security_fix
-    execution:
-      requires_isolated_worktree: true
-      worktree_created_by: runtime
-      codex_cwd: worktree_path
-      allow_main_checkout_edits: false
+{
+  "schema_version": 1,
+  "source_notes": [
+    "multica/agents.yaml is absent in this checkout; no migration seed was read.",
+    "Baseline derives from the Phase 5 task card, existing workflow capability refs, and existing worktree policy fields."
+  ],
+  "capabilities": [
+    {
+      "id": "spec.scope",
+      "display_name": "Spec scoping",
+      "description": "Converts an intent into bounded task scope, acceptance checks, risk notes, and route candidates.",
+      "task_types": ["scope_task", "docs_only", "read_only_analysis"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/spec.scope.input@v1",
+        "required_fields": ["goal", "context", "scope", "risk"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/spec.scope.output@v1",
+        "required_fields": ["task_scope", "route_candidates", "risk_notes"]
+      },
+      "worker_type": "runtime",
+      "permissions": {
+        "allow": ["repo:read", "runtime:route"],
+        "deny": ["repo:write_patch", "github:create_pr", "github:merge", "secrets:read", "memory:write_direct"]
+      },
+      "proof_required": false,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["scope_summary"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "low",
+      "policy_ref": "capability.spec.scope.default",
+      "examples": [
+        {
+          "task_type": "scope_task",
+          "route_when": "Intent needs a bounded task brief before any worker runs."
+        }
+      ]
+    },
+    {
+      "id": "repo.patch.codex",
+      "display_name": "Repo patch via Codex",
+      "description": "Produces a constrained repository patch in an isolated worktree from an approved task scope.",
+      "task_types": ["code_change", "test_change", "schema_change", "fixture_change", "refactor"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/repo.patch.codex.input@v1",
+        "required_fields": ["task_scope", "allowed_paths", "worktree"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/repo.patch.codex.output@v1",
+        "required_fields": ["artifact_patch", "validation_summary", "risk_notes"]
+      },
+      "worker_type": "codex_exec",
+      "permissions": {
+        "allow": ["repo:read", "repo:write_patch", "process:run_tests"],
+        "deny": ["repo:edit_main_checkout", "github:create_pr", "github:merge", "github:push_main", "secrets:read", "deploy:write"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["git_diff", "validation_log", "worktree_record"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "medium",
+      "policy_ref": "capability.repo.patch.codex.default",
+      "execution": {
+        "requires_isolated_worktree": true,
+        "worktree_created_by": "runtime",
+        "codex_cwd": "worktree_path",
+        "allow_main_checkout_edits": false,
+        "cleanup_policy": "keep_until_merged_or_failed_reviewed"
+      },
+      "examples": [
+        {
+          "task_type": "code_change",
+          "route_when": "A scoped repository change needs Codex execution and local validation."
+        }
+      ]
+    },
+    {
+      "id": "ci.recovery",
+      "display_name": "CI recovery",
+      "description": "Diagnoses a failing check and produces a narrow recovery patch with validation evidence.",
+      "task_types": ["code_change", "test_change", "ci_recovery"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/ci.recovery.input@v1",
+        "required_fields": ["ci_failure", "allowed_paths", "worktree"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/ci.recovery.output@v1",
+        "required_fields": ["artifact_recovery_patch", "test_evidence", "root_cause"]
+      },
+      "worker_type": "codex_exec",
+      "permissions": {
+        "allow": ["repo:read", "repo:write_patch", "github:read_checks", "process:run_tests"],
+        "deny": ["repo:edit_main_checkout", "github:create_pr", "github:merge", "github:push_main", "secrets:read", "deploy:write"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["ci_log_ref", "git_diff", "validation_log", "worktree_record"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "medium",
+      "policy_ref": "capability.ci.recovery.default",
+      "execution": {
+        "requires_isolated_worktree": true,
+        "worktree_created_by": "runtime",
+        "codex_cwd": "worktree_path",
+        "allow_main_checkout_edits": false,
+        "cleanup_policy": "keep_until_merged_or_failed_reviewed"
+      },
+      "examples": [
+        {
+          "task_type": "ci_recovery",
+          "route_when": "A known check failed and the task goal is recovery, not broad feature work."
+        }
+      ]
+    },
+    {
+      "id": "test.run",
+      "display_name": "Test run evidence",
+      "description": "Runs scoped validation commands and returns structured evidence without changing repository files.",
+      "task_types": ["test_run", "validation"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/test.run.input@v1",
+        "required_fields": ["worktree", "commands"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/test.run.output@v1",
+        "required_fields": ["test_evidence", "exit_codes", "log_refs"]
+      },
+      "worker_type": "test_runner",
+      "permissions": {
+        "allow": ["repo:read", "process:run_tests"],
+        "deny": ["repo:write_patch", "repo:edit_main_checkout", "github:create_pr", "github:merge", "secrets:read", "deploy:write"]
+      },
+      "proof_required": false,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["test_evidence"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "medium",
+      "policy_ref": "capability.test.run.default",
+      "examples": [
+        {
+          "task_type": "test_run",
+          "route_when": "A workflow needs validation evidence before proof verification."
+        }
+      ]
+    },
+    {
+      "id": "proof.verify",
+      "display_name": "Proof verification",
+      "description": "Checks artifact refs, validation evidence, risk notes, and rollback notes before gated actions.",
+      "task_types": ["proof_verification", "review"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/proof.verify.input@v1",
+        "required_fields": ["artifact_refs", "validation", "risk_notes"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/proof.verify.output@v1",
+        "required_fields": ["proof_verdict", "missing_evidence", "approval_ready"]
+      },
+      "worker_type": "verifier",
+      "permissions": {
+        "allow": ["repo:read", "artifact:read", "proof:write_verdict"],
+        "deny": ["repo:write_patch", "github:create_pr", "github:merge", "secrets:read", "memory:write_direct", "deploy:write"]
+      },
+      "proof_required": false,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["verifier_report"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "medium",
+      "policy_ref": "capability.proof.verify.default",
+      "examples": [
+        {
+          "task_type": "proof_verification",
+          "route_when": "An artifact must be checked before approval, memory proposal, or external action."
+        }
+      ]
+    },
+    {
+      "id": "memory.propose",
+      "display_name": "Memory proposal",
+      "description": "Creates a reviewable learning proposal from verified proof; it never writes memory directly.",
+      "task_types": ["memory_proposal"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/memory.propose.input@v1",
+        "required_fields": ["proof_verdict", "lesson", "evidence_refs"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/memory.propose.output@v1",
+        "required_fields": ["memory_proposal", "evidence_refs", "review_scope"]
+      },
+      "worker_type": "memory_curator",
+      "permissions": {
+        "allow": ["artifact:read", "proof:read", "memory:propose"],
+        "deny": ["memory:write_direct", "repo:write_patch", "github:create_pr", "github:merge", "secrets:read", "deploy:write"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["proof_verdict", "evidence_refs"]
+      },
+      "human_gate": {
+        "required": true,
+        "gate_type": "before_memory_proposal",
+        "scope": "proposal_scoped"
+      },
+      "risk_level": "high",
+      "policy_ref": "capability.memory.propose.default",
+      "examples": [
+        {
+          "task_type": "memory_proposal",
+          "route_when": "A verified run produced durable guidance worth human review."
+        }
+      ]
+    },
+    {
+      "id": "security.review",
+      "display_name": "Security review",
+      "description": "Reviews scoped artifacts for security risk and emits findings without applying fixes by itself.",
+      "task_types": ["security_fix", "security_review"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/security.review.input@v1",
+        "required_fields": ["artifact_refs", "scope", "threat_notes"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/security.review.output@v1",
+        "required_fields": ["security_findings", "risk_level", "recommended_gate"]
+      },
+      "worker_type": "codex_exec",
+      "permissions": {
+        "allow": ["repo:read", "repo:write_patch", "process:run_tests"],
+        "deny": ["repo:edit_main_checkout", "github:create_pr", "github:merge", "github:push_main", "secrets:read", "deploy:write"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["security_findings", "git_diff", "validation_log", "worktree_record"]
+      },
+      "human_gate": {
+        "required": true,
+        "gate_type": "before_handoff",
+        "scope": "review_scoped"
+      },
+      "risk_level": "high",
+      "policy_ref": "capability.security.review.default",
+      "execution": {
+        "requires_isolated_worktree": true,
+        "worktree_created_by": "runtime",
+        "codex_cwd": "worktree_path",
+        "allow_main_checkout_edits": false,
+        "cleanup_policy": "keep_until_merged_or_failed_reviewed"
+      },
+      "examples": [
+        {
+          "task_type": "security_review",
+          "route_when": "The task changes trust boundaries, permission checks, or evidence handling."
+        }
+      ]
+    },
+    {
+      "id": "release.notes",
+      "display_name": "Release notes",
+      "description": "Summarizes verified artifacts into release notes with links to proof and rollback notes.",
+      "task_types": ["release_notes"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/release.notes.input@v1",
+        "required_fields": ["artifact_refs", "change_summary", "proof_verdict"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/release.notes.output@v1",
+        "required_fields": ["release_notes", "proof_refs", "rollback_notes"]
+      },
+      "worker_type": "release_writer",
+      "permissions": {
+        "allow": ["artifact:read", "proof:read"],
+        "deny": ["repo:write_patch", "github:create_pr", "github:merge", "secrets:read", "memory:write_direct", "deploy:write"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["proof_verdict", "artifact_refs"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "medium",
+      "policy_ref": "capability.release.notes.default",
+      "examples": [
+        {
+          "task_type": "release_notes",
+          "route_when": "Verified artifacts need a human-readable release summary."
+        }
+      ]
+    },
+    {
+      "id": "github.pr.create",
+      "display_name": "GitHub PR request",
+      "description": "Requests PR creation only after verified proof and an action-scoped human gate; this entry is contract-only.",
+      "task_types": ["external_pr_request"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/github.pr.create.input@v1",
+        "required_fields": ["approval_granted", "proof_verified", "artifact_patch"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/github.pr.create.output@v1",
+        "required_fields": ["artifact_pr", "action_ref", "audit_ref"]
+      },
+      "worker_type": "external_action",
+      "permissions": {
+        "allow": ["github:create_pr"],
+        "deny": ["github:merge", "github:push_main", "deploy:write", "secrets:read", "memory:write_direct"]
+      },
+      "proof_required": true,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["proof_verdict", "approval_event", "artifact_patch"]
+      },
+      "human_gate": {
+        "required": true,
+        "gate_type": "before_external_action",
+        "scope": "action_scoped"
+      },
+      "risk_level": "high",
+      "policy_ref": "capability.github.pr.create.default",
+      "examples": [
+        {
+          "task_type": "external_pr_request",
+          "route_when": "An existing workflow reaches the approved PR creation node."
+        }
+      ]
+    }
+  ]
+}

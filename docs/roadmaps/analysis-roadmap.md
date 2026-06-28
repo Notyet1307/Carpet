@@ -362,7 +362,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline 均已完成 |
-| Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
+| Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capability registry baseline 已完成（registry/schema/fixtures/routing analysis/contract tests）；runtime router implementation 未开始 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
 | Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
 | Phase 8 | Proof Ledger 与 Approval 分析 | 部分完成：proof ledger baseline 已有；approval 缺 |
@@ -820,6 +820,10 @@ Verifier prompt:
 ### 目标
 
 把现有 `multica/agents.yaml` 里的 agent seed 改造成 capability registry。
+
+当前 checkout 未包含 `multica/agents.yaml`；Phase 5 baseline 不虚构迁移来源，
+而是以架构文档、Phase 5 task card、既有 workflow capability ref 和
+现有 worktree policy fields 为依据。
 
 ### 产物
 
@@ -1435,7 +1439,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] 所有 MVP Matrix event 有 JSON Schema
 [ ] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
 [x] task state machine 已定义合法/非法转换
-[ ] capability registry 有 schema 和 MVP capabilities
+[x] capability registry 有 schema 和 MVP capabilities
 [ ] default policy 是 deny-by-default
 [ ] Codex worker 输出 schema 能表达 success/failed/blocked
 [ ] proof ledger schema 能独立表达证据链

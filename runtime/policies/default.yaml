@@ -14,3 +14,121 @@ worktree_policy:
   branch_pattern: "^mcr/[A-Z]+-[0-9]+/[a-z0-9-]+$"
   path_pattern: "^../\\.worktrees/.+/.+$"
   cleanup_policy: keep_until_merged_or_failed_reviewed
+
+capability_policies:
+  - id: capability.spec.scope.default
+    capability_id: spec.scope
+    deny_by_default: true
+    proof_required: false
+    human_gate_required: false
+    allowed_permissions:
+      - repo:read
+      - runtime:route
+
+  - id: capability.repo.patch.codex.default
+    capability_id: repo.patch.codex
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: false
+    requires_isolated_worktree: true
+    denied_permissions:
+      - repo:edit_main_checkout
+      - github:create_pr
+      - github:merge
+      - github:push_main
+      - secrets:read
+      - deploy:write
+
+  - id: capability.ci.recovery.default
+    capability_id: ci.recovery
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: false
+    requires_isolated_worktree: true
+    denied_permissions:
+      - repo:edit_main_checkout
+      - github:create_pr
+      - github:merge
+      - github:push_main
+      - secrets:read
+      - deploy:write
+
+  - id: capability.test.run.default
+    capability_id: test.run
+    deny_by_default: true
+    proof_required: false
+    human_gate_required: false
+    denied_permissions:
+      - repo:write_patch
+      - repo:edit_main_checkout
+      - github:create_pr
+      - github:merge
+      - secrets:read
+      - deploy:write
+
+  - id: capability.proof.verify.default
+    capability_id: proof.verify
+    deny_by_default: true
+    proof_required: false
+    human_gate_required: false
+    denied_permissions:
+      - repo:write_patch
+      - github:create_pr
+      - github:merge
+      - secrets:read
+      - memory:write_direct
+      - deploy:write
+
+  - id: capability.memory.propose.default
+    capability_id: memory.propose
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: true
+    denied_permissions:
+      - memory:write_direct
+      - repo:write_patch
+      - github:create_pr
+      - github:merge
+      - secrets:read
+      - deploy:write
+
+  - id: capability.security.review.default
+    capability_id: security.review
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: true
+    requires_isolated_worktree: true
+    denied_permissions:
+      - repo:edit_main_checkout
+      - github:create_pr
+      - github:merge
+      - github:push_main
+      - secrets:read
+      - deploy:write
+
+  - id: capability.release.notes.default
+    capability_id: release.notes
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: false
+    denied_permissions:
+      - repo:write_patch
+      - github:create_pr
+      - github:merge
+      - secrets:read
+      - memory:write_direct
+      - deploy:write
+
+  - id: capability.github.pr.create.default
+    capability_id: github.pr.create
+    deny_by_default: true
+    proof_required: true
+    human_gate_required: true
+    allowed_permissions:
+      - github:create_pr
+    denied_permissions:
+      - github:merge
+      - github:push_main
+      - deploy:write
+      - secrets:read
+      - memory:write_direct

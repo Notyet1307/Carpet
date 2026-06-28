@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "capabilities": [
+    {
+      "id": "github.pr.create",
+      "display_name": "GitHub PR request",
+      "description": "Requests PR creation after approval.",
+      "task_types": ["external_pr_request"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/github.pr.create.input@v1",
+        "required_fields": ["approval_granted", "artifact_patch"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/github.pr.create.output@v1",
+        "required_fields": ["artifact_pr"]
+      },
+      "worker_type": "external_action",
+      "permissions": {
+        "allow": ["github:create_pr"],
+        "deny": ["github:merge", "github:push_main"]
+      },
+      "proof_required": false,
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "high",
+      "policy_ref": "capability.github.pr.create.default",
+      "examples": [
+        {
+          "task_type": "external_pr_request",
+          "route_when": "This fixture is intentionally invalid."
+        }
+      ]
+    }
+  ]
+}

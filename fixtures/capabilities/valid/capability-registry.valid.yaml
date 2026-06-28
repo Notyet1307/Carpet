@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "capabilities": [
+    {
+      "id": "spec.scope",
+      "display_name": "Spec scoping",
+      "description": "Converts an intent into bounded task scope and route candidates.",
+      "task_types": ["scope_task"],
+      "input_schema": {
+        "schema_ref": "schema://runtime/capabilities/spec.scope.input@v1",
+        "required_fields": ["goal", "context"]
+      },
+      "output_schema": {
+        "schema_ref": "schema://runtime/capabilities/spec.scope.output@v1",
+        "required_fields": ["task_scope", "route_candidates"]
+      },
+      "worker_type": "runtime",
+      "permissions": {
+        "allow": ["repo:read", "runtime:route"],
+        "deny": ["repo:write_patch", "github:create_pr", "secrets:read"]
+      },
+      "proof_required": false,
+      "verifier": {
+        "capability_ref": "proof.verify",
+        "required_evidence": ["scope_summary"]
+      },
+      "human_gate": {
+        "required": false,
+        "gate_type": "none",
+        "scope": "none"
+      },
+      "risk_level": "low",
+      "policy_ref": "capability.spec.scope.default",
+      "examples": [
+        {
+          "task_type": "scope_task",
+          "route_when": "Intent needs a bounded task brief."
+        }
+      ]
+    }
+  ]
+}
