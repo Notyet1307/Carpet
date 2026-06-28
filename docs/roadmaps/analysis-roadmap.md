@@ -369,7 +369,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 9 | Security Threat Model 与 Policy 分析 | 已完成：worktree policy baseline、security threat model、deny-by-default policy matrix、policy decision fixtures/contract tests 已完成；runtime policy engine 未开始 |
 | Phase 10 | Testing Strategy 与 Test Matrix | 已完成：测试分层、contract baseline 映射、fixtures 规则、fake adapter 计划、MVP E2E 场景与 failure scenarios 已完成；真实 runtime / E2E runner 未开始 |
 | Phase 11 | Prompt / Skill 设计分析 | 已完成：analyst、verifier、repo.patch.codex、proof.verify、memory.curator prompt baseline 与四个 reusable skill baseline 已完成；prompt 仍不作为权限 enforcement |
-| Phase 12 | MVP Backlog 与开发入口 | 未完成 |
+| Phase 12 | MVP Backlog 与开发入口 | 已完成：MVP backlog、implementation plan、development entry review 已完成；本地 fake MVP 开发入口通过，真实 Codex exec 仍需 ADR follow-up |
 
 ### 5.2 MCR 编号范围
 
@@ -1522,7 +1522,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] Matrix 作为协作层的 ADR 已通过
 [ ] Codex exec before SDK 的 ADR 已通过
 [x] 所有 MVP Matrix event 有 JSON Schema
-[ ] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
+[x] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
 [x] task state machine 已定义合法/非法转换
 [x] capability registry 有 schema 和 MVP capabilities
 [x] default policy 是 deny-by-default
@@ -1531,8 +1531,8 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] approval 是 action-scoped，不是 vague approval
 [x] memory update 只能 propose，不能自动写
 [x] test strategy 覆盖 happy path 和 failure path
-[ ] MVP backlog 已拆成小任务
-[ ] 每个实现任务都有 tests-first 要求
+[x] MVP backlog 已拆成小任务
+[x] 每个实现任务都有 tests-first 要求
 ```
 
 ---
