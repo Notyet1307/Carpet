@@ -1,0 +1,55 @@
+stateDiagram-v2
+  [*] --> created
+
+  created --> accepted: task.accepted / human
+  accepted --> scoped: task.scoped / runtime
+  scoped --> graph_compiled: task.graph_compiled / runtime
+  graph_compiled --> capability_selected: capability.selected / runtime
+  capability_selected --> work_cell_created: work_cell.created / runtime
+  work_cell_created --> worker_dispatched: worker.dispatched / runtime
+  worker_dispatched --> running: worker.started / worker
+  running --> artifact_submitted: artifact.submitted / worker
+  artifact_submitted --> proof_submitted: proof.submitted / worker
+  proof_submitted --> verifying: verification.started / verifier
+  verifying --> waiting_approval: approval.requested / runtime
+  waiting_approval --> approved: approval.granted / human
+  approved --> pr_created: github.pr.create_requested / runtime
+  pr_created --> completed: task.completed / runtime
+
+  created --> rejected: task.rejected / runtime
+  accepted --> blocked: task.blocked / runtime
+  scoped --> policy_denied: policy.denied / runtime
+  graph_compiled --> blocked: task.blocked / runtime
+  capability_selected --> policy_denied: policy.denied / runtime
+  worker_dispatched --> worker_failed: worker.failed / worker
+  running --> worker_failed: worker.failed / worker
+  running --> needs_human_input: human_input.requested / worker
+  proof_submitted --> verification_failed: verification.failed / verifier
+  verifying --> verification_failed: verification.failed / verifier
+  waiting_approval --> approval_denied: approval.denied / human
+
+  created --> cancelled: task.cancelled / human
+  accepted --> cancelled: task.cancelled / human
+  scoped --> cancelled: task.cancelled / human
+  running --> cancelled: task.cancelled / human
+  waiting_approval --> cancelled: task.cancelled / human
+
+  completed --> [*]
+  rejected --> [*]
+  blocked --> [*]
+  needs_human_input --> [*]
+  policy_denied --> [*]
+  worker_failed --> [*]
+  verification_failed --> [*]
+  approval_denied --> [*]
+  cancelled --> [*]
+
+  note right of approved
+    approval_ref must be action-scoped
+    and tied to proof_ref
+  end note
+
+  note right of pr_created
+    irreversible external action
+    requires explicit approval
+  end note

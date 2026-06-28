@@ -1,0 +1,536 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/runtime/task-state-transition.schema.json",
+  "title": "Runtime Task State Transition",
+  "allOf": [
+    {
+      "$ref": "#/definitions/base_transition"
+    },
+    {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "created" },
+            "to": { "const": "accepted" },
+            "trigger_event": { "const": "task.accepted" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "human" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "accepted" },
+            "to": { "const": "scoped" },
+            "trigger_event": { "const": "task.scoped" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "scoped" },
+            "to": { "const": "graph_compiled" },
+            "trigger_event": { "const": "task.graph_compiled" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "graph_compiled" },
+            "to": { "const": "capability_selected" },
+            "trigger_event": { "const": "capability.selected" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "capability_selected" },
+            "to": { "const": "work_cell_created" },
+            "trigger_event": { "const": "work_cell.created" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "work_cell_created" },
+            "to": { "const": "worker_dispatched" },
+            "trigger_event": { "const": "worker.dispatched" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "worker_dispatched" },
+            "to": { "const": "running" },
+            "trigger_event": { "const": "worker.started" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "running" },
+            "to": { "const": "artifact_submitted" },
+            "trigger_event": { "const": "artifact.submitted" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "artifact_submitted" },
+            "to": { "const": "proof_submitted" },
+            "trigger_event": { "const": "proof.submitted" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "proof_submitted" },
+            "to": { "const": "verifying" },
+            "trigger_event": { "const": "verification.started" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "verifier" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "verifying" },
+            "to": { "const": "waiting_approval" },
+            "trigger_event": { "const": "approval.requested" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "waiting_approval" },
+            "to": { "const": "approved" },
+            "trigger_event": { "const": "approval.granted" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "human" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "approved" },
+            "to": { "const": "pr_created" },
+            "trigger_event": { "const": "github.pr.create_requested" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "pr_created" },
+            "to": { "const": "completed" },
+            "trigger_event": { "const": "task.completed" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "created" },
+            "to": { "const": "rejected" },
+            "trigger_event": { "const": "task.rejected" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "accepted" },
+            "to": { "const": "blocked" },
+            "trigger_event": { "const": "task.blocked" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "scoped" },
+            "to": { "const": "policy_denied" },
+            "trigger_event": { "const": "policy.denied" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "graph_compiled" },
+            "to": { "const": "blocked" },
+            "trigger_event": { "const": "task.blocked" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "capability_selected" },
+            "to": { "const": "policy_denied" },
+            "trigger_event": { "const": "policy.denied" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "runtime" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "worker_dispatched" },
+            "to": { "const": "worker_failed" },
+            "trigger_event": { "const": "worker.failed" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "running" },
+            "to": { "const": "worker_failed" },
+            "trigger_event": { "const": "worker.failed" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "running" },
+            "to": { "const": "needs_human_input" },
+            "trigger_event": { "const": "human_input.requested" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "worker" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "proof_submitted" },
+            "to": { "const": "verification_failed" },
+            "trigger_event": { "const": "verification.failed" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "verifier" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "verifying" },
+            "to": { "const": "verification_failed" },
+            "trigger_event": { "const": "verification.failed" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "verifier" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "const": "waiting_approval" },
+            "to": { "const": "approval_denied" },
+            "trigger_event": { "const": "approval.denied" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "human" } }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": { "enum": ["created", "accepted", "scoped", "running", "waiting_approval"] },
+            "to": { "const": "cancelled" },
+            "trigger_event": { "const": "task.cancelled" },
+            "actor": {
+              "type": "object",
+              "properties": { "type": { "const": "human" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "enum": ["proof_submitted", "completed"] }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "artifact_ref": { "$ref": "#/definitions/artifact_ref" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "enum": [
+              "verifying",
+              "waiting_approval",
+              "approved",
+              "pr_created",
+              "completed",
+              "verification_failed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "proof_ref": { "$ref": "#/definitions/proof_ref" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "to": { "enum": ["approved", "pr_created", "completed", "approval_denied"] }
+        }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "approval_ref": { "$ref": "#/definitions/approval_ref" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "created",
+        "accepted",
+        "scoped",
+        "graph_compiled",
+        "capability_selected",
+        "work_cell_created",
+        "worker_dispatched",
+        "running",
+        "artifact_submitted",
+        "proof_submitted",
+        "verifying",
+        "waiting_approval",
+        "approved",
+        "pr_created",
+        "completed",
+        "rejected",
+        "blocked",
+        "needs_human_input",
+        "policy_denied",
+        "worker_failed",
+        "verification_failed",
+        "approval_denied",
+        "cancelled"
+      ]
+    },
+    "artifact_ref": {
+      "type": "string",
+      "pattern": "^artifact_[A-Za-z0-9_-]+$"
+    },
+    "proof_ref": {
+      "type": "string",
+      "pattern": "^proof_[A-Za-z0-9_-]+$"
+    },
+    "approval_ref": {
+      "type": "string",
+      "pattern": "^approval_[A-Za-z0-9_-]+$"
+    },
+    "optional_artifact_ref": {
+      "anyOf": [
+        { "$ref": "#/definitions/artifact_ref" },
+        { "type": "null" }
+      ]
+    },
+    "optional_proof_ref": {
+      "anyOf": [
+        { "$ref": "#/definitions/proof_ref" },
+        { "type": "null" }
+      ]
+    },
+    "optional_approval_ref": {
+      "anyOf": [
+        { "$ref": "#/definitions/approval_ref" },
+        { "type": "null" }
+      ]
+    },
+    "base_transition": {
+      "type": "object",
+      "required": [
+        "transition_id",
+        "task_id",
+        "from",
+        "to",
+        "trigger_event",
+        "actor",
+        "requirements",
+        "audit_event"
+      ],
+      "properties": {
+        "transition_id": {
+          "type": "string",
+          "pattern": "^transition_[A-Za-z0-9_-]+$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^task_[A-Za-z0-9_-]+$"
+        },
+        "from": {
+          "$ref": "#/definitions/state"
+        },
+        "to": {
+          "$ref": "#/definitions/state"
+        },
+        "trigger_event": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "actor": {
+          "type": "object",
+          "required": ["type", "id"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["human", "runtime", "worker", "verifier"]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "requirements": {
+          "type": "object",
+          "required": ["artifact_ref", "proof_ref", "approval_ref"],
+          "properties": {
+            "artifact_ref": {
+              "$ref": "#/definitions/optional_artifact_ref"
+            },
+            "proof_ref": {
+              "$ref": "#/definitions/optional_proof_ref"
+            },
+            "approval_ref": {
+              "$ref": "#/definitions/optional_approval_ref"
+            }
+          },
+          "additionalProperties": false
+        },
+        "audit_event": {
+          "type": "object",
+          "required": ["type", "event_id", "trace_id"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "pattern": "^task\\.transition\\.[a-z_]+$"
+            },
+            "event_id": {
+              "type": "string",
+              "pattern": "^event_[A-Za-z0-9_-]+$"
+            },
+            "trace_id": {
+              "type": "string",
+              "pattern": "^trace_[A-Za-z0-9_-]+$"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

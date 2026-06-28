@@ -137,7 +137,7 @@ docs/**/*.md
 schemas/**/*.json
 runtime/**/*.yaml
 fixtures/**/*.json
-tests/contracts/**/*.spec.ts
+tests/contracts/**/*.test.mjs
 adr/**/*.md
 ```
 
@@ -361,7 +361,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
-| Phase 4 | Runtime State Machine 与 Task Graph | 未完成 |
+| Phase 4 | Runtime State Machine 与 Task Graph | 部分完成：task state machine baseline、runtime task schemas、transition contract tests 已完成；task graph/workflow files 缺 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
 | Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
@@ -715,7 +715,7 @@ runtime/workflows/repo-patch.yaml
 runtime/workflows/ci-recovery.yaml
 schemas/runtime/task.schema.json
 schemas/runtime/task-state-transition.schema.json
-tests/contracts/task-state-machine.spec.ts
+tests/contracts/task-state-machine.test.mjs
 ```
 
 ### MVP 状态机
@@ -751,6 +751,22 @@ approval_denied
 cancelled
 ```
 
+当前进展：
+
+```text
+2026-06-28: task state machine baseline 已完成：
+- docs/analysis/task-state-machine.md
+- docs/diagrams/task-lifecycle.mmd
+- schemas/runtime/task.schema.json
+- schemas/runtime/task-state-transition.schema.json
+- tests/contracts/task-state-machine.test.mjs
+
+仍未完成：
+- runtime/workflows/repo-patch.yaml
+- runtime/workflows/ci-recovery.yaml
+- Task Graph 细化
+```
+
 ### Codex Task Card 4.1：状态机分析
 
 ```text
@@ -761,7 +777,7 @@ Allowed changes:
   - docs/diagrams/task-lifecycle.mmd
   - schemas/runtime/task.schema.json
   - schemas/runtime/task-state-transition.schema.json
-  - tests/contracts/task-state-machine.spec.ts
+  - tests/contracts/task-state-machine.test.mjs
 Prompt:
   Define the MVP task state machine.
   Include allowed transitions, forbidden transitions, actor allowed to trigger each transition, required proof or approval, and failure states.
@@ -797,7 +813,7 @@ runtime/capabilities.yaml
 schemas/runtime/capability.schema.json
 runtime/policies/default.yaml
 docs/analysis/capability-routing.md
-tests/contracts/capability-schema.spec.ts
+tests/contracts/capability-schema.test.mjs
 fixtures/capabilities/*.yaml
 ```
 
@@ -872,8 +888,8 @@ schemas/codex/repo-patch-result.schema.json
 fixtures/codex-jsonl/success.jsonl
 fixtures/codex-jsonl/failure.jsonl
 fixtures/codex-jsonl/blocked.jsonl
-tests/contracts/codex-jsonl-parser.spec.ts
-tests/contracts/codex-output-schema.spec.ts
+tests/contracts/codex-jsonl-parser.test.mjs
+tests/contracts/codex-output-schema.test.mjs
 runtime/prompts/codex-repo-patch.md
 runtime/prompts/proof-verifier.md
 ```
@@ -917,8 +933,8 @@ Allowed changes:
   - docs/analysis/05-codex-worker-analysis.md
   - schemas/codex/repo-patch-result.schema.json
   - fixtures/codex-jsonl/*.jsonl
-  - tests/contracts/codex-jsonl-parser.spec.ts
-  - tests/contracts/codex-output-schema.spec.ts
+  - tests/contracts/codex-jsonl-parser.test.mjs
+  - tests/contracts/codex-output-schema.test.mjs
   - runtime/prompts/codex-repo-patch.md
 Prompt:
   Define the MVP contract for a Codex repo patch worker.
@@ -957,7 +973,7 @@ Codex output 可以被 Runtime 自动判断
 docs/analysis/matrix-appservice-gateway.md
 schemas/runtime/runtime-event.schema.json
 fixtures/matrix-transactions/*.json
-tests/contracts/matrix-appservice-transaction.spec.ts
+tests/contracts/matrix-appservice-transaction.test.mjs
 docs/adr/0002-matrix-as-collaboration-surface.md
 ```
 
@@ -983,7 +999,7 @@ Role: Analyst Codex + Test Designer Codex
 Allowed changes:
   - docs/analysis/matrix-appservice-gateway.md
   - fixtures/matrix-transactions/*.json
-  - tests/contracts/matrix-appservice-transaction.spec.ts
+  - tests/contracts/matrix-appservice-transaction.test.mjs
 Prompt:
   Specify how the Matrix AppService Gateway receives homeserver transactions and converts them into runtime events.
   Include authentication, idempotency, schema validation, room mapping, and failure replies.
@@ -1019,7 +1035,7 @@ docs/analysis/06-proof-ledger-analysis.md
 schemas/proof/proof-ledger-entry.schema.json
 schemas/proof/approval.schema.json
 fixtures/proof/*.json
-tests/contracts/proof-ledger-entry.spec.ts
+tests/contracts/proof-ledger-entry.test.mjs
 docs/adr/0004-proof-ledger-before-memory-write.md
 docs/adr/0005-human-gate-for-irreversible-actions.md
 ```
@@ -1061,7 +1077,7 @@ Allowed changes:
   - docs/analysis/06-proof-ledger-analysis.md
   - schemas/proof/*.schema.json
   - fixtures/proof/*.json
-  - tests/contracts/proof-ledger-entry.spec.ts
+  - tests/contracts/proof-ledger-entry.test.mjs
 Prompt:
   Define the MVP proof ledger entry and approval event contracts.
   Proof must be evidence, not summary.
@@ -1098,7 +1114,7 @@ proof 可以独立审计
 docs/analysis/07-security-threat-model.md
 runtime/policies/default.yaml
 runtime/policies/repo-patch.yaml
-tests/contracts/policy-decisions.spec.ts
+tests/contracts/policy-decisions.test.mjs
 fixtures/policy/*.yaml
 ```
 
@@ -1129,7 +1145,7 @@ Allowed changes:
   - docs/analysis/07-security-threat-model.md
   - runtime/policies/default.yaml
   - runtime/policies/repo-patch.yaml
-  - tests/contracts/policy-decisions.spec.ts
+  - tests/contracts/policy-decisions.test.mjs
 Prompt:
   Produce a threat model for Matrix Codex Capability Runtime.
   Use STRIDE-style categories if useful, but keep the result actionable.
@@ -1403,7 +1419,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [ ] Codex exec before SDK 的 ADR 已通过
 [x] 所有 MVP Matrix event 有 JSON Schema
 [ ] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
-[ ] task state machine 已定义合法/非法转换
+[x] task state machine 已定义合法/非法转换
 [ ] capability registry 有 schema 和 MVP capabilities
 [ ] default policy 是 deny-by-default
 [ ] Codex worker 输出 schema 能表达 success/failed/blocked

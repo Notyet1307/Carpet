@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/runtime/task.schema.json",
+  "title": "Runtime Task",
+  "type": "object",
+  "required": ["task_id", "state", "risk", "current_transition_id"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^task_[A-Za-z0-9_-]+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "created",
+        "accepted",
+        "scoped",
+        "graph_compiled",
+        "capability_selected",
+        "work_cell_created",
+        "worker_dispatched",
+        "running",
+        "artifact_submitted",
+        "proof_submitted",
+        "verifying",
+        "waiting_approval",
+        "approved",
+        "pr_created",
+        "completed",
+        "rejected",
+        "blocked",
+        "needs_human_input",
+        "policy_denied",
+        "worker_failed",
+        "verification_failed",
+        "approval_denied",
+        "cancelled"
+      ]
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "current_transition_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^transition_[A-Za-z0-9_-]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}
