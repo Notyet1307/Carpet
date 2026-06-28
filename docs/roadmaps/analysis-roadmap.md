@@ -302,9 +302,18 @@ File handoff          → artifact refs and proof refs
 │   ├── matrix/
 │   │   ├── task.created.schema.json
 │   │   ├── task.accepted.schema.json
+│   │   ├── task.rejected.schema.json
+│   │   ├── capability.selected.schema.json
 │   │   ├── worker.dispatched.schema.json
+│   │   ├── worker.progress.schema.json
+│   │   ├── artifact.submitted.schema.json
 │   │   ├── proof.submitted.schema.json
-│   │   └── approval.granted.schema.json
+│   │   ├── verification.completed.schema.json
+│   │   ├── approval.requested.schema.json
+│   │   ├── approval.granted.schema.json
+│   │   ├── approval.denied.schema.json
+│   │   ├── memory.update.proposed.schema.json
+│   │   └── incident.created.schema.json
 │   ├── runtime/
 │   │   ├── task.schema.json
 │   │   ├── task-state-transition.schema.json
@@ -623,12 +632,16 @@ schemas/matrix/task.rejected.schema.json
 schemas/matrix/capability.selected.schema.json
 schemas/matrix/worker.dispatched.schema.json
 schemas/matrix/worker.progress.schema.json
+schemas/matrix/artifact.submitted.schema.json
 schemas/matrix/proof.submitted.schema.json
+schemas/matrix/verification.completed.schema.json
 schemas/matrix/approval.requested.schema.json
 schemas/matrix/approval.granted.schema.json
+schemas/matrix/approval.denied.schema.json
 schemas/matrix/memory.update.proposed.schema.json
+schemas/matrix/incident.created.schema.json
 fixtures/matrix-events/*.json
-tests/contracts/matrix-event-schemas.spec.ts
+tests/contracts/schema-fixtures.test.mjs
 ```
 
 ### Matrix event namespace
@@ -659,7 +672,7 @@ Allowed changes:
   - docs/analysis/04-matrix-integration-analysis.md
   - schemas/matrix/*.schema.json
   - fixtures/matrix-events/*.json
-  - tests/contracts/matrix-event-schemas.spec.ts
+  - tests/contracts/schema-fixtures.test.mjs
 Prompt:
   Define JSON Schemas for MVP Matrix custom events.
   Use reverse-DNS event names under com.notyet.agent.*.

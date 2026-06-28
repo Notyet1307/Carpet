@@ -57,11 +57,11 @@
             },
             "worktree_path": {
               "type": "string",
-              "pattern": "^\\.\\./\\.worktrees/[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*$"
+              "pattern": "^\\.\\./\\.worktrees/[^/]+/[A-Z]+-[0-9]+-[a-z0-9-]+$"
             },
             "branch": {
               "type": "string",
-              "minLength": 1
+              "pattern": "^mcr/[A-Z]+-[0-9]+/[a-z0-9-]+$"
             },
             "base_sha": {
               "type": "string",

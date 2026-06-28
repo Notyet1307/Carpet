@@ -9,7 +9,6 @@ This repository currently contains the planning and contract-baseline material f
 Evidence:
 
 ```text
-branch: codex/docs-schema-contracts
 remote: https://github.com/Notyet1307/Carpet.git
 visibility: private
 current stage: docs, analysis, schema baseline, worktree policy baseline, fixtures, contract tests
@@ -125,8 +124,6 @@ current stage: docs, analysis, schema baseline, worktree policy baseline, fixtur
 The repository does not yet contain:
 
 - `runtime/workflows/**`
-- `docs/adr/**`
-- `docs/diagrams/**`
 - `apps/**`
 - `packages/**`
 - `workers/**`
@@ -143,12 +140,12 @@ The architecture documents reference `Notyet1307/codex-multica`, Superpowers, Ma
 
 - The repository can be mistaken for an implementation repo even though it is currently documentation-only.
 - The architecture references external assets that have not been vendored or mapped into this repository.
-- Current schemas are a baseline only; approval events, state-machine schemas, capability schemas, and broader work-cell semantics are still missing.
+- Current schemas are a baseline only; state-machine schemas, capability schemas, runtime workflows, and broader work-cell semantics are still missing.
 - No development entry gate can pass until state-machine notes, broader policy notes, broader contract tests, and MVP backlog slices exist.
 
 ## Recommended Next Work
 
 1. Add state-machine analysis and transition tables.
 2. Add capability schema baseline.
-3. Add approval event schemas and fixtures.
+3. Add runtime workflow specs for repo patch and CI recovery.
 4. Add policy baseline with deny-by-default rules.

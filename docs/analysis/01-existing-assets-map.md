@@ -38,8 +38,7 @@ These baseline assets now exist:
 | `package.json` | development guide | Provide minimal pnpm scripts for contract tests. |
 | `pnpm-workspace.yaml` | development guide | Establish workspace shape without apps or workers. |
 | `tsconfig.base.json` | development guide | Reserve TypeScript strict baseline for future runtime packages. |
-| `schemas/matrix/event-envelope.schema.json` | architecture event contract | Define shared event envelope. |
-| `schemas/matrix/task.created.schema.json` | architecture and roadmap | Define MVP task intake event. |
+| `schemas/matrix/*.schema.json` | architecture event contract and roadmap Phase 3 | Define MVP Matrix event contracts for task, capability, worker, artifact, proof, verification, approval, memory, and incident events. |
 | `schemas/proof/proof-ledger-entry.schema.json` | architecture proof ledger | Define minimum proof entry. |
 | `schemas/codex/repo-patch-result.schema.json` | Codex worker contract | Define final structured Codex worker output. |
 | `schemas/runtime/work-cell.schema.json` | worktree policy baseline | Define isolated Work Cell worktree provenance. |
@@ -54,8 +53,6 @@ The next assets to create are:
 
 | Target | Source | Purpose |
 |---|---|---|
-| `schemas/matrix/approval.requested.schema.json` | roadmap Phase 3 and Phase 8 | Define non-ambiguous approval request events. |
-| `schemas/matrix/approval.granted.schema.json` | roadmap Phase 3 and Phase 8 | Define action-scoped human approval events. |
 | `schemas/runtime/task.schema.json` | roadmap Phase 4 | Define persisted task state shape. |
 | `schemas/runtime/task-state-transition.schema.json` | roadmap Phase 4 | Define legal and illegal task transitions. |
 | `schemas/runtime/capability.schema.json` | roadmap Phase 5 | Define capability registry entries. |

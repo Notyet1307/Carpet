@@ -261,6 +261,12 @@ const fixtureCases = [
     valid: false,
   },
   {
+    name: "worker dispatched main branch",
+    schema: "https://notyet.dev/schemas/matrix/worker.dispatched.schema.json",
+    fixture: "fixtures/matrix-events/invalid/worker.dispatched.main-branch.invalid.json",
+    valid: false,
+  },
+  {
     name: "worker progress valid",
     schema: "https://notyet.dev/schemas/matrix/worker.progress.schema.json",
     fixture: "fixtures/matrix-events/valid/worker.progress.valid.json",

@@ -1,10 +1,10 @@
 {
   "specversion": "1.0",
-  "id": "evt_20260627_010",
+  "id": "evt_20260627_012",
   "source": "runtime://work-cell-manager",
   "type": "com.notyet.agent.worker.dispatched",
   "subject": "task_20260627_001",
-  "time": "2026-06-27T04:13:00Z",
+  "time": "2026-06-27T04:13:20Z",
   "datacontenttype": "application/json",
   "workspace_id": "ws_carpet",
   "task_id": "task_20260627_001",
@@ -14,13 +14,13 @@
     "type": "runtime",
     "id": "work_cell_manager"
   },
-  "created_at": "2026-06-27T04:13:00Z",
-  "idempotency_key": "worker-dispatched:run_20260627_001",
+  "created_at": "2026-06-27T04:13:20Z",
+  "idempotency_key": "worker-dispatched:run_20260627_001:main-branch",
   "data": {
     "worker_id": "worker_codex_001",
     "capability_id": "repo.patch.codex",
     "worktree_path": "../.worktrees/Carpet/MCR-010-worker-dispatched",
-    "branch": "mcr/MCR-010/worker-dispatched",
+    "branch": "main",
     "base_sha": "8241074510bea6962824adc784d02b4d6bd0a1bc"
   }
 }
