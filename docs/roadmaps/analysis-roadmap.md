@@ -367,7 +367,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；真实 gateway implementation 未开始 |
 | Phase 8 | Proof Ledger 与 Approval 分析 | 已完成：proof ledger baseline 与 approval gate contract baseline 已完成；runtime approval engine、GitHub automation、memory writer 未开始 |
 | Phase 9 | Security Threat Model 与 Policy 分析 | 已完成：worktree policy baseline、security threat model、deny-by-default policy matrix、policy decision fixtures/contract tests 已完成；runtime policy engine 未开始 |
-| Phase 10 | Testing Strategy 与 Test Matrix | 未完成 |
+| Phase 10 | Testing Strategy 与 Test Matrix | 已完成：测试分层、contract baseline 映射、fixtures 规则、fake adapter 计划、MVP E2E 场景与 failure scenarios 已完成；真实 runtime / E2E runner 未开始 |
 | Phase 11 | Prompt / Skill 设计分析 | 未完成 |
 | Phase 12 | MVP Backlog 与开发入口 | 未完成 |
 
@@ -1341,6 +1341,22 @@ Verifier prompt:
 没有只测 happy path
 ```
 
+2026-06-28: Phase 10 Testing Strategy 与 Test Matrix baseline 已完成：
+- docs/analysis/08-test-strategy.md
+- tests/contracts/README.md
+- tests/fixtures/README.md
+- tests/e2e/mvp-scenarios.md
+
+覆盖范围：
+- unit / contract / integration / E2E / security regression / golden fixture 分层
+- 现有 contract tests 到 MVP components 的映射
+- Matrix gateway、runtime state machine、capability router、worker runner、proof verifier、approval gate、policy engine、GitHub adapter、memory proposal flow 的首批实现测试
+- fake Matrix、fake Codex、fake worktree、fake artifact store、fake GitHub、fake approval clock 等 harness
+- task.created -> worker dispatch -> artifact/proof -> verification -> approval request -> simulated PR creation 的本地 fake E2E 场景
+- invalid Matrix event、duplicate event、fake proof、policy bypass、worker failure、approval replay、secret-bearing logs failure cases
+
+真实 runtime apps、workers、Matrix gateway、GitHub automation、database、E2E runner 仍未开始。
+
 ---
 
 ## Phase 11：Prompt / Skill 设计分析
@@ -1513,7 +1529,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] proof ledger schema 能独立表达证据链
 [x] approval 是 action-scoped，不是 vague approval
 [x] memory update 只能 propose，不能自动写
-[ ] test strategy 覆盖 happy path 和 failure path
+[x] test strategy 覆盖 happy path 和 failure path
 [ ] MVP backlog 已拆成小任务
 [ ] 每个实现任务都有 tests-first 要求
 ```
