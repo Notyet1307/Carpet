@@ -23,6 +23,8 @@ importers:
         specifier: workspace:*
         version: link:../runtime-contracts
 
+  packages/policy-engine: {}
+
   packages/runtime-contracts: {}
 
   packages/runtime-store:
