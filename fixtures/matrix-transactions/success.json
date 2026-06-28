@@ -1,0 +1,79 @@
+{
+  "name": "success",
+  "request": {
+    "method": "PUT",
+    "path": "/_matrix/app/v1/transactions/txn_success_001",
+    "params": {
+      "txn_id": "txn_success_001"
+    },
+    "headers": {
+      "authorization": "Bearer hs_test_carpet"
+    },
+    "body": {
+      "events": [
+        {
+          "event_id": "$event_success_001",
+          "type": "com.notyet.agent.task.created",
+          "room_id": "!agent-intake:carpet.test",
+          "sender": "@yet:carpet.test",
+          "origin_server_ts": 1782604800000,
+          "content": {
+            "specversion": "1.0",
+            "id": "evt_matrix_success_001",
+            "source": "matrix://carpet.test/!agent-intake:carpet.test/$event_success_001",
+            "type": "com.notyet.agent.task.created",
+            "subject": "task_matrix_success_001",
+            "time": "2026-06-28T00:00:00Z",
+            "datacontenttype": "application/json",
+            "workspace_id": "ws_carpet",
+            "task_id": "task_matrix_success_001",
+            "trace_id": "trace_matrix_success_001",
+            "actor": {
+              "type": "human",
+              "id": "@yet:carpet.test"
+            },
+            "created_at": "2026-06-28T00:00:00Z",
+            "idempotency_key": "matrix:$event_success_001",
+            "data": {
+              "goal": "Add a Matrix AppService gateway contract baseline.",
+              "context": "Phase 7 analysis task.",
+              "scope": {
+                "allowed_paths": [
+                  "docs/analysis/matrix-appservice-gateway.md",
+                  "fixtures/matrix-transactions/*.json",
+                  "tests/contracts/matrix-appservice-transaction.test.mjs"
+                ],
+                "forbidden_paths": [
+                  "apps/**",
+                  "workers/**",
+                  "secrets/**"
+                ]
+              },
+              "acceptance_criteria": [
+                "Contract tests cover success and failure paths."
+              ],
+              "proof_requirements": [
+                "pnpm test:contracts exits 0."
+              ],
+              "risk": "medium",
+              "requested_capability": "spec.scope"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "response": {
+      "status": 200,
+      "body": {
+        "code": "ok",
+        "retryable": false
+      }
+    },
+    "committed": true,
+    "runtime_event_count": 1,
+    "failure_event_count": 0,
+    "outbound_projection_count": 1
+  }
+}

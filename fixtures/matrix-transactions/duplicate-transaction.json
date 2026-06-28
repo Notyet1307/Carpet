@@ -1,0 +1,80 @@
+{
+  "name": "duplicate transaction",
+  "preexisting": {
+    "processed_transaction_ids": [
+      "txn_duplicate_001"
+    ],
+    "processed_event_ids": []
+  },
+  "request": {
+    "method": "PUT",
+    "path": "/_matrix/app/v1/transactions/txn_duplicate_001",
+    "params": {
+      "txn_id": "txn_duplicate_001"
+    },
+    "headers": {
+      "authorization": "Bearer hs_test_carpet"
+    },
+    "body": {
+      "events": [
+        {
+          "event_id": "$event_duplicate_txn_001",
+          "type": "com.notyet.agent.task.created",
+          "room_id": "!agent-intake:carpet.test",
+          "sender": "@yet:carpet.test",
+          "origin_server_ts": 1782604801000,
+          "content": {
+            "specversion": "1.0",
+            "id": "evt_matrix_duplicate_txn_001",
+            "source": "matrix://carpet.test/!agent-intake:carpet.test/$event_duplicate_txn_001",
+            "type": "com.notyet.agent.task.created",
+            "subject": "task_matrix_duplicate_txn_001",
+            "time": "2026-06-28T00:00:01Z",
+            "datacontenttype": "application/json",
+            "workspace_id": "ws_carpet",
+            "task_id": "task_matrix_duplicate_txn_001",
+            "trace_id": "trace_matrix_duplicate_txn_001",
+            "actor": {
+              "type": "human",
+              "id": "@yet:carpet.test"
+            },
+            "created_at": "2026-06-28T00:00:01Z",
+            "idempotency_key": "matrix:$event_duplicate_txn_001",
+            "data": {
+              "goal": "This replay must not create another task.",
+              "context": "Duplicate transaction retry.",
+              "scope": {
+                "allowed_paths": [
+                  "docs/**"
+                ],
+                "forbidden_paths": [
+                  "apps/**"
+                ]
+              },
+              "acceptance_criteria": [
+                "No duplicate runtime event is queued."
+              ],
+              "proof_requirements": [
+                "Idempotency check is recorded."
+              ],
+              "risk": "low"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "response": {
+      "status": 200,
+      "body": {
+        "code": "duplicate_transaction",
+        "retryable": false
+      }
+    },
+    "committed": true,
+    "runtime_event_count": 0,
+    "failure_event_count": 0,
+    "outbound_projection_count": 0
+  }
+}

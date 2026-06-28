@@ -1,0 +1,74 @@
+{
+  "name": "invalid hs token",
+  "request": {
+    "method": "PUT",
+    "path": "/_matrix/app/v1/transactions/txn_invalid_hs_token_001",
+    "params": {
+      "txn_id": "txn_invalid_hs_token_001"
+    },
+    "headers": {
+      "authorization": "Bearer wrong_hs_token"
+    },
+    "body": {
+      "events": [
+        {
+          "event_id": "$event_invalid_hs_token_001",
+          "type": "com.notyet.agent.task.created",
+          "room_id": "!agent-intake:carpet.test",
+          "sender": "@yet:carpet.test",
+          "origin_server_ts": 1782604807000,
+          "content": {
+            "specversion": "1.0",
+            "id": "evt_matrix_invalid_hs_token_001",
+            "source": "matrix://carpet.test/!agent-intake:carpet.test/$event_invalid_hs_token_001",
+            "type": "com.notyet.agent.task.created",
+            "subject": "task_matrix_invalid_hs_token_001",
+            "time": "2026-06-28T00:00:07Z",
+            "datacontenttype": "application/json",
+            "workspace_id": "ws_carpet",
+            "task_id": "task_matrix_invalid_hs_token_001",
+            "trace_id": "trace_matrix_invalid_hs_token_001",
+            "actor": {
+              "type": "human",
+              "id": "@yet:carpet.test"
+            },
+            "created_at": "2026-06-28T00:00:07Z",
+            "idempotency_key": "matrix:$event_invalid_hs_token_001",
+            "data": {
+              "goal": "This event must be ignored because homeserver auth failed.",
+              "context": "hs_token validation runs before Matrix content trust.",
+              "scope": {
+                "allowed_paths": [
+                  "docs/**"
+                ],
+                "forbidden_paths": [
+                  "apps/**"
+                ]
+              },
+              "acceptance_criteria": [
+                "No runtime event is enqueued."
+              ],
+              "proof_requirements": [
+                "Gateway returns 401."
+              ],
+              "risk": "medium"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "response": {
+      "status": 401,
+      "body": {
+        "code": "unauthorized",
+        "retryable": false
+      }
+    },
+    "committed": false,
+    "runtime_event_count": 0,
+    "failure_event_count": 0,
+    "outbound_projection_count": 0
+  }
+}

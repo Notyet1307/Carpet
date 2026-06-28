@@ -1,0 +1,80 @@
+{
+  "name": "duplicate event",
+  "preexisting": {
+    "processed_transaction_ids": [],
+    "processed_event_ids": [
+      "$event_duplicate_001"
+    ]
+  },
+  "request": {
+    "method": "PUT",
+    "path": "/_matrix/app/v1/transactions/txn_duplicate_event_001",
+    "params": {
+      "txn_id": "txn_duplicate_event_001"
+    },
+    "headers": {
+      "authorization": "Bearer hs_test_carpet"
+    },
+    "body": {
+      "events": [
+        {
+          "event_id": "$event_duplicate_001",
+          "type": "com.notyet.agent.task.created",
+          "room_id": "!agent-intake:carpet.test",
+          "sender": "@yet:carpet.test",
+          "origin_server_ts": 1782604802000,
+          "content": {
+            "specversion": "1.0",
+            "id": "evt_matrix_duplicate_event_001",
+            "source": "matrix://carpet.test/!agent-intake:carpet.test/$event_duplicate_001",
+            "type": "com.notyet.agent.task.created",
+            "subject": "task_matrix_duplicate_event_001",
+            "time": "2026-06-28T00:00:02Z",
+            "datacontenttype": "application/json",
+            "workspace_id": "ws_carpet",
+            "task_id": "task_matrix_duplicate_event_001",
+            "trace_id": "trace_matrix_duplicate_event_001",
+            "actor": {
+              "type": "human",
+              "id": "@yet:carpet.test"
+            },
+            "created_at": "2026-06-28T00:00:02Z",
+            "idempotency_key": "matrix:$event_duplicate_001",
+            "data": {
+              "goal": "This duplicate event must be ignored.",
+              "context": "Duplicate event in a new transaction.",
+              "scope": {
+                "allowed_paths": [
+                  "docs/**"
+                ],
+                "forbidden_paths": [
+                  "apps/**"
+                ]
+              },
+              "acceptance_criteria": [
+                "No duplicate runtime work is enqueued."
+              ],
+              "proof_requirements": [
+                "Event id deduplication is checked."
+              ],
+              "risk": "low"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "response": {
+      "status": 200,
+      "body": {
+        "code": "ok",
+        "retryable": false
+      }
+    },
+    "committed": true,
+    "runtime_event_count": 0,
+    "failure_event_count": 0,
+    "outbound_projection_count": 0
+  }
+}

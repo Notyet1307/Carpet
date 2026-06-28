@@ -1,0 +1,77 @@
+{
+  "name": "runtime enqueue unavailable",
+  "runtime": {
+    "enqueue_available": false
+  },
+  "request": {
+    "method": "PUT",
+    "path": "/_matrix/app/v1/transactions/txn_failure_reply_001",
+    "params": {
+      "txn_id": "txn_failure_reply_001"
+    },
+    "headers": {
+      "authorization": "Bearer hs_test_carpet"
+    },
+    "body": {
+      "events": [
+        {
+          "event_id": "$event_failure_reply_001",
+          "type": "com.notyet.agent.task.created",
+          "room_id": "!agent-intake:carpet.test",
+          "sender": "@yet:carpet.test",
+          "origin_server_ts": 1782604806000,
+          "content": {
+            "specversion": "1.0",
+            "id": "evt_matrix_failure_reply_001",
+            "source": "matrix://carpet.test/!agent-intake:carpet.test/$event_failure_reply_001",
+            "type": "com.notyet.agent.task.created",
+            "subject": "task_matrix_failure_reply_001",
+            "time": "2026-06-28T00:00:06Z",
+            "datacontenttype": "application/json",
+            "workspace_id": "ws_carpet",
+            "task_id": "task_matrix_failure_reply_001",
+            "trace_id": "trace_matrix_failure_reply_001",
+            "actor": {
+              "type": "human",
+              "id": "@yet:carpet.test"
+            },
+            "created_at": "2026-06-28T00:00:06Z",
+            "idempotency_key": "matrix:$event_failure_reply_001",
+            "data": {
+              "goal": "Valid task cannot be durably enqueued because Runtime is unavailable.",
+              "context": "Gateway must ask homeserver to retry instead of committing idempotency.",
+              "scope": {
+                "allowed_paths": [
+                  "docs/**"
+                ],
+                "forbidden_paths": [
+                  "apps/**"
+                ]
+              },
+              "acceptance_criteria": [
+                "Gateway returns retryable failure."
+              ],
+              "proof_requirements": [
+                "No transaction or event idempotency commit occurs."
+              ],
+              "risk": "medium"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "expected": {
+    "response": {
+      "status": 503,
+      "body": {
+        "code": "runtime_enqueue_unavailable",
+        "retryable": true
+      }
+    },
+    "committed": false,
+    "runtime_event_count": 0,
+    "failure_event_count": 0,
+    "outbound_projection_count": 0
+  }
+}
