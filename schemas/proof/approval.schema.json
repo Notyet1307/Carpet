@@ -1,0 +1,269 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/proof/approval.schema.json",
+  "title": "Approval Gate Record",
+  "type": "object",
+  "required": [
+    "approval_id",
+    "task_id",
+    "proof_id",
+    "action",
+    "actor",
+    "target",
+    "conditions",
+    "created_at",
+    "expires_at"
+  ],
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "pattern": "^approval_[A-Za-z0-9_-]+$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task_[A-Za-z0-9_-]+$"
+    },
+    "proof_id": {
+      "type": "string",
+      "pattern": "^proof_[A-Za-z0-9_-]+$"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "push_branch",
+        "create_pr",
+        "external_write",
+        "secret_access",
+        "memory_write"
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "const": "human"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "git_branch",
+            "pull_request",
+            "external_system",
+            "secret",
+            "memory_proposal"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secret_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposal_id": {
+          "type": "string",
+          "pattern": "^memory_proposal_[A-Za-z0-9_-]+$"
+        },
+        "memory_scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "push_branch"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": ["type", "ref"],
+            "properties": {
+              "type": {
+                "const": "git_branch"
+              },
+              "ref": {
+                "type": "string",
+                "pattern": "^refs/heads/(?!main$|master$)[A-Za-z0-9._/-]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "create_pr"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": ["type", "ref", "base_ref"],
+            "properties": {
+              "type": {
+                "const": "pull_request"
+              },
+              "ref": {
+                "type": "string"
+              },
+              "base_ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "external_write"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": ["type", "system", "operation", "ref"],
+            "properties": {
+              "type": {
+                "const": "external_system"
+              },
+              "system": {
+                "type": "string"
+              },
+              "operation": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "secret_access"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": ["type", "secret_ref", "purpose"],
+            "properties": {
+              "type": {
+                "const": "secret"
+              },
+              "secret_ref": {
+                "type": "string"
+              },
+              "purpose": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "memory_write"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object",
+            "required": ["type", "proposal_id", "memory_scope"],
+            "properties": {
+              "type": {
+                "const": "memory_proposal"
+              },
+              "proposal_id": {
+                "type": "string",
+                "pattern": "^memory_proposal_[A-Za-z0-9_-]+$"
+              },
+              "memory_scope": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

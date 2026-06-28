@@ -1,0 +1,20 @@
+{
+  "approval_id": "approval_20260627_create_pr",
+  "task_id": "task_20260627_001",
+  "proof_id": "proof_20260627_001",
+  "action": "create_pr",
+  "actor": {
+    "type": "human",
+    "id": "@yet:notyet.local"
+  },
+  "target": {
+    "type": "pull_request",
+    "ref": "refs/heads/analysis/p8-approval-gate-contract",
+    "base_ref": "refs/heads/main"
+  },
+  "conditions": [
+    "PR body must include task_id, proof_id, validation, risk, and rollback notes."
+  ],
+  "created_at": "2026-06-27T04:21:00Z",
+  "expires_at": "2026-06-27T06:21:00Z"
+}

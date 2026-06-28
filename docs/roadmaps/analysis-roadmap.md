@@ -365,7 +365,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capability registry baseline 与 closeout routing hardening 已完成（registry/schema/fixtures/routing analysis/contract tests）；runtime router implementation 未开始 |
 | Phase 6 | Codex Worker Contract 分析 | 已完成：Codex worker contract baseline 已完成；proof-verifier prompt 明确 deferred 到 Phase 8/11 |
 | Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；真实 gateway implementation 未开始 |
-| Phase 8 | Proof Ledger 与 Approval 分析 | 部分完成：proof ledger baseline 已有；approval 缺 |
+| Phase 8 | Proof Ledger 与 Approval 分析 | 已完成：proof ledger baseline 与 approval gate contract baseline 已完成；runtime approval engine、GitHub automation、memory writer 未开始 |
 | Phase 9 | Security Threat Model 与 Policy 分析 | 部分完成：worktree policy baseline 已有；threat model/deny-by-default matrix 缺 |
 | Phase 10 | Testing Strategy 与 Test Matrix | 未完成 |
 | Phase 11 | Prompt / Skill 设计分析 | 未完成 |
@@ -1134,7 +1134,7 @@ created_at
 
 ```text
 允许：生成 patch、创建本地 branch、运行测试、生成 proof
-需要审批：push branch、create PR、external write、secret access
+需要审批：push branch、create PR、external write、secret access、memory write
 禁止：direct push main、merge PR、deploy production、读取 production secrets
 ```
 
@@ -1155,7 +1155,7 @@ Prompt:
   Include PR creation as a gated action.
 Done when:
   - Proof schema can reference logs/artifacts without embedding huge logs.
-  - Approval schema requires action, actor, task_id, proof_id, conditions.
+  - Approval schema requires action, actor, task_id, proof_id, conditions, created_at, expires_at.
   - Memory update requires proof reference.
 Verifier prompt:
   Check if any irreversible action can bypass approval.
@@ -1166,7 +1166,7 @@ Verifier prompt:
 
 ```text
 没有 proof，不进入 approval
-没有 approval，不执行 PR create / external write
+没有 approval，不执行 PR create / external write / memory write
 proof 可以独立审计
 ```
 
@@ -1493,9 +1493,9 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] capability registry 有 schema 和 MVP capabilities
 [ ] default policy 是 deny-by-default
 [x] Codex worker 输出 schema 能表达 success/failed/blocked/needs_human_input
-[ ] proof ledger schema 能独立表达证据链
-[ ] approval 是 action-scoped，不是 vague approval
-[ ] memory update 只能 propose，不能自动写
+[x] proof ledger schema 能独立表达证据链
+[x] approval 是 action-scoped，不是 vague approval
+[x] memory update 只能 propose，不能自动写
 [ ] test strategy 覆盖 happy path 和 failure path
 [ ] MVP backlog 已拆成小任务
 [ ] 每个实现任务都有 tests-first 要求

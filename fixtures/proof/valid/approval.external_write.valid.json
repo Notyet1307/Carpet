@@ -1,0 +1,21 @@
+{
+  "approval_id": "approval_20260627_external_write",
+  "task_id": "task_20260627_001",
+  "proof_id": "proof_20260627_001",
+  "action": "external_write",
+  "actor": {
+    "type": "human",
+    "id": "@yet:notyet.local"
+  },
+  "target": {
+    "type": "external_system",
+    "system": "github",
+    "operation": "create_review_comment",
+    "ref": "github://Notyet1307/Carpet/pull/1"
+  },
+  "conditions": [
+    "Write only the review comment described by the approved proof."
+  ],
+  "created_at": "2026-06-27T04:22:00Z",
+  "expires_at": "2026-06-27T06:22:00Z"
+}
