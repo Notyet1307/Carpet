@@ -19,6 +19,8 @@ importers:
 
   packages/runtime-contracts: {}
 
+  packages/state-machine: {}
+
 packages:
 
   ajv-formats@3.0.1:
