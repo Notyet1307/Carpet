@@ -1,26 +1,48 @@
 {
-  "summary": "Added schema baseline and contract fixtures.",
+  "status": "success",
+  "task_id": "task_p6_codex_worker_contract",
+  "run_id": "run_p6_success",
+  "root_cause": "The previous baseline did not encode terminal Codex worker states.",
+  "changes_made": [
+    "Added the Codex repo patch final output contract."
+  ],
   "files_changed": [
     {
-      "path": "schemas/matrix/event-envelope.schema.json",
-      "action": "added"
+      "path": "schemas/codex/repo-patch-result.schema.json",
+      "action": "modified"
     }
   ],
-  "tests_added_or_updated": [
-    "tests/contracts/schema-fixtures.test.mjs"
+  "commands_run": [
+    {
+      "command": "pnpm test:contracts",
+      "exit_code": 0,
+      "summary": "Contract tests passed."
+    }
   ],
   "validation_results": [
     {
       "command": "pnpm test:contracts",
       "exit_code": 0,
-      "summary": "Contract fixtures passed schema validation."
+      "status": "passed",
+      "summary": "Contract tests passed."
     }
   ],
+  "diff_summary": {
+    "summary": "One schema modified.",
+    "files_added": 0,
+    "files_modified": 1,
+    "files_deleted": 0
+  },
   "risk_notes": [
-    "No runtime integration is included."
+    "No runtime code changed."
   ],
   "rollback_notes": [
-    "Revert the schema baseline commit."
+    "Revert the contract baseline patch."
   ],
-  "follow_up_tasks": []
+  "security_notes": [
+    "No secrets or external writes were used."
+  ],
+  "blockers": [],
+  "memory_update_proposals": [],
+  "ready_for_review": true
 }

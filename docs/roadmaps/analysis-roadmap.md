@@ -363,7 +363,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
 | Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline 均已完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capability registry baseline 与 closeout routing hardening 已完成（registry/schema/fixtures/routing analysis/contract tests）；runtime router implementation 未开始 |
-| Phase 6 | Codex Worker Contract 分析 | 未完成 |
+| Phase 6 | Codex Worker Contract 分析 | 已完成：Codex worker contract baseline 已完成；proof-verifier prompt 明确 deferred 到 Phase 8/11 |
 | Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
 | Phase 8 | Proof Ledger 与 Approval 分析 | 部分完成：proof ledger baseline 已有；approval 缺 |
 | Phase 9 | Security Threat Model 与 Policy 分析 | 部分完成：worktree policy baseline 已有；threat model/deny-by-default matrix 缺 |
@@ -920,6 +920,11 @@ runtime/prompts/codex-repo-patch.md
 runtime/prompts/proof-verifier.md
 ```
 
+`runtime/prompts/proof-verifier.md` 在本次 Phase 6 baseline 中明确 deferred：
+repo patch worker 的输出合同已能表达 structured proof；verifier worker 的输入、
+verdict schema、approval readiness 和失败语义应在 Phase 8 Proof Ledger / Approval
+或 Phase 11 Prompt Pack 中单独定义。
+
 ### Codex worker MVP 命令
 
 ```bash
@@ -948,6 +953,23 @@ security_notes
 blockers
 memory_update_proposals
 ready_for_review
+```
+
+当前进展：
+
+```text
+2026-06-28: Codex worker contract baseline 已完成：
+- docs/analysis/05-codex-worker-analysis.md
+- schemas/codex/repo-patch-result.schema.json
+- fixtures/codex-jsonl/success.jsonl
+- fixtures/codex-jsonl/failure.jsonl
+- fixtures/codex-jsonl/blocked.jsonl
+- tests/contracts/codex-jsonl-parser.test.mjs
+- tests/contracts/codex-output-schema.test.mjs
+- runtime/prompts/codex-repo-patch.md
+
+proof-verifier prompt deferred 到 Phase 8/11，因为本阶段只锁定 repo.patch.codex
+worker final output 与 JSONL capture contract，不定义 verifier worker 行为。
 ```
 
 ### Codex Task Card 6.1：Codex worker 契约
@@ -1448,7 +1470,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [x] task state machine 已定义合法/非法转换
 [x] capability registry 有 schema 和 MVP capabilities
 [ ] default policy 是 deny-by-default
-[ ] Codex worker 输出 schema 能表达 success/failed/blocked
+[x] Codex worker 输出 schema 能表达 success/failed/blocked/needs_human_input
 [ ] proof ledger schema 能独立表达证据链
 [ ] approval 是 action-scoped，不是 vague approval
 [ ] memory update 只能 propose，不能自动写

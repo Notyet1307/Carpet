@@ -4,18 +4,45 @@
   "title": "Codex Repo Patch Result",
   "type": "object",
   "required": [
-    "summary",
+    "status",
+    "task_id",
+    "run_id",
+    "root_cause",
+    "changes_made",
     "files_changed",
-    "tests_added_or_updated",
+    "commands_run",
     "validation_results",
+    "diff_summary",
     "risk_notes",
     "rollback_notes",
-    "follow_up_tasks"
+    "security_notes",
+    "blockers",
+    "memory_update_proposals",
+    "ready_for_review"
   ],
   "properties": {
-    "summary": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "failed", "blocked", "needs_human_input"]
+    },
+    "task_id": {
       "type": "string",
       "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_cause": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changes_made": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "files_changed": {
       "type": "array",
@@ -35,16 +62,8 @@
         "additionalProperties": false
       }
     },
-    "tests_added_or_updated": {
+    "commands_run": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "validation_results": {
-      "type": "array",
-      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["command", "exit_code", "summary"],
@@ -60,10 +79,67 @@
           "summary": {
             "type": "string",
             "minLength": 1
+          },
+          "log_ref": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "additionalProperties": false
       }
+    },
+    "validation_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exit_code", "status", "summary"],
+        "properties": {
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exit_code": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "failed", "skipped"]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "log_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "diff_summary": {
+      "type": "object",
+      "required": ["summary", "files_added", "files_modified", "files_deleted"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "files_added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "files_modified": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "files_deleted": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
     },
     "risk_notes": {
       "type": "array",
@@ -74,19 +150,163 @@
     },
     "rollback_notes": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "type": "string",
         "minLength": 1
       }
     },
-    "follow_up_tasks": {
+    "security_notes": {
       "type": "array",
       "items": {
         "type": "string",
         "minLength": 1
       }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "memory_update_proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target", "proposal", "evidence_ref", "requires_human_review"],
+        "properties": {
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposal": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requires_human_review": {
+            "const": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ready_for_review": {
+      "type": "boolean"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "success"
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "ready_for_review": {
+            "type": "boolean",
+            "const": true
+          },
+          "blockers": {
+            "type": "array",
+            "maxItems": 0
+          },
+          "commands_run": {
+            "type": "array",
+            "minItems": 1
+          },
+          "validation_results": {
+            "type": "array",
+            "minItems": 1,
+            "contains": {
+              "type": "object",
+              "required": ["exit_code", "status"],
+              "properties": {
+                "exit_code": {
+                  "const": 0
+                },
+                "status": {
+                  "const": "passed"
+                }
+              }
+            },
+            "not": {
+              "contains": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {
+                    "const": "failed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["failed", "blocked", "needs_human_input"]
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "ready_for_review": {
+            "type": "boolean",
+            "const": false
+          },
+          "blockers": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ready_for_review": {
+            "const": true
+          }
+        },
+        "required": ["ready_for_review"]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "success"
+          },
+          "validation_results": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "required": ["exit_code", "status"],
+              "properties": {
+                "exit_code": {
+                  "const": 0
+                },
+                "status": {
+                  "const": "passed"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

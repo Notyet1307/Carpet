@@ -1,0 +1,21 @@
+{
+  "task_id": "task_p6_codex_worker_contract",
+  "run_id": "run_p6_invalid",
+  "root_cause": "This fixture is missing status and must be rejected.",
+  "changes_made": [],
+  "files_changed": [],
+  "commands_run": [],
+  "validation_results": [],
+  "diff_summary": {
+    "summary": "Invalid fixture.",
+    "files_added": 0,
+    "files_modified": 0,
+    "files_deleted": 0
+  },
+  "risk_notes": [],
+  "rollback_notes": [],
+  "security_notes": [],
+  "blockers": [],
+  "memory_update_proposals": [],
+  "ready_for_review": false
+}

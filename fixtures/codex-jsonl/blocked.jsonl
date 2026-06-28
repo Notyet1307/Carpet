@@ -1,0 +1,2 @@
+{"type":"thread.started","thread_id":"thread_p6_blocked","run_id":"run_p6_blocked","timestamp":"2026-06-28T04:20:00Z"}
+{"type":"turn.completed","thread_id":"thread_p6_blocked","turn_id":"turn_1","status":"blocked","reason":"Required worktree path is missing.","timestamp":"2026-06-28T04:21:00Z"}

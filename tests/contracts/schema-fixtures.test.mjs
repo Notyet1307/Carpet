@@ -348,9 +348,9 @@ const fixtureCases = [
     valid: true,
   },
   {
-    name: "codex repo patch result missing summary",
+    name: "codex repo patch result missing status",
     schema: "https://notyet.dev/schemas/codex/repo-patch-result.schema.json",
-    fixture: "fixtures/codex/invalid/repo-patch-result.missing-summary.invalid.json",
+    fixture: "fixtures/codex/invalid/repo-patch-result.missing-status.invalid.json",
     valid: false,
   },
 ];
