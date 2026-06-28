@@ -27,6 +27,12 @@ importers:
 
   packages/policy-engine: {}
 
+  packages/proof-ledger:
+    dependencies:
+      runtime-contracts:
+        specifier: workspace:*
+        version: link:../runtime-contracts
+
   packages/runtime-contracts: {}
 
   packages/runtime-store:
