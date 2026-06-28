@@ -1,0 +1,103 @@
+{
+  "task_id": "task_repo_patch_workflow",
+  "graph_id": "graph_repo_patch_workflow",
+  "version": 1,
+  "state_source": "runtime",
+  "nodes": [
+    {
+      "id": "node_event_ingest",
+      "kind": "event_ingest",
+      "event_ref": "event_task_created",
+      "required_inputs": [],
+      "produces": ["intent"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_runtime_decision",
+      "kind": "runtime_decision",
+      "required_inputs": ["intent"],
+      "produces": ["scope"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_repo_patch_codex",
+      "kind": "capability_execution",
+      "capability_ref": "capability.repo.patch.codex@v1",
+      "required_inputs": ["scope"],
+      "produces": ["artifact_patch"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_proof_verification",
+      "kind": "proof_verification",
+      "capability_ref": "capability.proof.verify@v1",
+      "required_inputs": ["artifact_patch"],
+      "produces": ["proof_verified"],
+      "proof_required": true,
+      "approval_required": false
+    },
+    {
+      "id": "node_approval_gate",
+      "kind": "approval_gate",
+      "required_inputs": ["proof_verified"],
+      "produces": ["approval_granted"],
+      "proof_required": true,
+      "approval_required": true
+    },
+    {
+      "id": "node_github_pr_create",
+      "kind": "external_action",
+      "capability_ref": "capability.github.pr.create@v1",
+      "action_type": "github_pr_create",
+      "risk": "high",
+      "required_inputs": ["approval_granted"],
+      "produces": ["artifact_pr"],
+      "proof_required": true,
+      "approval_required": true
+    },
+    {
+      "id": "node_matrix_projection",
+      "kind": "matrix_projection",
+      "event_ref": "event_task_completed_projection",
+      "required_inputs": ["artifact_pr"],
+      "produces": ["matrix_projection"],
+      "proof_required": false,
+      "approval_required": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "node_event_ingest",
+      "to": "node_runtime_decision",
+      "condition": "always"
+    },
+    {
+      "from": "node_runtime_decision",
+      "to": "node_repo_patch_codex",
+      "condition": "policy_allowed"
+    },
+    {
+      "from": "node_repo_patch_codex",
+      "to": "node_proof_verification",
+      "condition": "artifact_ready"
+    },
+    {
+      "from": "node_proof_verification",
+      "to": "node_approval_gate",
+      "condition": "proof_verified"
+    },
+    {
+      "from": "node_approval_gate",
+      "to": "node_github_pr_create",
+      "condition": "approval_granted"
+    },
+    {
+      "from": "node_github_pr_create",
+      "to": "node_matrix_projection",
+      "condition": "external_action_completed"
+    }
+  ]
+}
