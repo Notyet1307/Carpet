@@ -1,0 +1,117 @@
+{
+  "task_id": "task_ci_recovery_workflow",
+  "graph_id": "graph_ci_recovery_workflow",
+  "version": 1,
+  "state_source": "runtime",
+  "nodes": [
+    {
+      "id": "node_ci_failure_ingest",
+      "kind": "event_ingest",
+      "event_ref": "event_ci_failure",
+      "required_inputs": [],
+      "produces": ["ci_failure"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_runtime_decision",
+      "kind": "runtime_decision",
+      "required_inputs": ["ci_failure"],
+      "produces": ["recovery_scope"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_ci_recovery",
+      "kind": "capability_execution",
+      "capability_ref": "capability.ci.recovery@v1",
+      "required_inputs": ["recovery_scope"],
+      "produces": ["artifact_recovery_patch"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_test_run_evidence",
+      "kind": "capability_execution",
+      "capability_ref": "capability.test.run@v1",
+      "required_inputs": ["artifact_recovery_patch"],
+      "produces": ["test_evidence"],
+      "proof_required": false,
+      "approval_required": false
+    },
+    {
+      "id": "node_proof_verification",
+      "kind": "proof_verification",
+      "capability_ref": "capability.proof.verify@v1",
+      "required_inputs": ["artifact_recovery_patch", "test_evidence"],
+      "produces": ["proof_verified"],
+      "proof_required": true,
+      "approval_required": false
+    },
+    {
+      "id": "node_approval_gate",
+      "kind": "approval_gate",
+      "required_inputs": ["proof_verified"],
+      "produces": ["approval_granted"],
+      "proof_required": true,
+      "approval_required": true
+    },
+    {
+      "id": "node_recovery_pr_create",
+      "kind": "external_action",
+      "capability_ref": "capability.github.pr.create@v1",
+      "action_type": "github_pr_create",
+      "risk": "high",
+      "required_inputs": ["approval_granted"],
+      "produces": ["artifact_recovery_pr"],
+      "proof_required": true,
+      "approval_required": true
+    },
+    {
+      "id": "node_matrix_projection",
+      "kind": "matrix_projection",
+      "event_ref": "event_ci_recovery_projection",
+      "required_inputs": ["artifact_recovery_pr"],
+      "produces": ["matrix_projection"],
+      "proof_required": false,
+      "approval_required": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "node_ci_failure_ingest",
+      "to": "node_runtime_decision",
+      "condition": "always"
+    },
+    {
+      "from": "node_runtime_decision",
+      "to": "node_ci_recovery",
+      "condition": "policy_allowed"
+    },
+    {
+      "from": "node_ci_recovery",
+      "to": "node_test_run_evidence",
+      "condition": "artifact_ready"
+    },
+    {
+      "from": "node_test_run_evidence",
+      "to": "node_proof_verification",
+      "condition": "test_evidence_ready"
+    },
+    {
+      "from": "node_proof_verification",
+      "to": "node_approval_gate",
+      "condition": "proof_verified"
+    },
+    {
+      "from": "node_approval_gate",
+      "to": "node_recovery_pr_create",
+      "condition": "approval_granted"
+    },
+    {
+      "from": "node_recovery_pr_create",
+      "to": "node_matrix_projection",
+      "condition": "external_action_completed"
+    }
+  ]
+}

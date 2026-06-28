@@ -361,7 +361,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
-| Phase 4 | Runtime State Machine 与 Task Graph | 部分完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline 已完成；ci-recovery workflow 缺 |
+| Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline 均已完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 部分完成：capabilities seed 已有；schema/routing analysis 缺 |
 | Phase 6 | Codex Worker Contract 分析 | 未完成 |
 | Phase 7 | Matrix AppService Gateway 分析 | 未完成 |
@@ -775,8 +775,11 @@ cancelled
 - runtime/workflows/repo-patch.yaml
 - tests/contracts/repo-patch-workflow.test.mjs
 
-仍未完成：
+2026-06-28: ci-recovery workflow baseline 已完成：
 - runtime/workflows/ci-recovery.yaml
+- tests/contracts/ci-recovery-workflow.test.mjs
+
+Phase 4 完成：产物清单已补齐，并由 contract tests 覆盖。
 ```
 
 ### Codex Task Card 4.1：状态机分析
