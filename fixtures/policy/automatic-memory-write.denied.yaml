@@ -1,0 +1,28 @@
+{
+  "case_id": "automatic-memory-write.denied",
+  "expected_decision": "deny",
+  "expected_errors": [
+    "default deny: no allow rule matched",
+    "action denied: memory:write_live",
+    "direct memory write denied"
+  ],
+  "request": {
+    "task_id": "task_policy_006",
+    "run_id": "run_policy_006",
+    "capability_id": "memory.propose",
+    "action": "memory:write_live",
+    "requested_at": "2026-06-28T02:30:00Z",
+    "target": {
+      "type": "memory_store",
+      "operation": "write",
+      "ref": "memory://global/agent-rules"
+    },
+    "context_refs": [
+      {
+        "kind": "proof_summary",
+        "ref": "proof://proof_policy_006"
+      }
+    ],
+    "artifact_refs": []
+  }
+}

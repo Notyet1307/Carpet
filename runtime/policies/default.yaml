@@ -1,3 +1,29 @@
+policy_defaults:
+  id: policy.default.v1
+  decision_default: deny
+  prompt_constraints_are_not_enforcement: true
+  runtime_enforced_controls:
+    - schema_validation
+    - capability_permission_allowlist
+    - scoped_secret_context
+    - artifact_ref_safety
+    - action_scoped_approval
+    - approval_replay_protection
+    - proof_verification
+  global_denied_actions:
+    - repo:edit_main_checkout
+    - github:push_main
+    - github:merge
+    - deploy:write
+    - secrets:read
+    - memory:write_direct
+    - memory:write_live
+  worker_context_denied:
+    - production_secret
+    - production_env
+    - live_api_key
+    - raw_matrix_event_body
+
 worktree_policy:
   required_for:
     - code_change

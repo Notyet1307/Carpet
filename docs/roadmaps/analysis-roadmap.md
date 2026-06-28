@@ -366,7 +366,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 6 | Codex Worker Contract 分析 | 已完成：Codex worker contract baseline 已完成；proof-verifier prompt 明确 deferred 到 Phase 8/11 |
 | Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；真实 gateway implementation 未开始 |
 | Phase 8 | Proof Ledger 与 Approval 分析 | 已完成：proof ledger baseline 与 approval gate contract baseline 已完成；runtime approval engine、GitHub automation、memory writer 未开始 |
-| Phase 9 | Security Threat Model 与 Policy 分析 | 部分完成：worktree policy baseline 已有；threat model/deny-by-default matrix 缺 |
+| Phase 9 | Security Threat Model 与 Policy 分析 | 已完成：worktree policy baseline、security threat model、deny-by-default policy matrix、policy decision fixtures/contract tests 已完成；runtime policy engine 未开始 |
 | Phase 10 | Testing Strategy 与 Test Matrix | 未完成 |
 | Phase 11 | Prompt / Skill 设计分析 | 未完成 |
 | Phase 12 | MVP Backlog 与开发入口 | 未完成 |
@@ -1244,6 +1244,23 @@ proof 可校验
 memory write 不能自动发生
 ```
 
+当前进展：
+
+```text
+2026-06-28: Security threat model 与 policy decision contract baseline 已完成：
+- docs/analysis/07-security-threat-model.md
+- runtime/policies/default.yaml
+- runtime/policies/repo-patch.yaml
+- fixtures/policy/*.yaml
+- tests/contracts/policy-decisions.test.mjs
+
+Phase 9 完成：deny-by-default、secret isolation、action-scoped approval、
+fake proof rejection、approval replay rejection、memory proposal-only、artifact ref
+path safety、Matrix spoofing、room/workspace boundary、prompt injection、command
+allowlist、branch/PR confusion、secret-bearing logs 均已进入 contract fixtures。
+真实 runtime policy engine、secret broker、Matrix gateway 和 GitHub automation 仍未开始。
+```
+
 ---
 
 ## Phase 10：Testing Strategy 与 Test Matrix
@@ -1491,7 +1508,7 @@ Codex 可以按 backlog 逐个 issue 开发
 [ ] 所有 MVP Runtime object 有 schema 或 TypeScript interface 草案
 [x] task state machine 已定义合法/非法转换
 [x] capability registry 有 schema 和 MVP capabilities
-[ ] default policy 是 deny-by-default
+[x] default policy 是 deny-by-default
 [x] Codex worker 输出 schema 能表达 success/failed/blocked/needs_human_input
 [x] proof ledger schema 能独立表达证据链
 [x] approval 是 action-scoped，不是 vague approval

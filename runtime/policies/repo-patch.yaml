@@ -1,0 +1,120 @@
+{
+  "policy_id": "policy.repo_patch.v1",
+  "inherits": ["policy.default.v1"],
+  "decision_default": "deny",
+  "prompt_constraints": {
+    "not_runtime_enforcement": true,
+    "worker_prompt_must_repeat": [
+      "Do not read production secrets.",
+      "Do not perform external writes without approval.",
+      "Do not write long-term memory directly."
+    ]
+  },
+  "runtime_enforced_controls": [
+    "capability_permission_allowlist",
+    "scoped_secret_context",
+    "isolated_worktree_required",
+    "artifact_ref_safety",
+    "proof_verification",
+    "action_scoped_approval",
+    "approval_replay_protection",
+    "memory_proposal_only"
+  ],
+  "worker_context": {
+    "allowed_context_kinds": [
+      "task_scope",
+      "repo_worktree",
+      "policy_envelope",
+      "artifact_ref",
+      "proof_summary"
+    ],
+    "denied_context_kinds": [
+      "production_secret",
+      "production_env",
+      "live_api_key",
+      "raw_matrix_event_body",
+      "untrusted_instruction_as_policy",
+      "secret_bearing_log"
+    ]
+  },
+  "allowed_actions": [
+    {
+      "action": "repo:write_patch",
+      "capability_id": "repo.patch.codex",
+      "requires_isolated_worktree": true,
+      "target_type": "worktree_file"
+    },
+    {
+      "action": "process:run_tests",
+      "capability_id": "repo.patch.codex",
+      "requires_isolated_worktree": true,
+      "target_type": "worktree_process"
+    },
+    {
+      "action": "runtime:enqueue_task",
+      "capability_id": "matrix.gateway",
+      "requires_isolated_worktree": false,
+      "target_type": "runtime_task_queue"
+    },
+    {
+      "action": "external:write",
+      "capability_id": "github.pr.create",
+      "requires_isolated_worktree": false,
+      "target_type": "external_system"
+    }
+  ],
+  "denied_actions": [
+    "repo:edit_main_checkout",
+    "github:push_main",
+    "github:merge",
+    "deploy:write",
+    "secrets:read",
+    "memory:write_direct",
+    "memory:write_live",
+    "policy:override",
+    "process:run_command"
+  ],
+  "matrix_events": {
+    "trusted_actor_source": "matrix_sender_id",
+    "room_workspace_map": {
+      "!control:notyet.local": "workspace_carpet"
+    }
+  },
+  "commands": {
+    "allowed_names": ["pnpm test:contracts", "pnpm schemas:validate", "git diff --check"]
+  },
+  "approval_required_actions": [
+    {
+      "action": "external:write",
+      "approval_scope": "action",
+      "proof_required": true,
+      "replay_protection": "task_run_action_target_proof"
+    },
+    {
+      "action": "github:create_pr",
+      "approval_scope": "action",
+      "proof_required": true,
+      "replay_protection": "task_run_action_target_proof"
+    }
+  ],
+  "artifact_refs": {
+    "allowed_uri_prefixes": [
+      "object://artifacts/",
+      "object://logs/",
+      "https://object.local/artifacts/",
+      "https://object.local/logs/"
+    ],
+    "deny_path_traversal": true,
+    "require_sha256": true
+  },
+  "proof": {
+    "required_verifier_capability": "proof.verify",
+    "validation_requires_exit_code_zero": true,
+    "validation_logs_must_be_artifact_refs": true
+  },
+  "memory": {
+    "allowed_action": "memory:propose",
+    "direct_write_actions": ["memory:write_direct", "memory:write_live"],
+    "automatic_write_allowed": false
+  }
+}

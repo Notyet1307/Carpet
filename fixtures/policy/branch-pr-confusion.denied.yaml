@@ -1,0 +1,59 @@
+{
+  "case_id": "branch-pr-confusion.denied",
+  "expected_decision": "deny",
+  "expected_errors": ["branch/pr target confusion denied"],
+  "request": {
+    "task_id": "task_policy_012",
+    "run_id": "run_policy_012",
+    "capability_id": "github.pr.create",
+    "action": "external:write",
+    "requested_at": "2026-06-28T02:50:00Z",
+    "target": {
+      "type": "external_system",
+      "system": "github",
+      "operation": "create_pr",
+      "ref": "github://Notyet1307/Carpet/pull/12",
+      "source_ref": "refs/heads/main",
+      "base_ref": "refs/heads/main"
+    },
+    "context_refs": [
+      {
+        "kind": "proof_summary",
+        "ref": "proof://proof_policy_012"
+      }
+    ],
+    "artifact_refs": [
+      {
+        "kind": "git_diff",
+        "uri": "object://artifacts/run_policy_012/diff.patch",
+        "sha256": "1212121212121212121212121212121212121212121212121212121212121212"
+      }
+    ],
+    "proof": {
+      "proof_id": "proof_policy_012",
+      "verdict": "verified",
+      "verifier_capability": "proof.verify",
+      "validation": [
+        {
+          "command": "pnpm test:contracts",
+          "status": "passed",
+          "exit_code": 0,
+          "log_ref": "object://logs/run_policy_012/contracts.log"
+        }
+      ]
+    },
+    "approval": {
+      "approval_id": "approval_policy_012",
+      "task_id": "task_policy_012",
+      "proof_id": "proof_policy_012",
+      "action": "external:write",
+      "target_ref": "github://Notyet1307/Carpet/pull/12",
+      "replay_key": "task_policy_012:run_policy_012:external:write:github://Notyet1307/Carpet/pull/12:proof_policy_012",
+      "created_at": "2026-06-28T02:40:00Z",
+      "expires_at": "2026-06-28T03:40:00Z"
+    },
+    "replay_cache": {
+      "used_replay_keys": []
+    }
+  }
+}

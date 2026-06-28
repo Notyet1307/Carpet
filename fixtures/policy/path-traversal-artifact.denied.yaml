@@ -1,0 +1,39 @@
+{
+  "case_id": "path-traversal-artifact.denied",
+  "expected_decision": "deny",
+  "expected_errors": ["artifact ref path traversal denied"],
+  "request": {
+    "task_id": "task_policy_007",
+    "run_id": "run_policy_007",
+    "capability_id": "repo.patch.codex",
+    "action": "repo:write_patch",
+    "requested_at": "2026-06-28T02:00:00Z",
+    "worktree": {
+      "path": "/Users/yet/Test_drive_sales/.worktrees/Carpet/P9-security-policy-contract",
+      "branch": "analysis/p9-security-policy-contract",
+      "base_branch": "main"
+    },
+    "scope": {
+      "allowed_paths": ["docs/analysis/**"],
+      "forbidden_paths": [".env", ".env.*", "secrets/**", "production/**"]
+    },
+    "target": {
+      "type": "worktree_file",
+      "path": "docs/analysis/07-security-threat-model.md",
+      "ref": "worktree://docs/analysis/07-security-threat-model.md"
+    },
+    "context_refs": [
+      {
+        "kind": "task_scope",
+        "ref": "runtime://tasks/task_policy_007/scope"
+      }
+    ],
+    "artifact_refs": [
+      {
+        "kind": "git_diff",
+        "uri": "object://artifacts/run_policy_007/../../secrets.env",
+        "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
+    ]
+  }
+}

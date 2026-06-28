@@ -1,0 +1,30 @@
+{
+  "case_id": "matrix-spoofed-actor.denied",
+  "expected_decision": "deny",
+  "expected_errors": ["matrix actor spoofing denied"],
+  "request": {
+    "task_id": "task_policy_008",
+    "run_id": "run_policy_008",
+    "workspace_id": "workspace_carpet",
+    "capability_id": "matrix.gateway",
+    "action": "runtime:enqueue_task",
+    "requested_at": "2026-06-28T02:40:00Z",
+    "target": {
+      "type": "runtime_task_queue",
+      "ref": "runtime://queue/task_policy_008"
+    },
+    "matrix_event": {
+      "event_id": "$event_policy_008",
+      "room_id": "!control:notyet.local",
+      "sender_id": "@attacker:notyet.local",
+      "claimed_actor_id": "@yet:notyet.local"
+    },
+    "context_refs": [
+      {
+        "kind": "task_scope",
+        "ref": "matrix://!control:notyet.local/$event_policy_008"
+      }
+    ],
+    "artifact_refs": []
+  }
+}

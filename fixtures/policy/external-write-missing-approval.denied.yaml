@@ -1,0 +1,47 @@
+{
+  "case_id": "external-write-missing-approval.denied",
+  "expected_decision": "deny",
+  "expected_errors": ["missing action-scoped approval"],
+  "request": {
+    "task_id": "task_policy_003",
+    "run_id": "run_policy_003",
+    "capability_id": "github.pr.create",
+    "action": "external:write",
+    "requested_at": "2026-06-28T02:30:00Z",
+    "target": {
+      "type": "external_system",
+      "system": "github",
+      "operation": "create_pr",
+      "ref": "github://Notyet1307/Carpet/pull/8"
+    },
+    "context_refs": [
+      {
+        "kind": "proof_summary",
+        "ref": "proof://proof_policy_003"
+      }
+    ],
+    "artifact_refs": [
+      {
+        "kind": "git_diff",
+        "uri": "object://artifacts/run_policy_003/diff.patch",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "proof": {
+      "proof_id": "proof_policy_003",
+      "verdict": "verified",
+      "verifier_capability": "proof.verify",
+      "validation": [
+        {
+          "command": "pnpm test:contracts",
+          "status": "passed",
+          "exit_code": 0,
+          "log_ref": "object://logs/run_policy_003/contracts.log"
+        }
+      ]
+    },
+    "replay_cache": {
+      "used_replay_keys": []
+    }
+  }
+}
