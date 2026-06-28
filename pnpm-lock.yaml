@@ -19,6 +19,12 @@ importers:
 
   apps/worker-runner: {}
 
+  packages/approval-gate:
+    dependencies:
+      runtime-contracts:
+        specifier: workspace:*
+        version: link:../runtime-contracts
+
   packages/capability-router:
     dependencies:
       runtime-contracts:
