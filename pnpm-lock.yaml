@@ -19,6 +19,12 @@ importers:
 
   packages/runtime-contracts: {}
 
+  packages/runtime-store:
+    dependencies:
+      state-machine:
+        specifier: workspace:*
+        version: link:../state-machine
+
   packages/state-machine: {}
 
 packages:
