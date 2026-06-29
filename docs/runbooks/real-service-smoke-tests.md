@@ -90,6 +90,49 @@ This command is only a scaffold/manual gate check. It does not make real
 services run by default, and the skipped placeholder remains disabled until a
 future human-approved runner is added.
 
+## MCR-850 Manual Vertical Smoke Scaffold
+
+MCR-850 manual vertical smoke scaffold is default disabled and does not authorize real execution.
+It exists so preflight can see a Runtime-owned manual path shape before a
+separate one-run approval exists.
+
+Real execution requires another action-scoped human approval for one fresh
+`mcr-850-yyyymmddthhmmssz-<slug>` run id. This scaffold must not start Docker,
+Synapse, an AppService listener, real `codex exec`, real `gh pr create`, branch
+creation or deletion, PR close, deploy, database, secret manager, or live memory
+write during normal local tests.
+
+The planned order is:
+
+```text
+Matrix/local fixture ingress -> Runtime snapshot -> approved Codex exec -> proof verification -> approval -> disposable GitHub PR create -> cleanup/projection
+```
+
+The fully gated manual path may report `wouldCallRealServices=true` only as a
+readiness signal. Local tests must use an injected/fake step runner; no
+production service client or ambient credential fallback is allowed.
+
+Required gates:
+
+- run id: `mcr-850-yyyymmddthhmmssz-<slug>`
+- action-scoped human approval: `mcr_850_vertical_smoke`
+- disposable Matrix target only
+- Codex smoke approval scope: `codex_exec_smoke`
+- Codex credential scope: `disposable`
+- explicit Codex env key list; do not forward `process.env`
+- disposable GitHub token presence only: `set` or `unset`
+- disposable GitHub target: `Notyet1307/github-pr-smoke-sandbox`
+- disposable GitHub base/head branches named with the run id; no production
+  `main` target
+- run-scoped `evidence_dir`
+- cleanup plan covering Matrix services, PR close, disposable branch deletion,
+  disposable credential revocation, and generated Matrix file removal
+
+Allowed actions are only Matrix/local ingress, Runtime snapshot, Codex smoke,
+proof verification, approval request, disposable PR creation, and
+cleanup/projection. No merge, no deploy, no live memory write, no production
+main push, and no token values may appear in evidence.
+
 ## Manual Disposable Synapse Scaffold
 
 `infra/matrix/synapse` contains a manual-only disposable Synapse compose
