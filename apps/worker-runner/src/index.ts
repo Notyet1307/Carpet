@@ -15,3 +15,14 @@ export {
   type FakeCodexProcessInput,
   type FakeCodexReplay,
 } from "./fake-codex-process.ts";
+export {
+  buildCodexExecCommand,
+  runCodexExecSmoke,
+  type CodexExecCommand,
+  type CodexExecCommandInput,
+  type CodexExecEvidenceRefs,
+  type CodexExecProcessResult,
+  type CodexExecProcessRunner,
+  type CodexExecSmokeInput,
+  type CodexExecSmokeResult,
+} from "./codex-exec-runner.ts";
