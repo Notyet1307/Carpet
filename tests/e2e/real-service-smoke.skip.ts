@@ -170,6 +170,35 @@ test("runbook records manual evidence and safety boundaries", () => {
   }
 });
 
+test("disposable Synapse scaffold is manual-only and contains no secrets", () => {
+  const scaffoldFiles = [
+    "infra/matrix/synapse/README.md",
+    "infra/matrix/synapse/docker-compose.yaml",
+    "infra/matrix/synapse/homeserver.example.yaml",
+  ];
+  const combined = scaffoldFiles
+    .map((relativePath) => readFileSync(path.join(root, relativePath), "utf8"))
+    .join("\n")
+    .toLowerCase();
+
+  for (const requiredText of [
+    "manual-only",
+    "disposable",
+    "no secrets",
+    "no real secrets",
+    "no default service start",
+    "cleanup",
+    "127.0.0.1:8008:8008",
+    "127.0.0.1:8448:8448",
+  ]) {
+    assert.equal(
+      combined.includes(requiredText),
+      true,
+      `missing Synapse scaffold text: ${requiredText}`,
+    );
+  }
+});
+
 test("planning docs do not let MCR-310 authorize Matrix smoke", () => {
   for (const relativePath of [
     "docs/analysis/development-entry-review.md",

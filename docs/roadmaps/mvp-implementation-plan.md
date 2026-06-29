@@ -135,7 +135,8 @@ Exit criteria:
 
 - [x] MCR-310 Real Codex Exec Smoke Runner scaffold plus one manual real Codex
   exec smoke pass on 2026-06-29
-- [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold
+- [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold, including
+  manual-only disposable Synapse compose scaffold
 
 Satisfied scaffold prerequisites:
 
@@ -158,6 +159,8 @@ Manual smoke exit criteria:
 - No merge, deploy, or live memory write is automated.
 - MCR-720 remains scaffold/skipped-by-default unless separately approved.
 - MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
+- Disposable Synapse compose has no default service start and is not
+  compatibility proof by itself.
 
 ## Operating Cadence
 

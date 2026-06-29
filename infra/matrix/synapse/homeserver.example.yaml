@@ -1,0 +1,47 @@
+# MCR-720 disposable Synapse example config.
+# Manual-only scaffold, no real secrets, no default service start.
+# Do not use for production or a long-lived homeserver.
+
+server_name: "mcr-720.localhost"
+public_baseurl: "http://127.0.0.1:8008/"
+report_stats: false
+
+pid_file: "/data/homeserver.pid"
+signing_key_path: "/data/signing.key"
+media_store_path: "/data/media_store"
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    bind_addresses: ["0.0.0.0"]
+    x_forwarded: false
+    resources:
+      - names: [client, federation]
+        compress: false
+  - port: 8448
+    tls: false
+    type: http
+    bind_addresses: ["0.0.0.0"]
+    x_forwarded: false
+    resources:
+      - names: [federation]
+        compress: false
+
+database:
+  name: sqlite3
+  args:
+    database: "/data/homeserver.db"
+
+log_config: "/data/log.config"
+
+# Placeholder-only values. Generate run-scoped disposable values for any
+# approved manual smoke and keep them out of git.
+macaroon_secret_key: "mcr-720-example-not-a-real-secret"
+form_secret: "mcr-720-example-not-a-real-secret"
+
+enable_registration: false
+enable_registration_without_verification: false
+app_service_config_files: []
+trusted_key_servers: []
+suppress_key_server_warning: true

@@ -183,8 +183,8 @@ Evidence now present:
 - MCR-310 real Codex exec smoke passed once on 2026-06-29 with tracked proof
   `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
   `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
-- MCR-720 Matrix-only real-service smoke preflight runbook and skipped-test
-  scaffold have merged.
+- MCR-720 Matrix-only real-service smoke preflight runbook, skipped-test
+  scaffold, and manual-only disposable Synapse compose scaffold have merged.
 
 Not yet complete:
 
@@ -192,6 +192,8 @@ Not yet complete:
 - Any production-like Codex worker execution.
 - MCR-720 Matrix-only real-service smoke execution; it remains
   scaffold/skipped-by-default unless separately approved.
+- Disposable Synapse compose is not proof of compatibility; it is a
+  manual-only, no-default-start scaffold for a future approved run.
 
 Manual gate for any real smoke:
 

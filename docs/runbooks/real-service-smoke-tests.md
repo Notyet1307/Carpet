@@ -45,6 +45,27 @@ This command is only a scaffold/manual gate check. It does not make real
 services run by default, and the skipped placeholder remains disabled until a
 future human-approved runner is added.
 
+## Manual Disposable Synapse Scaffold
+
+`infra/matrix/synapse` contains a manual-only disposable Synapse compose
+scaffold for a future approved Matrix-only smoke. It has no secrets and no
+default service start: the service is behind the `manual` compose profile.
+
+Future manual commands after one action-scoped approval:
+
+```bash
+cd infra/matrix/synapse
+docker compose --profile manual config
+docker compose --profile manual up -d synapse
+docker compose --profile manual logs --tail=100 synapse
+docker compose --profile manual down --volumes --remove-orphans
+rm -rf data
+```
+
+Do not run these commands during scaffold review. They are documented so the
+next approved smoke can separate homeserver start, evidence capture, stop, and
+cleanup from test-runner implementation.
+
 ## Matrix-Only Disposable Resources
 
 Each approved MCR-720 run must use Matrix-only disposable resources:
@@ -104,6 +125,9 @@ After the run:
 
 Rollback for this scaffold is deletion of:
 
+- `infra/matrix/synapse/README.md`
+- `infra/matrix/synapse/docker-compose.yaml`
+- `infra/matrix/synapse/homeserver.example.yaml`
 - `docs/runbooks/real-service-smoke-tests.md`
 - `tests/e2e/real-service-smoke.skip.ts`
 
