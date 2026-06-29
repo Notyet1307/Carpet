@@ -14,6 +14,9 @@ import {
 import { readRuntimeStoreSnapshotFile } from "../../packages/runtime-store/src/index.ts";
 
 const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
+const mainCheckoutPath = "/Users/yet/Test_drive_sales/Carpet";
+const codexAdapterWorktreePath =
+  "/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-810-approved-codex-exec-adapter";
 
 test("runtime orchestrator writes and reads a schema-valid local snapshot", async () => {
   const snapshotPath = tempSnapshotPath();
@@ -62,6 +65,129 @@ test("runtime orchestrator writes and reads a schema-valid local snapshot", asyn
   assert.equal(written.proof_refs[0]?.status, "verified");
   assert.equal(written.approval_refs[0]?.status, "consumed");
   assert.equal(written.artifact_refs.some((artifact) => artifact.kind === "pr"), true);
+});
+
+test("runtime orchestrator opt-in Codex smoke adapter uses injected runner and persists evidence refs", async () => {
+  const snapshotPath = tempSnapshotPath();
+  const calls: unknown[] = [];
+  const result = await runRuntimeOrchestrator({
+    repoRoot: root,
+    snapshotPath,
+    worker_adapter: {
+      type: "codex_exec_smoke",
+      worktree_path: codexAdapterWorktreePath,
+      main_checkout_path: mainCheckoutPath,
+      prompt_file: ".mcr/runs/run_mcr_810/task.md",
+      evidence_dir: "artifact://mcr-810/codex-exec-smoke",
+      smoke: true,
+      manual_approval: {
+        approved: true,
+        approver: "yet",
+        run_id: "run_mcr_800_runtime_orchestrator_cli",
+        scope: "codex_exec_smoke",
+      },
+      credential_scope: "disposable",
+      env: { PATH: "/usr/bin:/bin" },
+      process_runner: async (command) => {
+        calls.push(command);
+        return { exit_code: 0, stdout: "{\"type\":\"turn.completed\"}\n", stderr: "" };
+      },
+    },
+  });
+  const written = await readRuntimeStoreSnapshotFile(snapshotPath);
+
+  assert.equal(calls.length, 1);
+  assert.equal(result.codex_exec_smoke?.status, "completed");
+  assert.equal(result.codex_exec_smoke?.executed, true);
+  assert.equal(result.worker.status, "success");
+  assert.equal(result.proof_verification.ok, true);
+  assert.equal(written.proof_refs[0]?.status, "verified");
+  assert.ok(
+    written.artifact_refs.some(
+      (artifact) =>
+        artifact.uri === "artifact://mcr-810/codex-exec-smoke/codex-exec.jsonl",
+    ),
+  );
+  assert.deepEqual(written, result.snapshot);
+});
+
+test("runtime orchestrator Codex smoke adapter blocks without approval before runner execution", async () => {
+  const snapshotPath = tempSnapshotPath();
+  let calls = 0;
+  const result = await runRuntimeOrchestrator({
+    repoRoot: root,
+    snapshotPath,
+    worker_adapter: {
+      type: "codex_exec_smoke",
+      worktree_path: codexAdapterWorktreePath,
+      main_checkout_path: mainCheckoutPath,
+      prompt_file: ".mcr/runs/run_mcr_810/task.md",
+      evidence_dir: "artifact://mcr-810/codex-exec-smoke",
+      smoke: true,
+      credential_scope: "disposable",
+      env: { PATH: "/usr/bin:/bin" },
+      process_runner: async () => {
+        calls += 1;
+        return { exit_code: 0, stdout: "", stderr: "" };
+      },
+    },
+  });
+
+  assert.equal(calls, 0);
+  assert.equal(result.codex_exec_smoke?.status, "blocked");
+  assert.equal(result.codex_exec_smoke?.executed, false);
+  assert.equal(result.codex_exec_smoke?.code, "manual_approval_required");
+  assert.equal(result.worker.status, "blocked");
+});
+
+test("runtime orchestrator Codex smoke adapter blocks unsafe cwd or secret env before runner execution", async () => {
+  for (const unsafe of [
+    {
+      name: "main checkout cwd",
+      worktree_path: mainCheckoutPath,
+      env: { PATH: "/usr/bin:/bin" },
+      code: "main_checkout_cwd_rejected",
+    },
+    {
+      name: "secret env",
+      worktree_path: codexAdapterWorktreePath,
+      env: { PATH: "/usr/bin:/bin", OPENAI_API_KEY: "sk-proj-not-for-smoke" },
+      code: "secret_env_rejected",
+    },
+  ]) {
+    const snapshotPath = tempSnapshotPath();
+    let calls = 0;
+    const result = await runRuntimeOrchestrator({
+      repoRoot: root,
+      snapshotPath,
+      worker_adapter: {
+        type: "codex_exec_smoke",
+        worktree_path: unsafe.worktree_path,
+        main_checkout_path: mainCheckoutPath,
+        prompt_file: ".mcr/runs/run_mcr_810/task.md",
+        evidence_dir: "artifact://mcr-810/codex-exec-smoke",
+        smoke: true,
+        manual_approval: {
+          approved: true,
+          approver: "yet",
+          run_id: "run_mcr_800_runtime_orchestrator_cli",
+          scope: "codex_exec_smoke",
+        },
+        credential_scope: "disposable",
+        env: unsafe.env,
+        process_runner: async () => {
+          calls += 1;
+          return { exit_code: 0, stdout: "", stderr: "" };
+        },
+      },
+    });
+
+    assert.equal(calls, 0, unsafe.name);
+    assert.equal(result.codex_exec_smoke?.status, "blocked", unsafe.name);
+    assert.equal(result.codex_exec_smoke?.executed, false, unsafe.name);
+    assert.equal(result.codex_exec_smoke?.code, unsafe.code, unsafe.name);
+    assert.equal(result.worker.status, "blocked", unsafe.name);
+  }
 });
 
 test("runtime orchestrator CLI writes a caller-provided snapshot path", async () => {

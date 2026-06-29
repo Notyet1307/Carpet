@@ -3,7 +3,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { runFakeCodexWorker } from "../../worker-runner/src/index.ts";
+import {
+  runCodexExecSmoke,
+  runFakeCodexWorker,
+  type CodexExecProcessRunner,
+  type CodexExecSmokeInput,
+  type CodexExecSmokeResult,
+  type WorkerRunnerResult,
+} from "../../worker-runner/src/index.ts";
 import { createInMemoryApprovalGate } from "../../../packages/approval-gate/src/index.ts";
 import {
   loadCapabilityRegistry,
@@ -45,6 +52,21 @@ import { createMemoryProposal } from "../../../workers/memory-curator-worker/src
 export type RunRuntimeOrchestratorInput = {
   snapshotPath: string;
   repoRoot?: string;
+  worker_adapter?: RuntimeWorkerAdapter;
+};
+
+type RuntimeWorkerAdapter = {
+  type: "codex_exec_smoke";
+  worktree_path: string;
+  main_checkout_path: string;
+  prompt_file: string;
+  evidence_dir: string;
+  codex_binary?: string;
+  smoke?: boolean;
+  manual_approval?: CodexExecSmokeInput["manual_approval"];
+  credential_scope?: string;
+  env?: Record<string, string>;
+  process_runner?: CodexExecProcessRunner;
 };
 
 const repoRoot = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
@@ -160,27 +182,78 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   );
   transition(store, "worker_dispatched", "running", "worker.started", "worker");
 
-  const jsonl = await readFile(path.join(root, "fixtures/codex-jsonl/success.jsonl"), "utf8");
-  const jsonlArtifact = artifacts.add("artifact_mcr_800_codex_jsonl", "log", jsonl);
-  const validationLog = artifacts.add(
-    "artifact_mcr_800_validation_log",
-    "log",
-    "contracts passed",
-    validationLogUri,
-  );
-  const finalOutput = await createFinalOutput(root);
-  const finalOutputArtifact = artifacts.add(
-    "artifact_mcr_800_final_output",
-    "report",
-    JSON.stringify(finalOutput),
-  );
-  const worker = runFakeCodexWorker({
-    jsonl,
-    jsonl_artifact_ref: jsonlArtifact.uri,
-    final_output: finalOutput,
-    final_output_artifact_ref: finalOutputArtifact.uri,
-    forbidden_paths: [".env*", "secrets/**"],
-  });
+  let codexExecSmoke: CodexExecSmokeResult | undefined;
+  let finalOutput;
+  let worker: WorkerRunnerResult;
+  let validationLog: ArtifactRefRecord;
+  let finalOutputArtifact: ArtifactRefRecord | undefined;
+  let proofArtifactRecords: ArtifactRefRecord[];
+
+  if (input.worker_adapter?.type === "codex_exec_smoke") {
+    const { type, process_runner: processRunner, ...adapter } = input.worker_adapter;
+    void type;
+    codexExecSmoke = await runCodexExecSmoke(
+      {
+        ...adapter,
+        task_id: taskId,
+        run_id: runId,
+      },
+      processRunner,
+    );
+    proofArtifactRecords = recordCodexExecSmokeArtifacts(artifacts, codexExecSmoke);
+    finalOutputArtifact = proofArtifactRecords[1];
+    validationLog = proofArtifactRecords[2] as ArtifactRefRecord;
+    worker = workerResultFromCodexExecSmoke(codexExecSmoke);
+    finalOutput = worker.final_output;
+  } else {
+    const jsonl = await readFile(path.join(root, "fixtures/codex-jsonl/success.jsonl"), "utf8");
+    const jsonlArtifact = artifacts.add("artifact_mcr_800_codex_jsonl", "log", jsonl);
+    validationLog = artifacts.add(
+      "artifact_mcr_800_validation_log",
+      "log",
+      "contracts passed",
+      validationLogUri,
+    );
+    finalOutput = await createFinalOutput(root);
+    finalOutputArtifact = artifacts.add(
+      "artifact_mcr_800_final_output",
+      "report",
+      JSON.stringify(finalOutput),
+    );
+    proofArtifactRecords = [jsonlArtifact, finalOutputArtifact, validationLog];
+    worker = runFakeCodexWorker({
+      jsonl,
+      jsonl_artifact_ref: jsonlArtifact.uri,
+      final_output: finalOutput,
+      final_output_artifact_ref: finalOutputArtifact.uri,
+      forbidden_paths: [".env*", "secrets/**"],
+    });
+  }
+
+  if (worker.status !== "success") {
+    transition(
+      store,
+      "running",
+      worker.status === "blocked" ? "needs_human_input" : "worker_failed",
+      worker.status === "blocked" ? "human_input.requested" : "worker.failed",
+      "worker",
+    );
+
+    return {
+      snapshot_path: input.snapshotPath,
+      route,
+      policy_decision: policyDecision,
+      work_cell: workCell.work_cell,
+      worker,
+      codex_exec_smoke: codexExecSmoke,
+      prs: [],
+    };
+  }
+
+  if (!finalOutput || !finalOutputArtifact) {
+    throw new Error("successful worker result requires final output artifacts");
+  }
+
   const proofBuild = createProofFromWorkerArtifacts({
     proof_id: proofId,
     task_id: taskId,
@@ -197,11 +270,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
       head_sha: baseSha,
       cleanup_status: "kept_for_review",
     },
-    artifacts: [
-      toProofArtifact(jsonlArtifact),
-      toProofArtifact(finalOutputArtifact),
-      toProofArtifact(validationLog),
-    ],
+    artifacts: proofArtifactRecords.map(toProofArtifact),
     worker_result: worker,
   });
 
@@ -339,7 +408,13 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   const snapshot = exportRuntimeStoreSnapshot(store, {
     store_id: "runtime_store_mcr_800_runtime_orchestrator_cli",
     created_at: now,
-    proof_refs: [proofRef(proofBuild.proof, validationLog.uri)],
+    proof_refs: [
+      proofRef(
+        proofBuild.proof,
+        validationLog.uri,
+        proofArtifactRecords.map((artifact) => artifact.artifact_id),
+      ),
+    ],
     approval_refs: [approvalRef()],
     artifact_refs: artifacts.records(),
   });
@@ -355,6 +430,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
     policy_decision: policyDecision,
     work_cell: workCell.work_cell,
     worker,
+    codex_exec_smoke: codexExecSmoke,
     proof_verification: proofVerification,
     approval_before_grant: approvalBeforeGrant,
     approval_grant: approvalGrant,
@@ -435,6 +511,106 @@ async function createFinalOutput(root: string) {
       },
     ],
     ready_for_review: true,
+  };
+}
+
+function recordCodexExecSmokeArtifacts(
+  artifacts: ReturnType<typeof createArtifactRecorder>,
+  result: CodexExecSmokeResult,
+) {
+  return [
+    artifacts.add(
+      "artifact_mcr_810_codex_exec_jsonl",
+      "log",
+      JSON.stringify({ ref: result.evidence_refs.jsonl }),
+      result.evidence_refs.jsonl,
+    ),
+    artifacts.add(
+      "artifact_mcr_810_codex_exec_final_output",
+      "report",
+      JSON.stringify({ ref: result.evidence_refs.final_output }),
+      result.evidence_refs.final_output,
+    ),
+    artifacts.add(
+      "artifact_mcr_810_codex_exec_validation_log",
+      "log",
+      JSON.stringify({ ref: result.evidence_refs.validation_log }),
+      result.evidence_refs.validation_log,
+    ),
+    artifacts.add(
+      "artifact_mcr_810_codex_exec_diff",
+      "patch",
+      JSON.stringify({ ref: result.evidence_refs.diff }),
+      result.evidence_refs.diff,
+    ),
+    artifacts.add(
+      "artifact_mcr_810_codex_exec_proof",
+      "report",
+      JSON.stringify({ ref: result.evidence_refs.proof }),
+      result.evidence_refs.proof,
+    ),
+  ];
+}
+
+function workerResultFromCodexExecSmoke(
+  result: CodexExecSmokeResult,
+): WorkerRunnerResult {
+  const artifact_refs = {
+    jsonl: result.evidence_refs.jsonl,
+    final_output: result.evidence_refs.final_output,
+  };
+
+  if (result.status !== "completed") {
+    return {
+      status: result.status === "failed" ? "failed" : "blocked",
+      ready_for_review: false,
+      needs_human_input: result.status === "blocked",
+      reason: result.reason,
+      code: result.code,
+      errors: result.errors,
+      artifact_refs,
+      command_results: [],
+    };
+  }
+
+  const command = "codex exec smoke";
+
+  return {
+    status: "success",
+    ready_for_review: true,
+    needs_human_input: false,
+    reason: result.reason,
+    code: "ok",
+    errors: [],
+    artifact_refs,
+    command_results: [
+      {
+        command,
+        exit_code: result.exit_code ?? 0,
+        status: "passed",
+      },
+    ],
+    final_output: {
+      status: "success",
+      task_id: taskId,
+      run_id: runId,
+      ready_for_review: true,
+      files_changed: [],
+      validation_results: [
+        {
+          command,
+          exit_code: result.exit_code ?? 0,
+          status: "passed",
+          summary: "Injected Codex exec smoke runner completed.",
+          log_ref: result.evidence_refs.validation_log,
+        },
+      ],
+      diff_summary: {
+        summary: "Runtime orchestrator invoked approved Codex exec smoke adapter.",
+      },
+      risk_notes: ["Codex exec smoke adapter remains explicit opt-in."],
+      rollback_notes: ["Switch runtime orchestrator worker_adapter back to fake/default."],
+    },
   };
 }
 
@@ -520,7 +696,15 @@ function toProofArtifact(record: ArtifactRefRecord): ProofArtifact {
   };
 }
 
-function proofRef(proof: ProofLedgerEntry, validationLogRef: string) {
+function proofRef(
+  proof: ProofLedgerEntry,
+  validationLogRef: string,
+  artifactRefs = [
+    "artifact_mcr_800_codex_jsonl",
+    "artifact_mcr_800_final_output",
+    "artifact_mcr_800_validation_log",
+  ],
+) {
   return {
     record_type: "proof_ref" as const,
     proof_id: proof.proof_id,
@@ -529,11 +713,7 @@ function proofRef(proof: ProofLedgerEntry, validationLogRef: string) {
     trace_id: proof.trace_id,
     status: "verified" as const,
     ledger_uri: `proof://mcr-800/${proof.proof_id}`,
-    artifact_refs: [
-      "artifact_mcr_800_codex_jsonl",
-      "artifact_mcr_800_final_output",
-      "artifact_mcr_800_validation_log",
-    ],
+    artifact_refs: artifactRefs,
     validation_summary: {
       command_count: proof.validation.length,
       failed_count: proof.validation.filter((validation) => validation.status === "failed").length,
