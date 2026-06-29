@@ -49,6 +49,15 @@ import {
 } from "../../../packages/work-cell-manager/src/index.ts";
 import { createMemoryProposal } from "../../../workers/memory-curator-worker/src/index.ts";
 import type { RuntimeEvent } from "../../matrix-appservice/src/runtime-event-mapper.ts";
+import {
+  createRuntimeApprovalIntake,
+  createRuntimeApprovalProjection,
+} from "./approval-projection.ts";
+
+export {
+  createRuntimeApprovalIntake,
+  createRuntimeApprovalProjection,
+} from "./approval-projection.ts";
 
 export type RunRuntimeOrchestratorInput = {
   snapshotPath: string;
@@ -479,6 +488,30 @@ export async function runRuntimeOrchestrator(
     { proof_ref: context.proofId },
   );
 
+  const approvalProjectionResult = createRuntimeApprovalProjection({
+    approval_id: context.approvalId,
+    task_id: context.taskId,
+    proof_id: context.proofId,
+    run_id: context.runId,
+    trace_id: context.traceId,
+    action: "create_pr",
+    target: prTarget,
+    requested_at: "2026-06-29T10:03:00.000Z",
+    expires_at: "2026-06-29T11:00:00.000Z",
+    risk_notes: proofBuild.proof.risk_notes,
+    rollback_notes: proofBuild.proof.rollback_notes,
+    validation_summary: proofBuild.proof.validation.map((validation) => ({
+      command: validation.command,
+      status: validation.status,
+      exit_code: validation.exit_code,
+    })),
+  });
+
+  if (!approvalProjectionResult.ok) {
+    throw new Error(approvalProjectionResult.reason);
+  }
+
+  const approvalProjection = approvalProjectionResult.projection;
   const approvalGate = createInMemoryApprovalGate({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
     verified_proof_ids: new Set([context.proofId]),
@@ -492,18 +525,26 @@ export async function runRuntimeOrchestrator(
     requested_at: "2026-06-29T10:05:00.000Z",
   };
   const approvalBeforeGrant = githubAdapter.createPullRequest(pullRequest);
-  const approval = {
+  const approvalIntake = createRuntimeApprovalIntake({
+    now: () => new Date("2026-06-29T10:05:00.000Z"),
+  });
+  const approvalIntakeResult = approvalIntake.accept(approvalProjection, {
     approval_id: context.approvalId,
     task_id: context.taskId,
     proof_id: context.proofId,
+    run_id: context.runId,
     action: "create_pr",
     actor: { type: "human" as const, id: "@lead:carpet.test" },
     target: prTarget,
-    conditions: ["Create only the simulated PR record."],
-    created_at: "2026-06-29T10:04:00.000Z",
-    expires_at: "2026-06-29T11:00:00.000Z",
-  };
-  const approvalGrant = approvalGate.grant(approval);
+    approved_at: "2026-06-29T10:04:00.000Z",
+  });
+  const approvalGrant = approvalIntakeResult.ok
+    ? approvalGate.grant(approvalIntakeResult.approval)
+    : approvalIntakeResult;
+
+  if (!approvalGrant.ok) {
+    throw new Error(approvalGrant.reason);
+  }
 
   transition(
     context,
@@ -587,6 +628,8 @@ export async function runRuntimeOrchestrator(
     worker,
     codex_exec_smoke: codexExecSmoke,
     proof_verification: proofVerification,
+    approval_projection: approvalProjection,
+    approval_intake: approvalIntakeResult,
     approval_before_grant: approvalBeforeGrant,
     approval_grant: approvalGrant,
     approval_after_grant: approvalAfterGrant,

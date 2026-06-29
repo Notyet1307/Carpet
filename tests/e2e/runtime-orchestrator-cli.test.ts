@@ -8,6 +8,8 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  createRuntimeApprovalIntake,
+  createRuntimeApprovalProjection,
   runRuntimeOrchestrator,
   runRuntimeOrchestratorFromMatrixEvent,
   proveMainCheckoutWorkCellRejected,
@@ -24,6 +26,13 @@ const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const mainCheckoutPath = "/Users/yet/Test_drive_sales/Carpet";
 const codexAdapterWorktreePath =
   "/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-810-approved-codex-exec-adapter";
+const runId = "run_mcr_800_runtime_orchestrator_cli";
+const proofId = "proof_mcr_800_runtime_orchestrator_cli";
+const prTarget = {
+  type: "pull_request",
+  ref: "refs/heads/mcr/MCR-800/runtime-orchestrator-cli",
+  base_ref: "refs/heads/main",
+};
 
 test("runtime orchestrator writes and reads a schema-valid local snapshot", async () => {
   const snapshotPath = tempSnapshotPath();
@@ -62,6 +71,20 @@ test("runtime orchestrator writes and reads a schema-valid local snapshot", asyn
   if (!result.approval_before_grant.ok) {
     assert.equal(result.approval_before_grant.code, "approval_required");
   }
+  assert.equal(result.approval_projection.proof_id, proofId);
+  assert.equal(result.approval_projection.action, "create_pr");
+  assert.equal(result.approval_projection.run_id, runId);
+  assert.equal(result.approval_projection.expires_at, "2026-06-29T11:00:00.000Z");
+  assert.deepEqual(result.approval_projection.target, prTarget);
+  assert.deepEqual(result.approval_projection.rollback_notes, [
+    "Remove apps/runtime-orchestrator and its e2e test.",
+  ]);
+  assert.deepEqual(result.approval_projection.risk_notes, [
+    "Default path uses fake/local adapters only.",
+  ]);
+  assert.equal(result.approval_projection.source_of_truth, "runtime");
+  assert.deepEqual(unsafeProjectionKeys(result.approval_projection), []);
+  assert.equal(result.approval_intake.ok, true);
   assert.equal(result.approval_grant.ok, true);
   assert.equal(result.approval_after_grant.ok, true);
   assert.equal(result.prs.length, 1);
@@ -72,6 +95,193 @@ test("runtime orchestrator writes and reads a schema-valid local snapshot", asyn
   assert.equal(written.proof_refs[0]?.status, "verified");
   assert.equal(written.approval_refs[0]?.status, "consumed");
   assert.equal(written.artifact_refs.some((artifact) => artifact.kind === "pr"), true);
+});
+
+test("runtime approval intake accepts only the same proof, action, run, and target once", () => {
+  const projectionResult = createRuntimeApprovalProjection({
+    approval_id: "approval_mcr_830",
+    task_id: "task_mcr_830",
+    proof_id: "proof_mcr_830",
+    run_id: "run_mcr_830",
+    trace_id: "trace_mcr_830",
+    action: "create_pr",
+    target: {
+      type: "pull_request",
+      ref: "refs/heads/mcr/MCR-830/runtime-approval-projection-intake",
+      base_ref: "refs/heads/main",
+    },
+    requested_at: "2026-06-29T10:00:00.000Z",
+    expires_at: "2026-06-29T11:00:00.000Z",
+    risk_notes: ["Fake GitHub adapter only."],
+    rollback_notes: ["Remove runtime approval projection helper."],
+    validation_summary: [
+      { command: "pnpm --filter runtime-orchestrator test", status: "passed", exit_code: 0 },
+    ],
+  });
+
+  assert.equal(projectionResult.ok, true);
+  if (!projectionResult.ok) {
+    return;
+  }
+
+  const projection = projectionResult.projection;
+  const validApproval = {
+    approval_id: "approval_mcr_830",
+    task_id: "task_mcr_830",
+    proof_id: "proof_mcr_830",
+    run_id: "run_mcr_830",
+    action: "create_pr",
+    actor: { type: "human", id: "@lead:carpet.test" },
+    target: projection.target,
+    approved_at: "2026-06-29T10:05:00.000Z",
+  };
+
+  for (const [name, approval, code] of [
+    ["vague approval", { ...validApproval, action: "task.approve" }, "vague_approval"],
+    ["wrong proof", { ...validApproval, proof_id: "proof_other" }, "approval_mismatch"],
+    ["wrong action", { ...validApproval, action: "push_branch" }, "forbidden_action"],
+    ["wrong run", { ...validApproval, run_id: "run_other" }, "approval_mismatch"],
+    [
+      "wrong target",
+      {
+        ...validApproval,
+        target: {
+          type: "pull_request",
+          ref: "refs/heads/mcr/MCR-830/other",
+          base_ref: "refs/heads/main",
+        },
+      },
+      "approval_mismatch",
+    ],
+    ["merge", { ...validApproval, action: "merge" }, "forbidden_action"],
+    ["deploy", { ...validApproval, action: "deploy" }, "forbidden_action"],
+    ["live memory", { ...validApproval, action: "memory_write" }, "forbidden_action"],
+  ] as const) {
+    const intake = createRuntimeApprovalIntake({
+      now: () => new Date("2026-06-29T10:05:00.000Z"),
+    });
+    const result = intake.accept(projection, approval);
+
+    assert.equal(result.ok, false, name);
+    if (!result.ok) {
+      assert.equal(result.code, code, name);
+    }
+  }
+
+  const expired = createRuntimeApprovalIntake({
+    now: () => new Date("2026-06-29T11:00:01.000Z"),
+  }).accept(projection, validApproval);
+
+  assert.equal(expired.ok, false);
+  if (!expired.ok) {
+    assert.equal(expired.code, "approval_expired");
+  }
+
+  const intake = createRuntimeApprovalIntake({
+    now: () => new Date("2026-06-29T10:05:00.000Z"),
+  });
+  const accepted = intake.accept(projection, validApproval);
+
+  assert.equal(accepted.ok, true);
+  if (accepted.ok) {
+    assert.equal(accepted.approval.proof_id, "proof_mcr_830");
+    assert.equal(accepted.approval.action, "create_pr");
+    assert.deepEqual(accepted.approval.target, projection.target);
+    assert.equal(accepted.approval.expires_at, projection.expires_at);
+  }
+
+  const replay = intake.accept(projection, validApproval);
+
+  assert.equal(replay.ok, false);
+  if (!replay.ok) {
+    assert.equal(replay.code, "approval_replayed");
+  }
+});
+
+test("runtime approval projection rejects unsafe summaries before Matrix boundary", () => {
+  for (const [name, overrides] of [
+    [
+      "raw diff risk note",
+      { risk_notes: ["diff --git a/secret b/secret"] },
+    ],
+    [
+      "token rollback note",
+      { rollback_notes: ["GITHUB_TOKEN=ghp_abcd"] },
+    ],
+    [
+      "unsafe validation command",
+      {
+        validation_summary: [
+          { command: "cat .env && echo SECRET=1", status: "passed", exit_code: 0 },
+        ],
+      },
+    ],
+    [
+      "bad exit code",
+      {
+        validation_summary: [
+          {
+            command: "pnpm --filter runtime-orchestrator test",
+            status: "passed",
+            exit_code: 999,
+          },
+        ],
+      },
+    ],
+    [
+      "bad validation status",
+      {
+        validation_summary: [
+          {
+            command: "pnpm --filter runtime-orchestrator test",
+            status: "green",
+            exit_code: 0,
+          },
+        ],
+      },
+    ],
+    [
+      "Matrix raw event body",
+      { risk_notes: ["raw_inbound_event_body: {\"content\":{\"body\":\"approve\"}}"] },
+    ],
+  ] as const) {
+    const result = createRuntimeApprovalProjection({
+      ...validApprovalProjectionInput(),
+      ...overrides,
+    });
+
+    assert.equal(result.ok, false, name);
+    if (!result.ok) {
+      assert.equal(result.code, "invalid_projection", name);
+    }
+  }
+});
+
+test("runtime approval intake rejects invalid approved_at before approval gate", () => {
+  const projectionResult = createRuntimeApprovalProjection(validApprovalProjectionInput());
+
+  assert.equal(projectionResult.ok, true);
+  if (!projectionResult.ok) {
+    return;
+  }
+
+  const result = createRuntimeApprovalIntake({
+    now: () => new Date("2026-06-29T10:05:00.000Z"),
+  }).accept(projectionResult.projection, {
+    approval_id: "approval_mcr_830",
+    task_id: "task_mcr_830",
+    proof_id: "proof_mcr_830",
+    run_id: "run_mcr_830",
+    action: "create_pr",
+    actor: { type: "human", id: "@lead:carpet.test" },
+    target: projectionResult.projection.target,
+    approved_at: "not-a-date",
+  });
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "invalid_approval");
+  }
 });
 
 test("runtime orchestrator accepts one queued Matrix runtime event into a Runtime-owned snapshot", async () => {
@@ -316,6 +526,74 @@ function tempSnapshotPath(): string {
     mkdtempSync(path.join(tmpdir(), "mcr-800-runtime-orchestrator-")),
     "runtime-store.snapshot.json",
   );
+}
+
+function validApprovalProjectionInput() {
+  return {
+    approval_id: "approval_mcr_830",
+    task_id: "task_mcr_830",
+    proof_id: "proof_mcr_830",
+    run_id: "run_mcr_830",
+    trace_id: "trace_mcr_830",
+    action: "create_pr",
+    target: {
+      type: "pull_request",
+      ref: "refs/heads/mcr/MCR-830/runtime-approval-projection-intake",
+      base_ref: "refs/heads/main",
+    },
+    requested_at: "2026-06-29T10:00:00.000Z",
+    expires_at: "2026-06-29T11:00:00.000Z",
+    risk_notes: ["Fake GitHub adapter only."],
+    rollback_notes: ["Remove runtime approval projection helper."],
+    validation_summary: [
+      { command: "pnpm --filter runtime-orchestrator test", status: "passed", exit_code: 0 },
+    ],
+  };
+}
+
+function unsafeProjectionKeys(value: unknown): string[] {
+  const unsafe = new Set([
+    "diff_body",
+    "raw_diff_body",
+    "raw_inbound_event_body",
+    "raw_proof_logs",
+    "raw_stderr",
+    "raw_stdout",
+    "raw_validation_logs",
+    "stderr",
+    "stdout",
+    "validation_logs",
+    "token",
+    "secret",
+  ]);
+  const keys: string[] = [];
+
+  collectUnsafeProjectionKeys(value, unsafe, keys);
+
+  return keys;
+}
+
+function collectUnsafeProjectionKeys(
+  value: unknown,
+  unsafe: Set<string>,
+  keys: string[],
+) {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectUnsafeProjectionKeys(item, unsafe, keys);
+    }
+    return;
+  }
+  if (typeof value !== "object" || value === null) {
+    return;
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    if (unsafe.has(key)) {
+      keys.push(key);
+    }
+    collectUnsafeProjectionKeys(child, unsafe, keys);
+  }
 }
 
 function readMatrixFixture(name: string) {
