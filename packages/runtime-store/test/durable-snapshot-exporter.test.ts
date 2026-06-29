@@ -1,14 +1,20 @@
-import { equal, match, throws } from "node:assert/strict";
+import { deepEqual, equal, match, rejects, throws } from "node:assert/strict";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import { createSchemaValidator, loadJsonSchema } from "runtime-contracts";
 import {
   createInMemoryTaskStore,
   exportRuntimeStoreSnapshot,
+  readRuntimeStoreSnapshotFile,
   type ArtifactRefRecord,
   type ApprovalRefRecord,
   type ProofRefRecord,
+  type RuntimeStoreSnapshot,
   type TaskSnapshot,
+  writeRuntimeStoreSnapshotFile,
 } from "runtime-store";
 import type { TaskStateTransition } from "state-machine";
 
@@ -69,6 +75,82 @@ test("rejects unsafe strings that would become exported snapshot fields", () => 
     () => exportRuntimeStoreSnapshot(store, snapshotOptions()),
     /unsafe runtime store snapshot string/,
   );
+});
+
+test("writes and reads a runtime-store snapshot JSON file", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "runtime-store-"));
+  const filePath = path.join(dir, "snapshot.json");
+
+  try {
+    const snapshot = exportRuntimeStoreSnapshot(populatedStore(), snapshotOptions());
+
+    await writeRuntimeStoreSnapshotFile(filePath, snapshot);
+
+    deepEqual(await readRuntimeStoreSnapshotFile(filePath), snapshot);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects invalid or unsafe runtime-store snapshot files", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "runtime-store-"));
+  const invalidPath = path.join(dir, "invalid.json");
+  const unsafePath = path.join(dir, "unsafe.json");
+
+  try {
+    const snapshot = exportRuntimeStoreSnapshot(populatedStore(), snapshotOptions());
+    const invalid = { ...snapshot, store_id: "store_without_required_prefix" };
+    const unsafe = {
+      ...snapshot,
+      tasks: [
+        {
+          ...snapshot.tasks[0],
+          workspace_id: "ws_GITHUB_TOKEN_ghp_secret",
+        },
+      ],
+    };
+
+    await rejects(
+      () => writeRuntimeStoreSnapshotFile(invalidPath, invalid as RuntimeStoreSnapshot),
+      /invalid runtime store snapshot/,
+    );
+
+    await writeFile(unsafePath, `${JSON.stringify(unsafe)}\n`);
+
+    await rejects(
+      () => readRuntimeStoreSnapshotFile(unsafePath),
+      /unsafe runtime store snapshot string/,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("failed writes leave the final snapshot file unchanged", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "runtime-store-"));
+  const filePath = path.join(dir, "snapshot.json");
+
+  try {
+    const original = exportRuntimeStoreSnapshot(populatedStore(), snapshotOptions());
+    const next = {
+      ...original,
+      store_id: "runtime_store_next",
+      created_at: "2026-06-29T00:12:00.000Z",
+    };
+
+    await writeRuntimeStoreSnapshotFile(filePath, original);
+    await mkdir(`${filePath}.tmp`);
+
+    await rejects(
+      () => writeRuntimeStoreSnapshotFile(filePath, next),
+      /EISDIR|illegal operation on a directory/,
+    );
+
+    deepEqual(await readRuntimeStoreSnapshotFile(filePath), original);
+    match(await readFile(filePath, "utf8"), /runtime_store_export_test/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 function populatedStore(

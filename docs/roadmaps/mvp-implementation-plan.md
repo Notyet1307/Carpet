@@ -52,8 +52,16 @@ It adds a Runtime Store snapshot exporter from the in-memory task store to the
 durable schema envelope. The export is schema-valid and ref-only: it carries
 task, transition, idempotency, proof, approval, and artifact references, not raw
 logs, diffs, Matrix event bodies, token material, or live memory writes. It does
-not add file persistence, DB persistence, Postgres, migrations, a persistent
-Runtime service, or Matrix/GitHub/Codex external calls.
+not add DB persistence, Postgres, migrations, a persistent Runtime service, or
+Matrix/GitHub/Codex external calls.
+
+MCR-106 adds the smallest Runtime Store file snapshot persistence adapter. It
+writes and reads schema-valid `RuntimeStoreSnapshot` JSON files using a temp
+file plus rename, and validates snapshots on write and read. The adapter is a
+single-writer local proof only: concurrent writers need later unique temp names
+or locking. It does not add DB persistence, Postgres, migrations, a persistent
+Runtime service, Matrix/GitHub/Codex calls, live memory writes, production
+durable Runtime Store semantics, or replay recovery.
 
 MCR-720 scope was exactly local disposable Synapse, a local AppService listener,
 and one AppService transaction. Evidence:
@@ -123,6 +131,7 @@ Exit criteria:
 - [x] MCR-101 In-Memory Runtime Task Store
 - [x] MCR-104 Durable Runtime Store Schema Contract
 - [x] MCR-105 Runtime Store Snapshot Exporter
+- [x] MCR-106 Runtime Store File Snapshot Persistence
 - [x] MCR-250 Capability Registry Loader And Router
 - [x] MCR-260 Minimal Policy Engine
 - [x] MCR-270 Work Cell Manager With Fake Worktree Manager
@@ -135,8 +144,10 @@ Exit criteria:
   implementation, and unsafe raw logs, raw diffs, secrets, Matrix event bodies,
   and GitHub token material are rejected by contract fixtures.
 - The in-memory Runtime Store can export a schema-valid, ref-only durable
-  snapshot; persistence of that snapshot to files or a database remains future
-  work.
+  snapshot; that snapshot can be written to and read from local JSON files with
+  temp-file-plus-rename validation. Database persistence remains future work.
+- The file snapshot adapter is single-writer only; concurrent writers need later
+  unique temp names or locking.
 - No database, real git worktree execution, real worker process, or external
   adapter exists yet.
 

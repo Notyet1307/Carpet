@@ -1,8 +1,8 @@
-# Durable Runtime Store Schema Contract And Snapshot Export
+# Durable Runtime Store Schema Contract, Snapshot Export, And File Snapshot Persistence
 
 Version: 2026-06-29
 
-Task ID: MCR-104 / MCR-105
+Task ID: MCR-104 / MCR-105 / MCR-106
 
 ## Purpose
 
@@ -12,6 +12,11 @@ database service, Postgres startup, or migrations exist.
 MCR-105 is merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. It adds
 a snapshot exporter from the in-memory Runtime Store to this schema contract.
 The exporter is not a persistence layer.
+
+MCR-106 adds the smallest file persistence proof for that exported snapshot. It
+writes and reads schema-valid `RuntimeStoreSnapshot` JSON files using a temp
+file plus rename, and validates snapshots on write and read. It is a local
+single-writer file adapter only, not a production durable Runtime Store.
 
 The Runtime Store is the source of truth for task state, transition history,
 idempotency, artifact references, proof references, and action-scoped approval
@@ -24,8 +29,8 @@ token material must not become the Runtime source of truth.
 This task does not implement:
 
 - a Runtime API, worker, queue, or app service;
-- file persistence, DB persistence, Postgres startup, SQL DDL, migrations,
-  indexes, locks, replay recovery, or backups;
+- DB persistence, Postgres startup, SQL DDL, migrations, indexes, multi-writer
+  locks, replay recovery, or backups;
 - Matrix, GitHub, Codex, object store, or live memory calls;
 - raw log, raw diff, raw Matrix event, secret, or token storage.
 
@@ -64,9 +69,31 @@ does not copy raw caller extras such as raw Matrix bodies, raw diffs, raw logs,
 worker stdout/stderr, PR bodies, token material, or live memory content. It also
 rejects unsafe strings that would otherwise become exported fields.
 
-This is still not durable storage. Persisting exported snapshots to files,
-Postgres, or another database is future work and must keep the same source of
-truth and unsafe-data rejection boundaries.
+This exporter is still not durable storage by itself. Persisting exported
+snapshots to Postgres or another database is future work and must keep the same
+source of truth and unsafe-data rejection boundaries.
+
+## MCR-106 File Snapshot Persistence
+
+`writeRuntimeStoreSnapshotFile(...)` and `readRuntimeStoreSnapshotFile(...)`
+provide the minimum file-based persistence adapter:
+
+- write a schema-valid `RuntimeStoreSnapshot` JSON file;
+- use a temp file plus rename instead of writing the target file directly;
+- read a JSON snapshot file back into a `RuntimeStoreSnapshot`;
+- validate on both write and read using the existing runtime-store schema
+  validator;
+- reject invalid or unsafe snapshots instead of coercing them.
+
+The adapter preserves the MCR-105 ref-only boundary. It must not persist raw
+logs, raw diffs, Matrix event bodies, token material, DB URLs, or live memory
+content. It does not call Matrix, GitHub, Codex, object storage, Postgres, or a
+Runtime service.
+
+This is a single-writer local adapter. Concurrent writers need a later design
+with unique temp names or locking. MCR-106 does not complete production durable
+Runtime Store behavior, DB persistence, migrations, replay recovery, backup
+semantics, or a persistent Runtime service.
 
 ## Durable Records
 
@@ -173,7 +200,9 @@ of those external systems can be replayed as the Runtime task database.
 snapshot, and the unsafe rejection fixtures.
 `packages/runtime-store/test/durable-snapshot-exporter.test.ts` validates that
 the MCR-105 exporter produces a schema-valid, ref-only snapshot and rejects
-unsafe exported strings. The standard repo validation remains:
+unsafe exported strings. It also validates the MCR-106 file adapter write/read
+round trip, invalid/unsafe rejection, and failed-write target preservation. The
+standard repo validation remains:
 
 ```bash
 pnpm test:contracts

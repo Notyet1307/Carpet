@@ -10,6 +10,8 @@ export {
 } from "./in-memory-task-store.ts";
 export {
   exportRuntimeStoreSnapshot,
+  readRuntimeStoreSnapshotFile,
+  writeRuntimeStoreSnapshotFile,
   type ApprovalRefRecord,
   type ArtifactRefRecord,
   type ExportRuntimeStoreSnapshotOptions,

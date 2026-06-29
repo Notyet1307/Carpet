@@ -46,9 +46,17 @@ GitHub PR path is still `packages/github-adapter` fake/contract-only.
 
 MCR-105 has merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. The
 Runtime Store can now export schema-valid durable snapshots from the in-memory
-task store. That export remains ref-only and does not add file persistence, DB
-persistence, Postgres, migrations, a persistent Runtime service,
-Matrix/GitHub/Codex external calls, or live memory writes.
+task store. That export remains ref-only and does not add DB persistence,
+Postgres, migrations, a persistent Runtime service, Matrix/GitHub/Codex
+external calls, or live memory writes.
+
+MCR-106 adds minimal Runtime Store file snapshot persistence. It writes and
+reads schema-valid `RuntimeStoreSnapshot` JSON files using a temp file plus
+rename, and validates snapshots on both write and read. This is a single-writer
+local file adapter only; concurrent writers need later unique temp names or
+locking. It does not add DB persistence, Postgres, migrations, a persistent
+Runtime service, Matrix/GitHub/Codex calls, live memory writes, production
+durable Runtime Store semantics, or replay recovery.
 
 ## Target System Design Alignment
 
@@ -66,8 +74,8 @@ explicit:
 - Proof must be verified before approval can be requested.
 - External actions require matching approval before they run.
 - Memory remains proposal-only; Runtime must not write live memory.
-- Runtime Store snapshot export is ref-only; file persistence and DB
-  persistence remain future work.
+- Runtime Store snapshot export and file snapshot persistence are ref-only; DB
+  persistence and replay recovery remain future work.
 
 The guarded MCR-310 real Codex exec smoke has produced one Codex-only proof.
 MCR-720 has produced one Matrix-only local disposable proof. MCR-730 has
@@ -92,6 +100,8 @@ Evidence:
 - MCR-105 exports in-memory Runtime Store state into the runtime-store schema
   envelope without embedding raw logs, diffs, Matrix event bodies, token
   material, or live memory content.
+- MCR-106 writes and reads schema-valid `RuntimeStoreSnapshot` JSON files with
+  temp-file-plus-rename semantics; it remains single-writer and local-only.
 - Codex output schema exists at `schemas/codex/repo-patch-result.schema.json`.
 - Proof and approval schemas exist under `schemas/proof/*.schema.json`.
 - Fixture coverage exists across `fixtures/matrix-events`,
@@ -241,8 +251,8 @@ Not yet complete:
 
 - Production Matrix integration.
 - Persistent Runtime service.
-- Runtime Store file persistence, DB persistence, Postgres migrations, locking,
-  and replay recovery.
+- Production durable Runtime Store behavior, DB persistence, Postgres
+  migrations, multi-writer locking, and replay recovery.
 - Real room/user lifecycle automation.
 - Production GitHub integration and any Runtime-owned real GitHub write path.
 - Additional GitHub PR smoke beyond the completed MCR-730 disposable sandbox

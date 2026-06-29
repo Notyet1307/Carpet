@@ -1,3 +1,7 @@
+import { readFile, rename, rm, writeFile } from "node:fs/promises";
+
+import { createSchemaValidator, loadJsonSchema } from "runtime-contracts";
+
 import type {
   IdempotencyKeyRecord,
   InMemoryTaskStore,
@@ -126,6 +130,9 @@ export type ExportRuntimeStoreSnapshotOptions = {
 
 const unsafeSnapshotString =
   /([\r\n]|diff --git|DATABASE_URL=|postgres:\/\/|PASS tests\/|FAIL tests\/|stdout:|stderr:|ghp_|github_pat_|GITHUB_TOKEN|MATRIX_ACCESS_TOKEN|BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|sk-[A-Za-z0-9])/;
+const validateRuntimeStoreSnapshot = createSchemaValidator(
+  loadJsonSchema(new URL("../../../schemas/runtime/runtime-store.schema.json", import.meta.url)),
+);
 
 export function exportRuntimeStoreSnapshot(
   store: InMemoryTaskStore,
@@ -149,6 +156,42 @@ export function exportRuntimeStoreSnapshot(
 
   rejectUnsafeStrings(snapshot);
   return snapshot;
+}
+
+export async function writeRuntimeStoreSnapshotFile(
+  filePath: string,
+  snapshot: RuntimeStoreSnapshot,
+): Promise<void> {
+  assertRuntimeStoreSnapshot(snapshot);
+
+  // ponytail: single-writer file adapter; use unique temp names if concurrent writers matter.
+  const tempPath = `${filePath}.tmp`;
+
+  try {
+    await writeFile(tempPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+    await rename(tempPath, filePath);
+  } catch (error) {
+    await rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+}
+
+export async function readRuntimeStoreSnapshotFile(
+  filePath: string,
+): Promise<RuntimeStoreSnapshot> {
+  const parsed = JSON.parse(await readFile(filePath, "utf8")) as unknown;
+
+  assertRuntimeStoreSnapshot(parsed);
+  return parsed;
+}
+
+function assertRuntimeStoreSnapshot(value: unknown): asserts value is RuntimeStoreSnapshot {
+  rejectUnsafeStrings(value);
+
+  const validation = validateRuntimeStoreSnapshot(value);
+  if (!validation.valid) {
+    throw new Error(`invalid runtime store snapshot: ${validation.errors.join("; ")}`);
+  }
 }
 
 function toTaskRecord(task: TaskSnapshot): TaskRecord {
