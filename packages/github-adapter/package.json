@@ -1,0 +1,16 @@
+{
+  "name": "github-adapter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.ts"
+  },
+  "dependencies": {
+    "approval-gate": "workspace:*",
+    "proof-ledger": "workspace:*"
+  }
+}

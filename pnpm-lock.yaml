@@ -31,6 +31,15 @@ importers:
         specifier: workspace:*
         version: link:../runtime-contracts
 
+  packages/github-adapter:
+    dependencies:
+      approval-gate:
+        specifier: workspace:*
+        version: link:../approval-gate
+      proof-ledger:
+        specifier: workspace:*
+        version: link:../proof-ledger
+
   packages/policy-engine: {}
 
   packages/proof-ledger:
