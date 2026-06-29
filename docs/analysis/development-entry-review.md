@@ -34,6 +34,12 @@ MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 MCR-720 Matrix proof remains separate and does not authorize production Matrix,
 GitHub, deploy, live memory, or default real-service execution.
 
+MCR-730 GitHub PR smoke is currently NO-GO. The local preflight found a broad
+main-account `gh` credential with `repo` and `workflow` scope rather than a
+disposable/scoped smoke credential. The current GitHub PR path is still
+`packages/github-adapter` fake/contract-only; it records simulated PRs in
+memory and does not call GitHub.
+
 ## Target System Design Alignment
 
 Target system alignment is recorded in
@@ -221,6 +227,9 @@ Not yet complete:
 - Persistent Runtime service.
 - Real room/user lifecycle automation.
 - Real GitHub test-service compatibility proof.
+- Real GitHub PR smoke. MCR-730 design documents the safety gates, but the run
+  remains blocked until a disposable target, scoped credential, and one
+  action-scoped approval for a specific run id exist.
 - Any production-like Codex worker execution.
 - GitHub PR/API, deploy, and live memory paths.
 - Disposable Synapse compose remains manual-only and no-default-start; the
@@ -233,6 +242,12 @@ Manual gate for any real smoke:
 - Targets are non-production and disposable where practical.
 - The run records command, exit code, artifact/log refs, cleanup, risk, and
   rollback notes.
+- For GitHub PR smoke, the target is a throwaway repository or explicitly
+  disposable branch policy, not production `main`.
+- For GitHub PR smoke, proof records command shape, PR URL, branch, base SHA,
+  head SHA, approval id, and close/delete branch cleanup status.
+- Forbidden GitHub smoke actions are merge PR, push production `main`, deploy,
+  secret dump, and live memory write.
 
 Do not treat the MCR-310 proof as approval for additional real Codex runs or as
 real Matrix, GitHub, deploy, or live memory validation. Do not treat the

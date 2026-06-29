@@ -56,6 +56,9 @@ passed by this plan. Further real-service smoke execution remains a manual
 compatibility check requiring action-scoped human approval, disposable scoped
 credentials, and captured proof.
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
+MCR-730 records the GitHub PR smoke design only. Real GitHub PR smoke remains
+NO-GO because the current local `gh` credential is broad/non-disposable and the
+current GitHub PR path is still fake/contract-only.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
@@ -147,6 +150,8 @@ Exit criteria:
 - [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold, including
   manual-only disposable Synapse compose scaffold, plus one Matrix-only local
   disposable smoke pass on 2026-06-29
+- [ ] MCR-730 GitHub Disposable PR Smoke Run. Current status: design-only
+  preflight documented; real GitHub PR smoke is NO-GO.
 
 Satisfied scaffold prerequisites:
 
@@ -167,12 +172,19 @@ Remaining manual smoke entry criteria for any further run:
 - Human owner explicitly approves each further real-service smoke.
 - Credentials are disposable and scoped.
 - Targets are non-production and disposable where practical.
+- GitHub PR smoke target is a throwaway repository or explicitly disposable
+  branch policy, never production `main`.
+- GitHub PR smoke credential is scoped/disposable, not a broad main-account
+  token by default.
+- GitHub PR smoke approval is one action-scoped human approval per `run_id`.
 
 Manual smoke exit criteria:
 
 - Real-service tests are opt-in and skipped by default.
 - Smoke evidence is recorded as compatibility proof, not the correctness source.
 - No merge, deploy, or live memory write is automated.
+- GitHub PR smoke proof records command shape, PR URL, source branch, base SHA,
+  head SHA, approval id, and close/delete branch cleanup status.
 - MCR-720 remains manual and skipped-by-default for future runs unless
   separately approved.
 - MCR-310 Codex proof remains separate and does not authorize Matrix smoke.

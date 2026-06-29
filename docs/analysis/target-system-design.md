@@ -83,7 +83,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02` | Default path remains skipped; proof is local disposable compatibility only. |
 | Real Matrix integration | local disposable smoke proof only | MCR-720 run id `mcr-720-20260629t130000z-matrix-smoke-02`: local Synapse, local AppService listener, one transaction | Production Matrix integration, persistent Runtime service, and room/user lifecycle automation remain not implemented. |
-| Real GitHub PR integration | not implemented real integration | Fake adapter only | Needs action-scoped approval and disposable repo/branch smoke. |
+| Real GitHub PR integration | NO-GO for real smoke | `packages/github-adapter` is fake/in-memory only | Blocked by broad non-disposable local `gh` credentials and fake/contract-only PR path. Needs disposable target, scoped credential, one approval per run id, and close/delete cleanup proof. |
 | Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only | Needs separate persistence vertical slice. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
 
@@ -99,7 +99,10 @@ Replace one fake boundary at a time:
    proof, not a default worker path.
 2. Keep the MCR-720 disposable Matrix AppService smoke as one compatibility
    proof, not a production Matrix path.
-3. Replace the fake GitHub adapter with a disposable PR creation smoke.
+3. Replace the fake GitHub adapter with a disposable PR creation smoke only
+   after MCR-730 gates pass. Current MCR-730 status is NO-GO: the local `gh`
+   credential is not disposable/scoped, and the real GitHub PR path is still
+   fake/contract-only.
 4. Add durable Runtime storage only after the adapter gates still preserve the
    same state, proof, approval, and memory boundaries.
 
@@ -175,3 +178,61 @@ listener and direct transaction exit-code capture.
 This proof does not validate production Matrix integration, a persistent Runtime
 service, real room/user lifecycle automation, real GitHub PR/API calls, deploy,
 or live memory writes. It does not make MCR-720 production-ready.
+
+## MCR-730 GitHub PR Smoke Boundary
+
+MCR-730 is design-only. It does not implement Octokit, a `gh pr create` wrapper,
+or any real GitHub write path.
+
+Current status: NO-GO for real GitHub PR smoke.
+
+Blockers:
+
+- The current local `gh` credential is a broad main-account credential, not a
+  disposable/scoped smoke credential.
+- The current `packages/github-adapter` path is fake and contract-only. It
+  records `SimulatedPullRequest` objects in memory and exports no real GitHub
+  API, push, or merge path.
+
+Required disposable target:
+
+- Use a throwaway repository by default.
+- If a throwaway repository is not used, the repository must have an explicitly
+  disposable branch policy for the run id.
+- The target must not be production `main`, and no smoke may push to or merge
+  into production `main`.
+
+Required credential boundary:
+
+- Use a scoped, disposable GitHub credential created for the smoke target.
+- Do not use a broad main-account token by default.
+- Evidence may record credential class, account class, target repo, selected
+  permissions, and expiry/revocation status. It must not record token values.
+
+Approval gate:
+
+- Require one action-scoped human approval for exactly one `run_id`.
+- Approval must name `action=create_pr`, the disposable repo, source branch,
+  base branch, task id, proof id, and expiry.
+- Approval cannot authorize merge, push to main, deploy, secret access, or live
+  memory write.
+
+Proof requirements for any future approved run:
+
+- command shape used for PR creation, without token values
+- PR URL
+- source branch and base branch
+- base SHA and head SHA
+- proof id and approval id
+- captured `gh auth status` or equivalent credential-scope summary without
+  secrets
+- cleanup status, including whether the PR was closed and whether the smoke
+  branch was deleted
+
+Forbidden actions:
+
+- merge PR
+- push production `main`
+- deploy
+- dump secrets or token values
+- write live memory
