@@ -1,6 +1,6 @@
 # Phase 12 MVP Implementation Backlog
 
-Version: 2026-06-28
+Version: 2026-06-29 status sync
 
 Task ID: Analysis-P12-mvp-backlog
 
@@ -11,6 +11,17 @@ Roadmap: Phase 12 / MVP Backlog 与开发入口
 This backlog converts the existing analysis, schema, policy, prompt, and test
 artifacts into implementation-sized MVP tasks. It is an analysis artifact only.
 It does not authorize implementation in this branch.
+
+## Current Closeout Status
+
+As of 2026-06-29, MCR-030 through MCR-700 local fake MVP work is merged on
+`main`. The MCR-310 guarded Codex exec runner scaffold and MCR-720 real-service
+smoke scaffold are also merged.
+
+Those scaffolds do not mean real service compatibility has been verified. Real
+Matrix, Codex, GitHub, or service smoke execution still requires action-scoped
+human approval, disposable scoped credentials, opt-in commands, cleanup notes,
+and captured proof.
 
 The sequence is:
 
@@ -612,9 +623,9 @@ Tests to add first:
   - rejects missing validation evidence and forbidden path changes;
   - records command exit codes and artifact refs.
 
-Implementation notes: the fake runner should not shell out. Keep real Codex
-integration blocked until the Codex exec before SDK ADR exists and fake E2E
-passes.
+Implementation notes: the fake runner should not shell out. Real Codex execution
+belongs to the later MCR-310 opt-in scaffold and still requires human approval,
+disposable scope, and proof capture before any manual smoke run.
 
 Acceptance criteria:
 
@@ -956,7 +967,10 @@ Expected proof / validation evidence:
 
 ### MCR-310: Real Codex Exec Smoke Runner
 
-Status: blocked until the Codex exec before SDK ADR exists and MCR-700 passes.
+Status: scaffold merged. The guarded command builder, unit test, and runbook
+exist, but no real Codex smoke execution is marked complete by this backlog.
+Any manual run still requires human approval, a disposable low-risk target,
+scoped environment, cleanup notes, and proof capture.
 
 Objective: add a manually triggered real Codex exec smoke runner for a
 disposable low-risk task, behind an explicit feature flag.
@@ -1017,8 +1031,10 @@ Expected proof / validation evidence:
 
 ### MCR-720: Real-Service Compatibility Smoke Tests
 
-Status: blocked until MCR-700 passes and the relevant human gates approve real
-service credentials.
+Status: scaffold merged. The runbook and skipped-by-default test exist, but no
+real Matrix, Codex, GitHub, or service compatibility smoke is marked complete.
+Manual execution remains blocked on action-scoped human approval and disposable
+scoped credentials.
 
 Objective: document and run minimal compatibility smoke tests for real Matrix,
 real Codex, and GitHub test-repo PR creation after fake E2E is stable.
@@ -1072,28 +1088,11 @@ Expected proof / validation evidence:
 - Cleanup log
 - `git diff --check`
 
-## Non-Backlog Architecture Follow-Up
+## Closed Architecture Follow-Up
 
-The analysis roadmap still lists `Codex exec before SDK 的 ADR 已通过` as
-incomplete. Do not hide that decision inside MCR-310. The smallest follow-up is:
+ADR-0006 exists at `docs/adr/0006-codex-exec-before-sdk.md`, closing the
+previous architecture-decision blocker for adding the MCR-310 scaffold.
 
-```text
-Task: ADR-0006 Codex exec before SDK
-Allowed files:
-- docs/adr/0006-codex-exec-before-sdk.md
-- docs/roadmaps/analysis-roadmap.md only for the checklist line
-Forbidden files:
-- apps/**
-- workers/**
-- packages/**
-- runtime/**
-- schemas/**
-- fixtures/**
-Validation:
-- pnpm test:contracts
-- pnpm schemas:validate
-- git diff --check
-```
-
-Until that ADR exists, local fake implementation can proceed through MCR-700,
-but real Codex exec integration remains blocked.
+This does not approve or prove real service compatibility. MCR-310 and MCR-720
+remain manual, opt-in smoke paths until a human owner approves disposable
+credentials and the run records compatibility proof.

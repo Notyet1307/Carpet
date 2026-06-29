@@ -34,19 +34,29 @@ explicit gates.
   access, and live memory writes are not allowed until their explicit follow-up
   gates pass.
 
+## Current Closeout Status
+
+As of 2026-06-29, local fake MVP work through MCR-700 is merged on `main`.
+MCR-310 and MCR-720 scaffolds are also merged, but only as guarded runner,
+runbook, and skipped-test scaffolds.
+
+No real Matrix, Codex, GitHub, or service smoke has passed by this plan. Real
+service smoke execution remains a manual compatibility check requiring
+action-scoped human approval, disposable scoped credentials, and captured proof.
+
 ---
 
 ## Wave 0: Entry Fixups
 
-- [ ] Create ADR-0006 for Codex exec before SDK.
+- [x] Create ADR-0006 for Codex exec before SDK.
 
-This is not an implementation task. It is required before MCR-310 real Codex
-exec smoke work. Local fake MVP tasks may proceed without it.
+This was not an implementation task. It closed the architecture decision needed
+before adding the guarded MCR-310 scaffold.
 
 ## Wave 1: Contracts And Foundation
 
-- [ ] MCR-030 TypeScript Package Foundation
-- [ ] MCR-031 Shared Schema Validator Helper
+- [x] MCR-030 TypeScript Package Foundation
+- [x] MCR-031 Shared Schema Validator Helper
 
 Exit criteria:
 
@@ -57,8 +67,8 @@ Exit criteria:
 
 ## Wave 2: Fake Collaboration Boundary
 
-- [ ] MCR-200 Fake Matrix Transaction Handler
-- [ ] MCR-201 Fake Matrix Projection Adapter
+- [x] MCR-200 Fake Matrix Transaction Handler
+- [x] MCR-201 Fake Matrix Projection Adapter
 
 Exit criteria:
 
@@ -69,11 +79,11 @@ Exit criteria:
 
 ## Wave 3: Runtime Core
 
-- [ ] MCR-100 Runtime State Machine Package
-- [ ] MCR-101 In-Memory Runtime Task Store
-- [ ] MCR-250 Capability Registry Loader And Router
-- [ ] MCR-260 Minimal Policy Engine
-- [ ] MCR-270 Work Cell Manager With Fake Worktree Manager
+- [x] MCR-100 Runtime State Machine Package
+- [x] MCR-101 In-Memory Runtime Task Store
+- [x] MCR-250 Capability Registry Loader And Router
+- [x] MCR-260 Minimal Policy Engine
+- [x] MCR-270 Work Cell Manager With Fake Worktree Manager
 
 Exit criteria:
 
@@ -84,11 +94,11 @@ Exit criteria:
 
 ## Wave 4: Worker, Proof, Approval, External Fakes
 
-- [ ] MCR-300 Fake Codex Worker Runner
-- [ ] MCR-400 Proof Ledger And Verifier
-- [ ] MCR-500 Approval Gate
-- [ ] MCR-510 Fake GitHub PR Adapter
-- [ ] MCR-600 Memory Proposal Flow
+- [x] MCR-300 Fake Codex Worker Runner
+- [x] MCR-400 Proof Ledger And Verifier
+- [x] MCR-500 Approval Gate
+- [x] MCR-510 Fake GitHub PR Adapter
+- [x] MCR-600 Memory Proposal Flow
 
 Exit criteria:
 
@@ -100,7 +110,7 @@ Exit criteria:
 
 ## Wave 5: Local Fake E2E
 
-- [ ] MCR-700 Local Fake MVP E2E Harness
+- [x] MCR-700 Local Fake MVP E2E Harness
 
 Exit criteria:
 
@@ -111,19 +121,23 @@ Exit criteria:
   logs.
 - Every external side effect is fake and locally inspectable.
 
-## Wave 6: Blocked Real-Service Smoke Work
+## Wave 6: Real-Service Smoke Scaffolds And Manual Gates
 
-- [ ] MCR-310 Real Codex Exec Smoke Runner
-- [ ] MCR-720 Real-Service Compatibility Smoke Tests
+- [x] MCR-310 Real Codex Exec Smoke Runner scaffold
+- [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold
 
-Entry criteria:
+Satisfied scaffold prerequisites:
 
 - ADR-0006 exists.
 - MCR-700 passes.
+
+Remaining manual smoke entry criteria:
+
 - Human owner explicitly approves each real-service smoke.
 - Credentials are disposable and scoped.
+- Targets are non-production and disposable where practical.
 
-Exit criteria:
+Manual smoke exit criteria:
 
 - Real-service tests are opt-in and skipped by default.
 - Smoke evidence is recorded as compatibility proof, not the correctness source.

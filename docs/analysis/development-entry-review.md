@@ -1,17 +1,23 @@
 # Development Entry Review
 
-Version: 2026-06-28
+Version: 2026-06-29 status sync
 
 Task ID: Analysis-P12-development-entry-review
 
-## Verdict
+## Current Closeout Status
 
-Limited development entry is ready for local fake MVP implementation through
-MCR-700.
+Local fake MVP implementation through MCR-700 has merged into `main`. MCR-310
+and MCR-720 scaffolds have also merged as guarded, opt-in scaffolds.
 
-Real Codex exec and real-service smoke work remain blocked until the missing
-Codex exec before SDK ADR is written and approved. This is a separate
-architecture decision, not an implementation detail.
+No real Matrix, Codex, GitHub, or service smoke is marked complete here.
+Scaffold presence is not compatibility proof. Any real smoke still requires
+action-scoped human approval, disposable scoped credentials, opt-in execution,
+cleanup notes, and captured proof.
+
+## Original Entry Verdict
+
+Limited development entry was ready for local fake MVP implementation through
+MCR-700. That local fake implementation has since merged.
 
 ## Gate A: Contract Lock
 
@@ -81,8 +87,9 @@ Evidence:
 
 Notes:
 
-- Runtime policy engine implementation does not exist yet. The first policy
-  implementation task must implement the current data contract, not change it.
+- Runtime policy engine implementation now exists. Future policy changes must
+  still implement the current data contract unless a separate schema/fixture
+  task changes it first.
 - Worktree isolation is development isolation, not a security boundary.
 
 Smallest follow-up if this gate regresses: add the missing policy fixture and
@@ -104,8 +111,8 @@ Evidence:
 
 Notes:
 
-- Implementation tasks still need package-local unit/integration tests. Contract
-  tests alone are not enough for runtime code.
+- Package-local unit/integration tests and the local fake E2E harness now exist.
+  Contract tests alone still are not enough for future runtime changes.
 
 Smallest follow-up if this gate regresses: add the missing test plan or fixture
 coverage before the affected component implementation starts.
@@ -126,67 +133,37 @@ Evidence:
 
 Notes:
 
-- MCR-310 and MCR-720 are intentionally blocked. They must not be used to sneak
-  real Codex, Matrix, GitHub, secrets, PR creation, merge, deploy, or live memory
-  writes into earlier fake MVP tasks.
+- MCR-310 and MCR-720 scaffolds are merged. They must not be treated as approval
+  to run real Codex, Matrix, GitHub, secrets, PR creation, merge, deploy, or live
+  memory writes.
 
 Smallest follow-up if this gate regresses: split the oversized task and restore
 allowed/forbidden files plus tests-first requirements.
 
-## Non-Gate Architecture Blocker
+## Real-Service Smoke Gate
 
-Blocker: `docs/roadmaps/analysis-roadmap.md` still lists
-`Codex exec before SDK 的 ADR 已通过` as incomplete. The architecture document
-currently recommends `codex exec --json --sandbox workspace-write --output-schema`
-for MVP and later SDK migration, but there is no ADR file in `docs/adr/` that
-locks that decision.
+Status: manual execution still gated.
 
-Blocked scope:
+Evidence now present:
 
-- MCR-310 Real Codex Exec Smoke Runner.
-- MCR-720 real-service smoke tests that depend on real Codex execution.
+- `docs/adr/0006-codex-exec-before-sdk.md` exists.
+- MCR-700 local fake MVP E2E harness has merged.
+- MCR-310 guarded Codex exec runner scaffold has merged.
+- MCR-720 real-service smoke runbook and skipped-test scaffold have merged.
+
+Not yet complete:
+
+- Real Codex smoke execution proof.
+- Real Matrix/Codex/GitHub test-service compatibility proof.
 - Any production-like Codex worker execution.
 
-Not blocked:
+Manual gate for any real smoke:
 
-- MCR-030 through MCR-700 local fake MVP implementation, provided each task
-  follows its allowed files and fake-adapter constraints.
+- Human owner explicitly approves the specific smoke action.
+- Credentials are disposable and scoped.
+- Targets are non-production and disposable where practical.
+- The run records command, exit code, artifact/log refs, cleanup, risk, and
+  rollback notes.
 
-Smallest follow-up task:
-
-```text
-Task: ADR-0006 Codex exec before SDK
-Allowed files:
-- docs/adr/0006-codex-exec-before-sdk.md
-- docs/roadmaps/analysis-roadmap.md only for the matching checklist line
-Forbidden files:
-- apps/**
-- workers/**
-- packages/**
-- runtime/**
-- schemas/**
-- fixtures/**
-Validation:
-- pnpm test:contracts
-- pnpm schemas:validate
-- git diff --check
-```
-
-## Development Entry Conditions For First Implementation Task
-
-The first implementation task should be MCR-030.
-
-Required task packet:
-
-- worktree path and branch;
-- exact base SHA;
-- allowed files and forbidden files from the backlog;
-- tests to add first;
-- validation commands;
-- proof requirements;
-- Handoff Back template with worktree path, branch, base SHA, head SHA, changed
-  files, validation results, cleanup status, risk notes, rollback notes, and
-  blockers.
-
-Do not start with Matrix, Codex, GitHub, database, or E2E code. That would skip
-the foundation and fake-adapter sequence.
+Do not treat MCR-310 or MCR-720 scaffold completion as real-service
+compatibility validation.
