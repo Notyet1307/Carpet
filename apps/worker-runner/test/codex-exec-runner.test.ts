@@ -120,6 +120,109 @@ test("rejects secret-bearing env", async () => {
   equal(called, false);
 });
 
+test("refuses to run without manual approval for this smoke run", async () => {
+  let called = false;
+  const result = await runCodexExecSmoke(
+    {
+      ...smokeInput,
+      smoke: true,
+      credential_scope: "disposable",
+      env: { PATH: "/usr/bin:/bin" },
+    },
+    async () => {
+      called = true;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  );
+
+  equal(result.status, "blocked");
+  equal(result.executed, false);
+  equal(result.code, "manual_approval_required");
+  equal(called, false);
+});
+
+test("rejects manual approval for a different smoke run", async () => {
+  let called = false;
+  const result = await runCodexExecSmoke(
+    {
+      ...smokeInput,
+      smoke: true,
+      manual_approval: {
+        approved: true,
+        approver: "yet",
+        run_id: "run_other",
+        scope: "codex_exec_smoke",
+      },
+      credential_scope: "disposable",
+      env: { PATH: "/usr/bin:/bin" },
+    },
+    async () => {
+      called = true;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  );
+
+  equal(result.status, "blocked");
+  equal(result.executed, false);
+  equal(result.code, "manual_approval_required");
+  equal(called, false);
+});
+
+test("rejects missing or invalid credential scope", async () => {
+  for (const credentialScope of [undefined, "production"]) {
+    let called = false;
+    const result = await runCodexExecSmoke(
+      {
+        ...smokeInput,
+        smoke: true,
+        manual_approval: {
+          approved: true,
+          approver: "yet",
+          run_id: smokeInput.run_id,
+          scope: "codex_exec_smoke",
+        },
+        credential_scope: credentialScope,
+        env: { PATH: "/usr/bin:/bin" },
+      },
+      async () => {
+        called = true;
+        return { exit_code: 0, stdout: "", stderr: "" };
+      },
+    );
+
+    equal(result.status, "blocked");
+    equal(result.executed, false);
+    equal(result.code, "credential_scope_required");
+    equal(called, false);
+  }
+});
+
+test("rejects missing explicit env", async () => {
+  let called = false;
+  const result = await runCodexExecSmoke(
+    {
+      ...smokeInput,
+      smoke: true,
+      manual_approval: {
+        approved: true,
+        approver: "yet",
+        run_id: smokeInput.run_id,
+        scope: "codex_exec_smoke",
+      },
+      credential_scope: "disposable",
+    },
+    async () => {
+      called = true;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  );
+
+  equal(result.status, "blocked");
+  equal(result.executed, false);
+  equal(result.code, "explicit_env_required");
+  equal(called, false);
+});
+
 test("records intended evidence refs without executing real Codex", async () => {
   const result = await runCodexExecSmoke({
     ...smokeInput,
@@ -142,6 +245,13 @@ test("uses an injected process runner for approved manual smoke", async () => {
     {
       ...smokeInput,
       smoke: true,
+      manual_approval: {
+        approved: true,
+        approver: "yet",
+        run_id: smokeInput.run_id,
+        scope: "codex_exec_smoke",
+      },
+      credential_scope: "disposable",
       env: { PATH: "/usr/bin:/bin" },
     },
     async (command) => {

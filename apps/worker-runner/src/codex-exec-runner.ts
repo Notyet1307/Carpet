@@ -28,11 +28,20 @@ export type CodexExecEvidenceRefs = {
   proof: string;
 };
 
+export type CodexExecManualApproval = {
+  approved: boolean;
+  approver: string;
+  run_id: string;
+  scope: string;
+};
+
 export type CodexExecSmokeInput = CodexExecCommandInput & {
   task_id: string;
   run_id: string;
   main_checkout_path: string;
   smoke?: boolean;
+  manual_approval?: CodexExecManualApproval;
+  credential_scope?: string;
   env?: Record<string, string>;
 };
 
@@ -108,6 +117,36 @@ export async function runCodexExecSmoke(
     return blocked(
       "explicit_smoke_flag_required",
       "Real codex exec smoke is disabled unless smoke is explicitly true.",
+      [],
+      command,
+      evidenceRefs,
+    );
+  }
+
+  if (!hasManualApprovalForRun(input)) {
+    return blocked(
+      "manual_approval_required",
+      "Real codex exec smoke requires explicit human approval for this run.",
+      [],
+      command,
+      evidenceRefs,
+    );
+  }
+
+  if (!isAllowedCredentialScope(input.credential_scope)) {
+    return blocked(
+      "credential_scope_required",
+      "Real codex exec smoke requires disposable or scoped credentials.",
+      [],
+      command,
+      evidenceRefs,
+    );
+  }
+
+  if (!hasExplicitEnv(input.env)) {
+    return blocked(
+      "explicit_env_required",
+      "Real codex exec smoke requires an explicit minimal environment.",
       [],
       command,
       evidenceRefs,
@@ -198,4 +237,24 @@ function findSecretEnvKeys(env: Record<string, string> | undefined) {
         secretEnvKeyPattern.test(key) || secretEnvValuePattern.test(value),
     )
     .map(([key]) => key);
+}
+
+function hasManualApprovalForRun(input: CodexExecSmokeInput) {
+  const approval = input.manual_approval;
+
+  return (
+    approval?.approved === true &&
+    approval.scope === "codex_exec_smoke" &&
+    approval.run_id === input.run_id &&
+    typeof approval.approver === "string" &&
+    approval.approver.trim().length > 0
+  );
+}
+
+function isAllowedCredentialScope(scope: string | undefined) {
+  return scope === "disposable" || scope === "scoped";
+}
+
+function hasExplicitEnv(env: Record<string, string> | undefined) {
+  return !!env && Object.keys(env).length > 0;
 }
