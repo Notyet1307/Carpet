@@ -36,6 +36,18 @@ rejected as cwd.
 - `credential_scope`: must be `disposable` or `scoped`.
 - `env`: minimal explicit environment only. Do not forward `process.env`.
 
+## Smoke Prompt Requirements
+
+The task prompt passed in `prompt_file` must include this output contract:
+
+```text
+Machine output has priority over human-facing reply style.
+The final output must be a JSON object matching `./schemas/codex/codex-exec-smoke-result.schema.json`.
+AGENTS.md Chinese reply style and `杨哥` first-paragraph prefix apply only to human-facing chat, not to the `--output-schema` final machine output.
+Do not include human-facing prose, Markdown, `杨哥`, or any text outside the final JSON object.
+After creating and validating the target file, immediately emit the final JSON object and exit.
+```
+
 ## Evidence Paths
 
 For `evidence_dir=.mcr/runs/<run_id>`, record these refs before execution:
@@ -50,7 +62,8 @@ For `evidence_dir=.mcr/runs/<run_id>`, record these refs before execution:
 
 1. Confirm the task is disposable and low risk.
 2. Confirm the worktree path is not the main checkout.
-3. Create the task prompt file under the run evidence directory.
+3. Create the task prompt file under the run evidence directory, including the
+   Smoke Prompt Requirements output contract above.
 4. Record explicit human approval for this `run_id` and credential scope.
 5. Call `runCodexExecSmoke` with `smoke: true` and an injected process runner.
 6. Pass only a minimal explicit environment, such as `PATH`.

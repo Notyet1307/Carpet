@@ -1,4 +1,5 @@
 import { deepEqual, equal, match } from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -264,4 +265,28 @@ test("uses an injected process runner for approved manual smoke", async () => {
   equal(result.status, "completed");
   equal(result.executed, true);
   equal(result.exit_code, 0);
+});
+
+test("documents smoke prompt isolation for output-schema final JSON", () => {
+  const runbook = readFileSync(
+    "docs/runbooks/codex-exec-smoke.md",
+    "utf8",
+  );
+
+  match(
+    runbook,
+    /final output must be a JSON object matching `\.\/schemas\/codex\/codex-exec-smoke-result\.schema\.json`/,
+  );
+  match(
+    runbook,
+    /AGENTS\.md Chinese reply style and `杨哥` first-paragraph prefix apply only to human-facing chat/,
+  );
+  match(
+    runbook,
+    /Do not include human-facing prose, Markdown, `杨哥`, or any text outside the final JSON object/,
+  );
+  match(
+    runbook,
+    /After creating and validating the target file, immediately emit the final JSON object and exit/,
+  );
 });
