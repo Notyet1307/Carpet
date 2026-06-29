@@ -785,6 +785,16 @@ cancelled
 - schemas/runtime/task-state-transition.schema.json
 - tests/contracts/task-state-machine.test.mjs
 
+2026-06-28: MCR-100 Runtime State Machine Package 已完成：
+- packages/state-machine/src/task-state-machine.ts
+- packages/state-machine/src/index.ts
+- packages/state-machine/test/task-state-machine.test.ts
+
+2026-06-28: MCR-101 In-Memory Runtime Task Store 已完成：
+- packages/runtime-store/src/in-memory-task-store.ts
+- packages/runtime-store/src/index.ts
+- packages/runtime-store/test/in-memory-task-store.test.ts
+
 2026-06-28: task graph contract baseline 已完成：
 - docs/analysis/task-graph.md
 - docs/diagrams/task-graph.mmd
@@ -816,6 +826,12 @@ cancelled
 - packages/runtime-store/src/durable-snapshot-exporter.ts
 - packages/runtime-store/src/index.ts
 - packages/runtime-store/test/durable-snapshot-exporter.test.ts
+
+2026-06-29: MCR-270 Work Cell Manager With Fake Worktree Manager 已完成：
+- packages/work-cell-manager/src/work-cell-manager.ts
+- packages/work-cell-manager/src/fake-worktree-manager.ts
+- packages/work-cell-manager/src/index.ts
+- packages/work-cell-manager/test/work-cell-manager.test.ts
 
 MCR-106 只增加最小 file adapter：用 temp file + rename 写入
 schema-valid `RuntimeStoreSnapshot` JSON 文件，并在 write/read 时用现有
@@ -1868,7 +1884,7 @@ Specifically test:
 | 风险 | 表现 | 分析阶段控制 |
 |---|---|---|
 | Codex 提前实现 | 没有 contracts 就写 runtime | 分析阶段禁止大块 production code |
-| Matrix 被当数据库 | 状态靠 room history 推断 | ADR 明确 Postgres 为 source of truth |
+| Matrix 被当数据库 | 状态靠 room history 推断 | ADR 明确 Runtime-owned store 为 source of truth，Matrix 只做输入与投影 |
 | Capability 退化成部门 | OpenAI-backend / OpenAI-test 变岗位 | capability manifest 必须有 input/output/permission/proof |
 | Proof 退化成总结 | agent 说测试通过但无日志 | proof schema 必须有 command、exit_code、log_ref |
 | Approval 含糊 | “同意继续”触发多个动作 | approval schema 必须 action-scoped |
