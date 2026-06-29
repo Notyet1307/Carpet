@@ -80,6 +80,20 @@ The homeserver example references the example registration only so the shape is
 visible to reviewers. Do not use the committed placeholder token values as smoke
 credentials.
 
+## AppService HTTP Listener Scaffold
+
+`apps/matrix-appservice/src/http-listener.ts` contains a minimal Node built-in
+HTTP listener factory for future approved Matrix-only smoke work. AppService HTTP listener start is manual-only: no default command, skipped test, Docker compose, or package script starts it.
+
+The listener is only the `registration.url` target glue for
+`PUT /_matrix/app/v1/transactions/:txn_id`; it reuses the existing
+`apps/matrix-appservice` transaction handler for Matrix validation and runtime
+event mapping.
+
+The committed registration `url` is a placeholder local scaffold. Registration url must match the listener host and port chosen for the approved run. If the
+listener binds a different localhost port or host, generate a run-scoped
+registration with that exact URL and remove it during cleanup.
+
 ## Matrix-Only Disposable Resources
 
 Each approved MCR-720 run must use Matrix-only disposable resources:

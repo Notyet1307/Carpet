@@ -1,4 +1,8 @@
 export {
+  createMatrixAppserviceHttpListener,
+  type MatrixAppserviceTransactionHandler,
+} from "./http-listener.ts";
+export {
   createFixtureTransactionHandler,
   IdempotencyStore,
   MATRIX_FIXTURE_HS_TOKEN,

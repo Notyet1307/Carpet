@@ -19,6 +19,10 @@ The registration is a shape reference only. For an approved MCR-720 run,
 generate disposable, run-scoped `as_token` and `hs_token` values, keep them out
 of git, and delete or revoke them during cleanup.
 
+The `url` value is also a local placeholder for the AppService HTTP listener
+scaffold. It must match the manually started listener host and port for the
+approved run.
+
 The example namespace is intentionally narrow:
 
 - users: `@mcr_720_.*:mcr-720.localhost`

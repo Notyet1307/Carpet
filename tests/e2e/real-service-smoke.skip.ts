@@ -164,6 +164,8 @@ test("runbook records manual evidence and safety boundaries", () => {
     "never committed",
     "raw matrix event bodies",
     "mcr-310 codex proof remains separate",
+    "appservice http listener start is manual-only",
+    "registration url must match the listener host and port",
   ]) {
     assert.equal(
       runbook.toLowerCase().includes(requiredText),
@@ -222,6 +224,8 @@ test("AppService registration scaffold uses only run-scoped placeholders", () =>
     "never commit",
     "as_token: \"mcr-720-example-as-token-replace-per-approved-run\"",
     "hs_token: \"mcr-720-example-hs-token-replace-per-approved-run\"",
+    "url: \"http://127.0.0.1:9009\"",
+    "must match the manually started listener host and port",
     "regex: \"@mcr_720_.*:mcr-720.localhost\"",
   ]) {
     assert.equal(
