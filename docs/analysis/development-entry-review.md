@@ -7,12 +7,17 @@ Task ID: Analysis-P12-development-entry-review
 ## Current Closeout Status
 
 Local fake MVP implementation through MCR-700 has merged into `main`. MCR-310
-and MCR-720 scaffolds have also merged as guarded, opt-in scaffolds.
+has merged as a guarded scaffold and one manual real Codex exec smoke passed on
+2026-06-29. Tracked proof:
+`fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
+`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 remains a guarded,
+skipped-by-default scaffold.
 
-No real Matrix, Codex, GitHub, or service smoke is marked complete here.
-Scaffold presence is not compatibility proof. Any real smoke still requires
-action-scoped human approval, disposable scoped credentials, opt-in execution,
-cleanup notes, and captured proof.
+No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
+real-service smoke is marked complete here. Scaffold presence is not
+compatibility proof. Any further real smoke still requires action-scoped human
+approval, disposable scoped credentials, opt-in execution, cleanup notes, and
+captured proof.
 
 ## Target System Design Alignment
 
@@ -31,9 +36,10 @@ explicit:
 - External actions require matching approval before they run.
 - Memory remains proposal-only; Runtime must not write live memory.
 
-The smallest next real-service vertical slice is a guarded real Codex exec
-smoke in a Runtime-created worktree while Matrix and GitHub remain fake. This
-does not introduce an automatic commander loop or a separate review lane.
+The guarded MCR-310 real Codex exec smoke has now produced one proof while
+Matrix and GitHub remained fake. This does not introduce an automatic commander
+loop, a separate review lane, default real Codex execution, real GitHub PR/API
+calls, real Matrix writes, deploy, or live memory writes.
 
 ## Original Entry Verdict
 
@@ -154,8 +160,9 @@ Evidence:
 
 Notes:
 
-- MCR-310 and MCR-720 scaffolds are merged. They must not be treated as approval
-  to run real Codex, Matrix, GitHub, secrets, PR creation, merge, deploy, or live
+- MCR-310 and MCR-720 scaffolds are merged. MCR-310 has one tracked real Codex
+  exec smoke proof, but that proof must not be treated as approval to run more
+  real Codex, Matrix, GitHub, secrets, PR creation, merge, deploy, or live
   memory writes.
 
 Smallest follow-up if this gate regresses: split the oversized task and restore
@@ -163,20 +170,25 @@ allowed/forbidden files plus tests-first requirements.
 
 ## Real-Service Smoke Gate
 
-Status: manual execution still gated.
+Status: partially satisfied for MCR-310 Codex exec smoke only; manual execution
+still gated for every further real-service smoke.
 
 Evidence now present:
 
 - `docs/adr/0006-codex-exec-before-sdk.md` exists.
 - MCR-700 local fake MVP E2E harness has merged.
 - MCR-310 guarded Codex exec runner scaffold has merged.
+- MCR-310 real Codex exec smoke passed once on 2026-06-29 with tracked proof
+  `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
+  `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
 - MCR-720 real-service smoke runbook and skipped-test scaffold have merged.
 
 Not yet complete:
 
-- Real Codex smoke execution proof.
-- Real Matrix/Codex/GitHub test-service compatibility proof.
+- Real Matrix and GitHub test-service compatibility proof.
 - Any production-like Codex worker execution.
+- MCR-720 real-service smoke execution; it remains scaffold/skipped-by-default
+  unless separately approved.
 
 Manual gate for any real smoke:
 
@@ -186,5 +198,6 @@ Manual gate for any real smoke:
 - The run records command, exit code, artifact/log refs, cleanup, risk, and
   rollback notes.
 
-Do not treat MCR-310 or MCR-720 scaffold completion as real-service
-compatibility validation.
+Do not treat the MCR-310 proof as approval for additional real Codex runs or as
+real Matrix, GitHub, deploy, or live memory validation. Do not treat MCR-720
+scaffold completion as real-service compatibility validation.

@@ -30,26 +30,28 @@ explicit gates.
   rollback notes.
 - Approval is action-scoped.
 - Memory update is proposal-only.
-- Real Matrix, real Codex exec, real GitHub PR creation, merge, deploy, secret
-  access, and live memory writes are not allowed until their explicit follow-up
-  gates pass.
+- Further real Matrix, real Codex exec, real GitHub PR creation, merge, deploy,
+  secret access, and live memory writes are not allowed until their explicit
+  follow-up gates pass.
 
 ## Current Closeout Status
 
 As of 2026-06-29, local fake MVP work through MCR-700 is merged on `main`.
-MCR-310 and MCR-720 scaffolds are also merged, but only as guarded runner,
-runbook, and skipped-test scaffolds.
+MCR-310 scaffold is merged and one manual real Codex exec smoke has passed.
+Tracked proof: `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in
+commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 remains only a
+guarded runbook and skipped-test scaffold.
 
-No real Matrix, Codex, GitHub, or service smoke has passed by this plan. Real
-service smoke execution remains a manual compatibility check requiring
-action-scoped human approval, disposable scoped credentials, and captured proof.
+No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
+real-service smoke has passed by this plan. Further real-service smoke execution
+remains a manual compatibility check requiring action-scoped human approval,
+disposable scoped credentials, and captured proof.
 
 Target system alignment now lives in
-`docs/analysis/target-system-design.md`. The next phase should replace only the
-fake Codex worker boundary with a guarded real Codex exec smoke in a
-Runtime-created worktree. Matrix and GitHub stay fake for that slice; memory
-stays proposal-only. Do not add an automatic commander loop or independent
-review lane.
+`docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
+compatibility proof only; Matrix and GitHub remain fake, and memory stays
+proposal-only. Do not add an automatic commander loop or independent review
+lane.
 
 ---
 
@@ -130,17 +132,21 @@ Exit criteria:
 
 ## Wave 6: Real-Service Smoke Scaffolds And Manual Gates
 
-- [x] MCR-310 Real Codex Exec Smoke Runner scaffold
+- [x] MCR-310 Real Codex Exec Smoke Runner scaffold plus one manual real Codex
+  exec smoke pass on 2026-06-29
 - [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold
 
 Satisfied scaffold prerequisites:
 
 - ADR-0006 exists.
 - MCR-700 passes.
+- MCR-310 proof exists at
+  `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
+  `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
 
 Remaining manual smoke entry criteria:
 
-- Human owner explicitly approves each real-service smoke.
+- Human owner explicitly approves each further real-service smoke.
 - Credentials are disposable and scoped.
 - Targets are non-production and disposable where practical.
 
@@ -149,6 +155,7 @@ Manual smoke exit criteria:
 - Real-service tests are opt-in and skipped by default.
 - Smoke evidence is recorded as compatibility proof, not the correctness source.
 - No merge, deploy, or live memory write is automated.
+- MCR-720 remains scaffold/skipped-by-default unless separately approved.
 
 ## Operating Cadence
 

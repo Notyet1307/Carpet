@@ -4,6 +4,10 @@
 
 Default: disabled.
 
+MCR-310 real Codex exec smoke passed once on 2026-06-29. Tracked proof:
+`fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
+`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
+
 Run this only after the human owner approves one manual smoke run for a
 disposable repo or fixture-only task. Do not use production secrets, production
 data, GitHub PR creation, deploy automation, Matrix real-service integration, or

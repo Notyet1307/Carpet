@@ -75,14 +75,14 @@ a reviewed human or PR path, not an automatic live memory write.
 | Policy engine | implemented fake | `packages/policy-engine/**`, `runtime/policies/*.yaml` | No production policy service, no external identity or secret broker. |
 | Work Cell manager | implemented fake | `packages/work-cell-manager/src/fake-worktree-manager.ts` | No real git worktree create/remove implementation in the Runtime path. |
 | Fake Codex worker runner | implemented fake | `apps/worker-runner/src/fake-codex-process.ts`, local fake E2E | No default real Codex execution. |
-| Codex exec smoke runner | guarded scaffold | `apps/worker-runner/src/codex-exec-runner.ts` | Requires explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
+| Codex exec smoke runner | guarded scaffold; passed once manually | `apps/worker-runner/src/codex-exec-runner.ts`; `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2` | Further runs still require explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
 | Proof ledger and verifier | implemented fake | `packages/proof-ledger/**` | No object store, durable proof ledger, or verifier worker service. |
 | Approval gate | implemented fake | `packages/approval-gate/**` | No durable approval service, Matrix identity binding, or production authorization store. |
 | GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or GitHub API call, no real PR creation proof. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts` | Scaffold explicitly does not call real services. |
-| Real Matrix integration | not implemented real integration | No real service proof in current review | Needs disposable homeserver/room smoke after Codex smoke is proven. |
+| Real Matrix integration | not implemented real integration | No real service proof in current review | Needs separately approved disposable homeserver/room smoke. |
 | Real GitHub PR integration | not implemented real integration | Fake adapter only | Needs action-scoped approval and disposable repo/branch smoke. |
 | Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only | Needs separate persistence vertical slice. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
@@ -95,8 +95,8 @@ bypass, approval replay, and secret-bearing logs stop before PR creation.
 
 Replace one fake boundary at a time:
 
-1. Replace the fake Codex worker with a real Codex exec smoke in a
-   Runtime-created worktree.
+1. Keep the MCR-310 real Codex exec smoke proof as a one-time compatibility
+   proof, not a default worker path.
 2. Replace fake Matrix ingress with a disposable Matrix AppService smoke.
 3. Replace the fake GitHub adapter with a disposable PR creation smoke.
 4. Add durable Runtime storage only after the adapter gates still preserve the
@@ -106,9 +106,13 @@ Do not start with broad service orchestration. Do not add an automatic commander
 loop. Do not add a separate review lane. The existing verifier/proof path is the
 review boundary for the next slice.
 
-## Recommended Next Vertical Slice
+## MCR-310 Closeout Boundary
 
-Build the smallest real-service slice around Codex exec only:
+MCR-310 has produced one manual real Codex exec smoke proof on 2026-06-29:
+`fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
+`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
+
+That closes one compatibility proof around Codex exec only:
 
 ```text
 checked-in task fixture
@@ -133,6 +137,6 @@ Acceptance boundary:
 - records command, exit code, artifact refs, cleanup, risk, and rollback notes
 - proves no GitHub, Matrix, deploy, merge, secret, or live memory call occurs
 
-This slice proves the highest-risk worker boundary without expanding product
-surface. Real Matrix and real GitHub smoke should wait until this Codex worker
-boundary has proof.
+This proof does not make real Codex execution the default worker path and does
+not validate real Matrix, real GitHub PR/API calls, deploy, or live memory
+writes. MCR-720 remains scaffold/skipped-by-default unless separately approved.
