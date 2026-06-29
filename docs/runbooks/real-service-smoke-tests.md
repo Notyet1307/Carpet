@@ -66,6 +66,20 @@ Do not run these commands during scaffold review. They are documented so the
 next approved smoke can separate homeserver start, evidence capture, stop, and
 cleanup from test-runner implementation.
 
+## AppService Registration Scaffold
+
+`infra/matrix/synapse/appservice-registration.example.yaml` is an example-only
+registration shape for a future approved MCR-720 Matrix smoke. It contains only
+placeholder `as_token` and `hs_token` values.
+
+Tokens must be generated per approved run and never committed. Generated
+registrations must use the MCR-720 run id in the token scope, appservice
+identity, namespace, artifact refs, and cleanup note.
+
+The homeserver example references the example registration only so the shape is
+visible to reviewers. Do not use the committed placeholder token values as smoke
+credentials.
+
 ## Matrix-Only Disposable Resources
 
 Each approved MCR-720 run must use Matrix-only disposable resources:
@@ -116,6 +130,7 @@ After the run:
 - remove the disposable homeserver if local to the run
 - remove disposable rooms, bot/appservice identities, appservice registrations,
   branches, and artifacts that were created only for the run
+- remove generated run-scoped AppService registration files and tokens
 - stop any local processes created for the run
 - remove temporary evidence working files after review, keeping only approved
   proof refs
@@ -128,6 +143,7 @@ Rollback for this scaffold is deletion of:
 - `infra/matrix/synapse/README.md`
 - `infra/matrix/synapse/docker-compose.yaml`
 - `infra/matrix/synapse/homeserver.example.yaml`
+- `infra/matrix/synapse/appservice-registration.example.yaml`
 - `docs/runbooks/real-service-smoke-tests.md`
 - `tests/e2e/real-service-smoke.skip.ts`
 

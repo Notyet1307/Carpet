@@ -10,6 +10,21 @@ smoke. Do not start Docker or Synapse as part of this scaffold review.
 - `docker-compose.yaml`: local-only Synapse service behind the `manual` profile.
 - `homeserver.example.yaml`: example config with placeholder-only values and no
   real secrets.
+- `appservice-registration.example.yaml`: example-only AppService registration
+  with placeholder-only `as_token` / `hs_token` values.
+
+## AppService Registration
+
+The registration is a shape reference only. For an approved MCR-720 run,
+generate disposable, run-scoped `as_token` and `hs_token` values, keep them out
+of git, and delete or revoke them during cleanup.
+
+The example namespace is intentionally narrow:
+
+- users: `@mcr_720_.*:mcr-720.localhost`
+- aliases: `#mcr_720_.*:mcr-720.localhost`
+
+Do not treat the committed placeholder tokens as approved smoke credentials.
 
 ## Ports
 
@@ -43,6 +58,7 @@ After an approved run, remove every disposable artifact created for that run:
 - remove `infra/matrix/synapse/data`
 - remove disposable users, rooms, appservice registrations, tokens, and evidence
   working files that are not approved proof refs
+- remove any generated run-scoped AppService registration file
 - record cleanup status in the handoff
 
 No GitHub client, Codex exec path, Runtime database client/path, deploy target,

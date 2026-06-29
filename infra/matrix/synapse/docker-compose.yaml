@@ -17,6 +17,7 @@ services:
     volumes:
       - ./data:/data
       - ./homeserver.example.yaml:/data/homeserver.yaml:ro
+      - ./appservice-registration.example.yaml:/data/appservice-registration.example.yaml:ro
     labels:
       com.notyet.mcr.task: "MCR-720"
       com.notyet.mcr.manual-only: "true"

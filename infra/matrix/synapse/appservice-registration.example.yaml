@@ -1,0 +1,21 @@
+# MCR-720 example-only Matrix AppService registration.
+# placeholder-only tokens. Generate run-scoped disposable tokens for an
+# approved manual run and never commit generated values.
+# cleanup must remove the run-scoped registration, tokens, users, rooms, and
+# unapproved evidence working files for the MCR-720 run id.
+
+id: "mcr-720-appservice-example"
+url: "http://127.0.0.1:9009"
+as_token: "mcr-720-example-as-token-replace-per-approved-run"
+hs_token: "mcr-720-example-hs-token-replace-per-approved-run"
+sender_localpart: "mcr_720_appservice"
+rate_limited: false
+
+namespaces:
+  users:
+    - exclusive: true
+      regex: "@mcr_720_.*:mcr-720.localhost"
+  aliases:
+    - exclusive: true
+      regex: "#mcr_720_.*:mcr-720.localhost"
+  rooms: []

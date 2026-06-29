@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -159,6 +159,9 @@ test("runbook records manual evidence and safety boundaries", () => {
     "disposable room",
     "bot/appservice identity",
     "appservice registration",
+    "appservice registration scaffold",
+    "tokens must be generated per approved run",
+    "never committed",
     "raw matrix event bodies",
     "mcr-310 codex proof remains separate",
   ]) {
@@ -197,6 +200,51 @@ test("disposable Synapse scaffold is manual-only and contains no secrets", () =>
       `missing Synapse scaffold text: ${requiredText}`,
     );
   }
+});
+
+test("AppService registration scaffold uses only run-scoped placeholders", () => {
+  const registrationPath =
+    "infra/matrix/synapse/appservice-registration.example.yaml";
+
+  assert.equal(
+    existsSync(path.join(root, registrationPath)),
+    true,
+    "missing AppService registration scaffold",
+  );
+
+  const registration = readFileSync(path.join(root, registrationPath), "utf8");
+
+  for (const requiredText of [
+    "MCR-720",
+    "placeholder-only",
+    "run-scoped",
+    "cleanup",
+    "never commit",
+    "as_token: \"mcr-720-example-as-token-replace-per-approved-run\"",
+    "hs_token: \"mcr-720-example-hs-token-replace-per-approved-run\"",
+    "regex: \"@mcr_720_.*:mcr-720.localhost\"",
+  ]) {
+    assert.equal(
+      registration.includes(requiredText),
+      true,
+      `missing registration text: ${requiredText}`,
+    );
+  }
+
+  const homeserver = readFileSync(
+    path.join(root, "infra/matrix/synapse/homeserver.example.yaml"),
+    "utf8",
+  );
+  assert.equal(
+    homeserver.includes("/data/appservice-registration.example.yaml"),
+    true,
+    "homeserver example must reference the example-only registration",
+  );
+  assert.equal(
+    homeserver.includes("example-only AppService registration"),
+    true,
+    "homeserver registration reference must stay example-only",
+  );
 });
 
 test("planning docs do not let MCR-310 authorize Matrix smoke", () => {
