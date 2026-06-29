@@ -166,6 +166,12 @@ test("runbook records manual evidence and safety boundaries", () => {
     "mcr-310 codex proof remains separate",
     "appservice http listener start is manual-only",
     "registration url must match the listener host and port",
+    "host.docker.internal:9009",
+    "generate-matrix-smoke-config",
+    "mcr_matrix_run_dir",
+    "mcr_matrix_appservice_hs_token",
+    "appservice-registration.yaml",
+    "log.config",
   ]) {
     assert.equal(
       runbook.toLowerCase().includes(requiredText),
@@ -224,7 +230,7 @@ test("AppService registration scaffold uses only run-scoped placeholders", () =>
     "never commit",
     "as_token: \"mcr-720-example-as-token-replace-per-approved-run\"",
     "hs_token: \"mcr-720-example-hs-token-replace-per-approved-run\"",
-    "url: \"http://127.0.0.1:9009\"",
+    "url: \"http://host.docker.internal:9009\"",
     "must match the manually started listener host and port",
     "regex: \"@mcr_720_.*:mcr-720.localhost\"",
   ]) {
@@ -240,15 +246,39 @@ test("AppService registration scaffold uses only run-scoped placeholders", () =>
     "utf8",
   );
   assert.equal(
-    homeserver.includes("/data/appservice-registration.example.yaml"),
+    homeserver.includes("/data/appservice-registration.yaml"),
     true,
-    "homeserver example must reference the example-only registration",
+    "homeserver example must reference the generated registration mount",
   );
   assert.equal(
-    homeserver.includes("example-only AppService registration"),
-    true,
-    "homeserver registration reference must stay example-only",
+    homeserver.includes("/data/appservice-registration.example.yaml"),
+    false,
+    "homeserver must not use the tracked example registration for smoke",
   );
+});
+
+test("Synapse compose uses generated run files, not tracked smoke credentials", () => {
+  const compose = readFileSync(
+    path.join(root, "infra/matrix/synapse/docker-compose.yaml"),
+    "utf8",
+  );
+  const homeserver = readFileSync(
+    path.join(root, "infra/matrix/synapse/homeserver.example.yaml"),
+    "utf8",
+  );
+
+  assert.equal(compose.includes("MCR_MATRIX_RUN_DIR"), true);
+  assert.equal(compose.includes("/data/appservice-registration.yaml"), true);
+  assert.equal(compose.includes("/data/log.config"), true);
+  assert.equal(
+    compose.includes(
+      "./appservice-registration.example.yaml:/data/appservice-registration.example.yaml",
+    ),
+    false,
+    "compose must not mount the tracked example registration as live smoke config",
+  );
+  assert.equal(homeserver.includes("/data/appservice-registration.yaml"), true);
+  assert.equal(homeserver.includes("/data/log.config"), true);
 });
 
 test("planning docs do not let MCR-310 authorize Matrix smoke", () => {

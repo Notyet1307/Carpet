@@ -1,12 +1,13 @@
 # MCR-720 example-only Matrix AppService registration.
 # placeholder-only tokens. Generate run-scoped disposable tokens for an
 # approved manual run and never commit generated values.
-# url is a local placeholder; must match the manually started listener host and port.
+# url is a Docker Desktop host-access placeholder for a listener on 127.0.0.1:9009.
+# The generated run-scoped registration must match the manually started listener host and port.
 # cleanup must remove the run-scoped registration, tokens, users, rooms, and
 # unapproved evidence working files for the MCR-720 run id.
 
 id: "mcr-720-appservice-example"
-url: "http://127.0.0.1:9009"
+url: "http://host.docker.internal:9009"
 as_token: "mcr-720-example-as-token-replace-per-approved-run"
 hs_token: "mcr-720-example-hs-token-replace-per-approved-run"
 sender_localpart: "mcr_720_appservice"

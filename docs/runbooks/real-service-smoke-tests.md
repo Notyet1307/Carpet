@@ -55,11 +55,17 @@ Future manual commands after one action-scoped approval:
 
 ```bash
 cd infra/matrix/synapse
+RUN_ID=mcr-720-yyyymmddthhmmssz-slug
+MCR_MATRIX_SMOKE_RUN_ID="$RUN_ID" \
+  node ../../../apps/matrix-appservice/src/index.ts generate-matrix-smoke-config
+
+export MCR_MATRIX_RUN_DIR="$PWD/generated/$RUN_ID"
 docker compose --profile manual config
 docker compose --profile manual up -d synapse
 docker compose --profile manual logs --tail=100 synapse
 docker compose --profile manual down --volumes --remove-orphans
 rm -rf data
+rm -rf "generated/$RUN_ID"
 ```
 
 Do not run these commands during scaffold review. They are documented so the
@@ -70,15 +76,27 @@ cleanup from test-runner implementation.
 
 `infra/matrix/synapse/appservice-registration.example.yaml` is an example-only
 registration shape for a future approved MCR-720 Matrix smoke. It contains only
-placeholder `as_token` and `hs_token` values.
+placeholder `as_token` and `hs_token` values. The compose file must not mount
+that tracked example as the live smoke registration.
 
 Tokens must be generated per approved run and never committed. Generated
 registrations must use the MCR-720 run id in the token scope, appservice
 identity, namespace, artifact refs, and cleanup note.
 
-The homeserver example references the example registration only so the shape is
-visible to reviewers. Do not use the committed placeholder token values as smoke
-credentials.
+Generate the run-scoped files with:
+
+```bash
+cd infra/matrix/synapse
+RUN_ID=mcr-720-yyyymmddthhmmssz-slug
+MCR_MATRIX_SMOKE_RUN_ID="$RUN_ID" \
+  node ../../../apps/matrix-appservice/src/index.ts generate-matrix-smoke-config
+export MCR_MATRIX_RUN_DIR="$PWD/generated/$RUN_ID"
+```
+
+This writes untracked `appservice-registration.yaml`, `log.config`, and
+`listener.env` under `MCR_MATRIX_RUN_DIR`. The homeserver example references
+`/data/appservice-registration.yaml`, which is the generated compose mount.
+Do not use the committed placeholder token values as smoke credentials.
 
 ## AppService HTTP Listener Scaffold
 
@@ -90,9 +108,30 @@ The listener is only the `registration.url` target glue for
 `apps/matrix-appservice` transaction handler for Matrix validation and runtime
 event mapping.
 
-The committed registration `url` is a placeholder local scaffold. Registration url must match the listener host and port chosen for the approved run. If the
-listener binds a different localhost port or host, generate a run-scoped
-registration with that exact URL and remove it during cleanup.
+The default generated registration URL is `http://host.docker.internal:9009`.
+That is the Docker Desktop host route for a Synapse container to reach a
+listener bound on the host at `127.0.0.1:9009`. Registration url must match the listener host and port chosen for the approved run. If the listener binds a
+different localhost port or host, set `MCR_MATRIX_APPSERVICE_REGISTRATION_URL`
+before running `generate-matrix-smoke-config`, and remove the generated files
+during cleanup.
+
+Manual listener start path after the generated `listener.env` exists:
+
+```bash
+cd infra/matrix/synapse
+RUN_ID=mcr-720-yyyymmddthhmmssz-slug
+export MCR_MATRIX_RUN_DIR="$PWD/generated/$RUN_ID"
+set -a
+. "$MCR_MATRIX_RUN_DIR/listener.env"
+set +a
+export MCR_MATRIX_ROOM_ID='!mcr_720_room:mcr-720.localhost'
+export MCR_MATRIX_WORKSPACE_ID='ws_mcr_720'
+node ../../../apps/matrix-appservice/src/index.ts listen
+```
+
+`MCR_MATRIX_APPSERVICE_HS_TOKEN` must come from the generated `listener.env`
+for the same run id. The listener binds `127.0.0.1:9009` by default only when
+the `listen` command is explicitly invoked.
 
 ## Matrix-Only Disposable Resources
 
@@ -144,7 +183,9 @@ After the run:
 - remove the disposable homeserver if local to the run
 - remove disposable rooms, bot/appservice identities, appservice registrations,
   branches, and artifacts that were created only for the run
-- remove generated run-scoped AppService registration files and tokens
+- remove generated run-scoped AppService registration files and tokens:
+  `MCR_MATRIX_RUN_DIR/appservice-registration.yaml`,
+  `MCR_MATRIX_RUN_DIR/log.config`, and `MCR_MATRIX_RUN_DIR/listener.env`
 - stop any local processes created for the run
 - remove temporary evidence working files after review, keeping only approved
   proof refs

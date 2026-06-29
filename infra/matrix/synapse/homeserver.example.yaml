@@ -43,9 +43,10 @@ form_secret: "mcr-720-example-not-a-real-secret"
 enable_registration: false
 enable_registration_without_verification: false
 
-# example-only AppService registration reference. For an approved MCR-720 run,
-# generate run-scoped disposable as_token/hs_token values and never commit them.
+# Generated AppService registration mount. For an approved MCR-720 run,
+# generate run-scoped disposable as_token/hs_token values under MCR_MATRIX_RUN_DIR
+# and never commit them.
 app_service_config_files:
-  - "/data/appservice-registration.example.yaml"
+  - "/data/appservice-registration.yaml"
 trusted_key_servers: []
 suppress_key_server_warning: true

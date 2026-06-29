@@ -17,7 +17,8 @@ services:
     volumes:
       - ./data:/data
       - ./homeserver.example.yaml:/data/homeserver.yaml:ro
-      - ./appservice-registration.example.yaml:/data/appservice-registration.example.yaml:ro
+      - ${MCR_MATRIX_RUN_DIR:-./generated/mcr-720-unset}/appservice-registration.yaml:/data/appservice-registration.yaml:ro
+      - ${MCR_MATRIX_RUN_DIR:-./generated/mcr-720-unset}/log.config:/data/log.config:ro
     labels:
       com.notyet.mcr.task: "MCR-720"
       com.notyet.mcr.manual-only: "true"
