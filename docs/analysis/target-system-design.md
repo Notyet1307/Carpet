@@ -139,4 +139,6 @@ Acceptance boundary:
 
 This proof does not make real Codex execution the default worker path and does
 not validate real Matrix, real GitHub PR/API calls, deploy, or live memory
-writes. MCR-720 remains scaffold/skipped-by-default unless separately approved.
+writes. MCR-310 Codex proof remains separate and does not authorize Matrix
+smoke. MCR-720 remains Matrix-only scaffold/skipped-by-default unless
+separately approved.

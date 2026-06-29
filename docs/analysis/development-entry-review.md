@@ -14,10 +14,12 @@ has merged as a guarded scaffold and one manual real Codex exec smoke passed on
 skipped-by-default scaffold.
 
 No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
-real-service smoke is marked complete here. Scaffold presence is not
+Matrix-only real-service smoke is marked complete here. Scaffold presence is not
 compatibility proof. Any further real smoke still requires action-scoped human
 approval, disposable scoped credentials, opt-in execution, cleanup notes, and
 captured proof.
+
+MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 
 ## Target System Design Alignment
 
@@ -161,9 +163,9 @@ Evidence:
 Notes:
 
 - MCR-310 and MCR-720 scaffolds are merged. MCR-310 has one tracked real Codex
-  exec smoke proof, but that proof must not be treated as approval to run more
-  real Codex, Matrix, GitHub, secrets, PR creation, merge, deploy, or live
-  memory writes.
+  exec smoke proof, but MCR-310 Codex proof remains separate and does not
+  authorize Matrix smoke, more real Codex, GitHub, secrets, PR creation, merge,
+  deploy, or live memory writes.
 
 Smallest follow-up if this gate regresses: split the oversized task and restore
 allowed/forbidden files plus tests-first requirements.
@@ -181,14 +183,15 @@ Evidence now present:
 - MCR-310 real Codex exec smoke passed once on 2026-06-29 with tracked proof
   `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
   `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
-- MCR-720 real-service smoke runbook and skipped-test scaffold have merged.
+- MCR-720 Matrix-only real-service smoke preflight runbook and skipped-test
+  scaffold have merged.
 
 Not yet complete:
 
 - Real Matrix and GitHub test-service compatibility proof.
 - Any production-like Codex worker execution.
-- MCR-720 real-service smoke execution; it remains scaffold/skipped-by-default
-  unless separately approved.
+- MCR-720 Matrix-only real-service smoke execution; it remains
+  scaffold/skipped-by-default unless separately approved.
 
 Manual gate for any real smoke:
 

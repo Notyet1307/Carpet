@@ -46,6 +46,7 @@ No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
 real-service smoke has passed by this plan. Further real-service smoke execution
 remains a manual compatibility check requiring action-scoped human approval,
 disposable scoped credentials, and captured proof.
+MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
@@ -156,6 +157,7 @@ Manual smoke exit criteria:
 - Smoke evidence is recorded as compatibility proof, not the correctness source.
 - No merge, deploy, or live memory write is automated.
 - MCR-720 remains scaffold/skipped-by-default unless separately approved.
+- MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 
 ## Operating Cadence
 

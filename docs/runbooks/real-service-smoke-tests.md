@@ -2,7 +2,7 @@
 
 ## Status
 
-Default: disabled. The current repo artifact is only a skipped scaffold in
+Default: disabled. The current repo artifact is only a Matrix-only skipped scaffold in
 `tests/e2e/real-service-smoke.skip.ts`.
 
 Do not start a real Matrix service, real Codex execution, GitHub API client,
@@ -11,12 +11,16 @@ path.
 
 ## Purpose
 
-This smoke exists to check whether the local contracts can be compared against
-a disposable real-service surface after explicit human approval.
+MCR-720 exists to preflight whether the local Matrix contracts can later be
+compared against a disposable Matrix-only real-service surface after explicit
+human approval.
 
 Smoke evidence is compatibility proof. It is not a correctness source.
 Correctness still comes from contract tests, schemas, fake E2E tests, proof
 verification, and human review.
+
+MCR-310 Codex proof remains separate and does not authorize Matrix smoke,
+GitHub smoke, deploy, live memory writes, or any further real Codex execution.
 
 ## Required Gate
 
@@ -24,20 +28,36 @@ The smoke remains blocked unless all gates are true:
 
 - `MCR_REAL_SERVICE_SMOKE=1`
 - `MCR_REAL_SERVICE_CREDENTIAL_SCOPE=disposable`
+- `MCR_REAL_SERVICE_TARGET=matrix`
+- `MCR_MATRIX_SMOKE_RUN_ID=mcr-720-yyyymmddthhmmssz-<slug>`
 - human owner approved one run for one run id
-- all credentials and resources are disposable and scoped to that run
+- all Matrix credentials and resources are disposable and scoped to that run
 
-Missing either environment gate means no real-service path may run.
+Missing any environment gate means no real-service path may run.
 
 ## Manual Opt-In Command
 
 ```bash
-MCR_REAL_SERVICE_SMOKE=1 MCR_REAL_SERVICE_CREDENTIAL_SCOPE=disposable node --test tests/e2e/real-service-smoke.skip.ts
+MCR_REAL_SERVICE_SMOKE=1 MCR_REAL_SERVICE_CREDENTIAL_SCOPE=disposable MCR_REAL_SERVICE_TARGET=matrix MCR_MATRIX_SMOKE_RUN_ID=mcr-720-20260629t120000z-example node --test tests/e2e/real-service-smoke.skip.ts
 ```
 
 This command is only a scaffold/manual gate check. It does not make real
 services run by default, and the skipped placeholder remains disabled until a
 future human-approved runner is added.
+
+## Matrix-Only Disposable Resources
+
+Each approved MCR-720 run must use Matrix-only disposable resources:
+
+- disposable homeserver: local or throwaway, never production or personal
+- disposable room: named with the run id and removed after the run
+- bot/appservice identity: run-scoped user or namespace with no broad room access
+- appservice registration: generated for that run, revoked or deleted after use
+- run_id naming: `mcr-720-yyyymmddthhmmssz-<slug>` on every room, identity,
+  registration, artifact ref, and cleanup note
+
+No GitHub repo, Codex exec, database, deploy target, secret manager, or live
+memory path is part of MCR-720.
 
 ## Disposable Credential Scope
 
@@ -64,16 +84,17 @@ For each approved manual run, capture:
 - rollback result or rollback not-needed rationale
 
 Evidence capture should prove what was observed without storing raw secrets,
-large logs, raw Matrix events, raw Codex output, GitHub API payloads, database
-dumps, or live memory writes.
+large logs, raw Matrix events, raw Matrix event bodies, Matrix access tokens,
+raw Codex output, GitHub API payloads, database dumps, or live memory writes.
 
 ## Cleanup
 
 After the run:
 
 - revoke disposable credentials
-- remove disposable rooms, users, registrations, branches, and artifacts that
-  were created only for the run
+- remove the disposable homeserver if local to the run
+- remove disposable rooms, bot/appservice identities, appservice registrations,
+  branches, and artifacts that were created only for the run
 - stop any local processes created for the run
 - remove temporary evidence working files after review, keeping only approved
   proof refs
