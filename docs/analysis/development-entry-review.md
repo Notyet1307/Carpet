@@ -14,6 +14,27 @@ Scaffold presence is not compatibility proof. Any real smoke still requires
 action-scoped human approval, disposable scoped credentials, opt-in execution,
 cleanup notes, and captured proof.
 
+## Target System Design Alignment
+
+Target system alignment is recorded in
+`docs/analysis/target-system-design.md`.
+
+Development may continue only if the current fake/scaffold/real split remains
+explicit:
+
+- Matrix is collaboration ingress and projection, not Runtime source of truth.
+- Runtime owns task state, policy, Work Cell creation, proof verification,
+  action-scoped approval, external adapter authorization, and memory proposals.
+- Codex workers run only inside Runtime-created worktrees, never the main
+  checkout.
+- Proof must be verified before approval can be requested.
+- External actions require matching approval before they run.
+- Memory remains proposal-only; Runtime must not write live memory.
+
+The smallest next real-service vertical slice is a guarded real Codex exec
+smoke in a Runtime-created worktree while Matrix and GitHub remain fake. This
+does not introduce an automatic commander loop or a separate review lane.
+
 ## Original Entry Verdict
 
 Limited development entry was ready for local fake MVP implementation through

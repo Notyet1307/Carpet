@@ -44,6 +44,13 @@ No real Matrix, Codex, GitHub, or service smoke has passed by this plan. Real
 service smoke execution remains a manual compatibility check requiring
 action-scoped human approval, disposable scoped credentials, and captured proof.
 
+Target system alignment now lives in
+`docs/analysis/target-system-design.md`. The next phase should replace only the
+fake Codex worker boundary with a guarded real Codex exec smoke in a
+Runtime-created worktree. Matrix and GitHub stay fake for that slice; memory
+stays proposal-only. Do not add an automatic commander loop or independent
+review lane.
+
 ---
 
 ## Wave 0: Entry Fixups

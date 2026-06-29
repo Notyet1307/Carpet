@@ -77,6 +77,28 @@ OpenTelemetry instrumentation
 经验可审批后沉淀
 ```
 
+### 0.1 当前目标系统对齐
+
+截至 2026-06-29，local fake MVP 已经完成并合入 `main`。它证明了
+Matrix intake、Runtime state/policy/work cell、fake Codex worker、proof、
+approval gate、fake GitHub PR、memory proposal 的本地闭环。
+
+这不是真实服务系统完成。当前目标系统边界以
+`docs/analysis/target-system-design.md` 为准：
+
+```text
+Matrix = 协作入口 / 人类审批界面 / 投影时间线，不是 runtime source of truth
+Runtime = task state / policy / work cell / proof / approval gate / memory proposal 的 source of truth
+Codex worker = 只在 Runtime-created worktree 内执行
+Proof = approval 前置条件
+Approval = external action 前置条件
+Memory = proposal-only，不能自动写 live memory
+```
+
+下一阶段最小 vertical slice 是真实 Codex exec smoke：仍保留 fake Matrix
+和 fake GitHub，只替换 fake Codex worker 边界，并证明 main checkout、
+secret env、无 approval 外部调用、无 live memory write 都被阻止。
+
 ---
 
 ## 1. 背景依据
@@ -1398,6 +1420,9 @@ memory.update.proposed
 ---
 
 ## 15. MVP 规划
+
+当前已完成的是 local fake MVP。下面的真实工程闭环仍是目标系统方向，
+不能把 fake adapter 或 guarded scaffold 当成真实服务兼容性证明。
 
 ### MVP 目标
 
