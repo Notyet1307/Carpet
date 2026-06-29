@@ -15,13 +15,16 @@ It does not authorize implementation in this branch.
 ## Current Closeout Status
 
 As of 2026-06-29, MCR-030 through MCR-700 local fake MVP work is merged on
-`main`. The MCR-310 guarded Codex exec runner scaffold and MCR-720 real-service
-smoke scaffold are also merged.
+`main`. The MCR-310 guarded Codex exec runner scaffold, MCR-720 real-service
+smoke scaffold, and MCR-730 disposable GitHub PR smoke proof are also merged or
+closed out in the roadmap.
 
-Those scaffolds do not mean real service compatibility has been verified. Real
-Matrix, Codex, GitHub, or service smoke execution still requires action-scoped
-human approval, disposable scoped credentials, opt-in commands, cleanup notes,
-and captured proof.
+Wave 0-6 now has one manual proof each for real Codex exec, local disposable
+Matrix ingress, and disposable GitHub PR creation. Those proofs are narrow
+compatibility evidence, not production readiness and not approval for default
+real-service execution. Further real Matrix, Codex, GitHub, or service smoke
+execution still requires action-scoped human approval, disposable scoped
+credentials, opt-in commands, cleanup notes, and captured proof.
 
 The sequence is:
 
@@ -31,7 +34,8 @@ contracts / foundation
 -> runtime core
 -> worker, proof, approval, memory
 -> local fake E2E
--> later real-service smoke tests
+-> guarded real-service smoke proofs
+-> next real-service MVP vertical slices
 ```
 
 Global rules for every implementation task:
@@ -967,10 +971,11 @@ Expected proof / validation evidence:
 
 ### MCR-310: Real Codex Exec Smoke Runner
 
-Status: scaffold merged. The guarded command builder, unit test, and runbook
-exist, but no real Codex smoke execution is marked complete by this backlog.
-Any manual run still requires human approval, a disposable low-risk target,
-scoped environment, cleanup notes, and proof capture.
+Status: scaffold merged, with one manual real Codex exec smoke proof recorded on
+2026-06-29. The guarded command builder, unit test, runbook, and proof exist,
+but real Codex execution is still not the default worker path. Any further
+manual run still requires human approval, a disposable low-risk target, scoped
+environment, cleanup notes, and proof capture.
 
 Objective: add a manually triggered real Codex exec smoke runner for a
 disposable low-risk task, behind an explicit feature flag.
@@ -1031,10 +1036,11 @@ Expected proof / validation evidence:
 
 ### MCR-720: Real-Service Compatibility Smoke Tests
 
-Status: scaffold merged. The runbook and skipped-by-default test exist, but no
-real Matrix, Codex, GitHub, or service compatibility smoke is marked complete.
-Manual execution remains blocked on action-scoped human approval and disposable
-scoped credentials.
+Status: scaffold merged, with one Matrix-only local disposable smoke proof
+recorded on 2026-06-29. MCR-730 separately records one disposable GitHub PR
+create/cleanup proof. These are compatibility proofs only; manual execution
+remains blocked on action-scoped human approval and disposable scoped
+credentials for every further run.
 
 Objective: document and run minimal compatibility smoke tests for real Matrix,
 real Codex, and GitHub test-repo PR creation after fake E2E is stable.
@@ -1087,6 +1093,25 @@ Expected proof / validation evidence:
 - Manual smoke evidence if approved and run
 - Cleanup log
 - `git diff --check`
+
+## Next Real-Service MVP Vertical Slices
+
+The canonical next task cards are in
+`docs/roadmaps/mvp-implementation-plan.md#next-real-service-mvp-vertical-slices`.
+They are intentionally limited to six ordered cards:
+
+1. MCR-800 Runtime Orchestrator CLI With File Snapshot Store
+2. MCR-810 Approved Codex Exec Adapter In Runtime Orchestrator
+3. MCR-820 Matrix Ingress To Runtime Orchestrator
+4. MCR-830 Runtime Approval Projection And Intake
+5. MCR-840 Runtime-Owned GitHub PR Create Adapter For Disposable Targets
+6. MCR-850 One Real-Service MVP Vertical Smoke
+
+The first implementation task is MCR-800. It must compose existing local
+components and the MCR-106 file snapshot store without default real
+Matrix/GitHub/Codex calls. Postgres and DB migrations remain later because the
+immediate vertical slice needs single-writer replayable proof, which the file
+snapshot adapter already provides.
 
 ## Closed Architecture Follow-Up
 

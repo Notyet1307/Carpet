@@ -235,6 +235,217 @@ Manual smoke exit criteria:
 - Disposable Synapse compose has no default service start and is not
   production-ready by itself.
 
+## Next Real-Service MVP Vertical Slices
+
+These are the next implementation cards after Wave 0-6 closeout. They move one
+fake boundary at a time while keeping the Runtime-owned store as source of truth.
+Postgres, DB migrations, queues, object storage, production deploy, commander
+automation, independent review lanes, and live memory writes stay out of this
+slice set. The MCR-106 file snapshot adapter is sufficient for the immediate
+single-writer MVP because the next slices need replayable local proof, not
+multi-writer production durability.
+
+### MCR-800: Runtime Orchestrator CLI With File Snapshot Store
+
+Problem solved: there is no small Runtime-owned entrypoint that composes the
+existing local components and persists the resulting Runtime snapshot.
+
+Why now: Wave 0-6 proved components and manual smokes separately; the next work
+needs one boring local command before any default real Matrix, Codex, or GitHub
+path.
+
+Allowed files: `apps/runtime-orchestrator/**`, package index exports for
+existing packages only when needed, `tests/e2e/runtime-orchestrator-cli.test.ts`,
+and package/workspace metadata required to register that app.
+
+Forbidden files: schemas, fixtures, lockfiles unless package metadata requires
+them, DB/Postgres/migrations, real Matrix/GitHub/Codex adapters, deploy or CI
+automation, live memory paths, commander automation, and independent review lane
+docs or code.
+
+Acceptance criteria: a local CLI runs the existing fake/local flow from a checked
+fixture or task brief through runtime validation, routing, policy, fake worker,
+proof verification, action-scoped approval request, fake PR adapter, memory
+proposal, and MCR-106 file snapshot write/read. It must reject main-checkout
+work cells and must not call real Matrix, Codex, GitHub, deploy, secret, or live
+memory APIs by default.
+
+Validation commands: package test for the new orchestrator,
+`pnpm test:contracts`, `pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: keep this as composition glue. Do not introduce a service framework,
+HTTP API, queue, scheduler, DB abstraction, or config system until a later slice
+proves the CLI cannot carry the MVP.
+
+Fake/scaffold/real boundary: real Runtime orchestration and real file snapshot
+persistence; fake Matrix, fake Codex worker by default, fake GitHub, fake
+approval identity, and memory proposal only.
+
+### MCR-810: Approved Codex Exec Adapter In Runtime Orchestrator
+
+Problem solved: MCR-310 proves a guarded Codex smoke once, but the Runtime
+orchestrator still cannot choose that runner as an approved adapter for one task.
+
+Why now: after MCR-800 owns the local task path and snapshot, the smallest real
+worker upgrade is to replace only the fake Codex worker behind the same policy,
+proof, and approval gates.
+
+Allowed files: `apps/runtime-orchestrator/**`, `apps/worker-runner/**`, focused
+tests for adapter selection and proof capture, and runbook notes for the manual
+approved smoke command.
+
+Forbidden files: Matrix real integration, GitHub real adapter, DB/Postgres,
+production secrets, default-on Codex execution, deploy, merge, PR creation, live
+memory writes, and broad credential plumbing.
+
+Acceptance criteria: the default CLI still uses the fake worker. With an explicit
+run id, scoped env, non-main worktree, output schema, and action-scoped approval
+fixture, Runtime may invoke the existing guarded Codex exec runner and persist
+proof refs in the file snapshot. Missing approval, main-checkout cwd, secret
+env, or absent smoke flag blocks before process execution.
+
+Validation commands: worker-runner/orchestrator package tests, one approved
+manual smoke only if the owner explicitly requests it, `pnpm test:contracts`,
+`pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: this proves a Runtime-owned Codex adapter path, not production Codex
+execution. Keep GitHub fake so a bad worker result cannot create external PRs.
+
+Fake/scaffold/real boundary: real Codex process only for an approved opt-in run;
+Matrix and GitHub remain fake, approval remains action-scoped fixture or manual
+record, file snapshot remains the Runtime store.
+
+### MCR-820: Matrix Ingress To Runtime Orchestrator
+
+Problem solved: MCR-720 proves one local AppService transaction, but the Runtime
+orchestrator does not yet consume Matrix ingress as one Runtime-owned task path.
+
+Why now: after the CLI can own task state, Matrix can become an untrusted input
+adapter without becoming the source of truth.
+
+Allowed files: `apps/matrix-appservice/**`, `apps/runtime-orchestrator/**`,
+focused e2e tests that inject a local transaction into the orchestrator, and the
+existing real-service smoke runbook if command wording changes.
+
+Forbidden files: production homeserver setup, room/user lifecycle automation,
+real GitHub adapter, default real Codex execution, DB/Postgres, deploy, live
+memory writes, and commander automation.
+
+Acceptance criteria: a local Matrix transaction can enqueue or submit one
+Runtime task into the orchestrator, which writes the canonical state to the file
+snapshot. Invalid auth, invalid schema, duplicate transaction/event, unknown
+room, and spoofed actor data stop before Runtime work. Matrix room history is
+never read as task state.
+
+Validation commands: matrix-appservice/orchestrator package tests, normal
+skipped real-service smoke test output, `pnpm test:contracts`,
+`pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: do not solve production room lifecycle here. Local disposable
+Matrix proof is enough to validate ingress shape.
+
+Fake/scaffold/real boundary: real local Matrix ingress adapter against
+disposable/local targets only; Runtime store is real file snapshot; Codex and
+GitHub remain fake by default.
+
+### MCR-830: Runtime Approval Projection And Intake
+
+Problem solved: approval is currently local/fake; the next external action needs
+a Runtime-owned way to project a specific approval request and bind one returned
+approval to the same proof/action/run id.
+
+Why now: GitHub PR creation must not be implemented until proof-before-approval
+and approval-before-external-action are enforced across the real-service path.
+
+Allowed files: `apps/runtime-orchestrator/**`, `apps/matrix-appservice/**`,
+`packages/approval-gate/**`, focused approval projection/intake tests, and
+runbook notes for manual approval evidence.
+
+Forbidden files: independent review lane, commander automation, broad approval
+phrases, merge/deploy approval, DB/Postgres, GitHub PR creation, default real
+Codex, and live memory writes.
+
+Acceptance criteria: Runtime emits a projection containing proof id, action,
+run id, expiry, target, rollback notes, and risk notes. Intake accepts only a
+matching action-scoped approval and rejects vague approval, expired approval,
+wrong proof id, wrong action, replay, and approval for merge/deploy/live memory.
+
+Validation commands: approval-gate/matrix/orchestrator package tests,
+`pnpm test:contracts`, `pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: this is not a new review system. It is only the existing proof and
+approval gate crossing a Matrix projection boundary.
+
+Fake/scaffold/real boundary: real approval shape and local/disposable Matrix
+projection/intake; no real GitHub write yet, no deploy, no live memory write.
+
+### MCR-840: Runtime-Owned GitHub PR Create Adapter For Disposable Targets
+
+Problem solved: MCR-730 proves a manual sandbox `gh pr create`; Runtime still
+has only the fake GitHub adapter and cannot create a PR after verified proof and
+matching approval.
+
+Why now: once Runtime can persist state, produce proof, and bind approval, the
+next real external write can be a disposable PR create with no merge path.
+
+Allowed files: `packages/github-adapter/**`, `apps/runtime-orchestrator/**`,
+focused tests for command/API wrapper gating, and the GitHub smoke runbook.
+
+Forbidden files: production repo defaults, push to production `main`, merge,
+deploy, broad account tokens, secret dumps, DB/Postgres, live memory writes, and
+commander automation.
+
+Acceptance criteria: the adapter is disabled by default and can target only an
+explicit disposable repo or disposable branch policy. It requires verified proof
+and action-scoped approval for `create_pr`, records command/API shape, PR URL,
+base/head refs and SHAs, cleanup status, and refuses merge, production main,
+deploy, secret access, and live memory write.
+
+Validation commands: github-adapter/orchestrator package tests, one approved
+manual disposable PR smoke only if the owner explicitly requests it,
+`pnpm test:contracts`, `pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: prefer the existing `gh` proof shape before adding Octokit. Add a
+library only when command wrapping is insufficient for required evidence.
+
+Fake/scaffold/real boundary: real PR creation only against a disposable target
+after proof and approval; no merge, deploy, production repo default, or memory
+write. Matrix may be local/disposable only.
+
+### MCR-850: One Real-Service MVP Vertical Smoke
+
+Problem solved: the repo has separate proofs for Codex, Matrix, and GitHub, but
+not one Runtime-owned vertical proof that preserves all boundaries end to end.
+
+Why now: after MCR-800 through MCR-840, the smallest integrated proof is one
+approved disposable run, not a production service.
+
+Allowed files: `tests/e2e/real-service-smoke.skip.ts`, `docs/runbooks/**`,
+`apps/runtime-orchestrator/**` only for narrow wiring fixes found by the smoke,
+and proof fixtures only if the run records checked-in redacted evidence.
+
+Forbidden files: default-on real-service tests, DB/Postgres/migrations,
+production Matrix/GitHub targets, merge, deploy, live memory writes, commander
+automation, independent review lanes, and broad credential handling.
+
+Acceptance criteria: with explicit human approval and disposable scoped
+credentials, one skipped-by-default smoke demonstrates Matrix ingress or local
+task fixture -> Runtime file snapshot -> approved Codex exec -> proof
+verification -> approval -> disposable GitHub PR create -> cleanup/projection.
+The proof must show no merge, no deploy, no production main push, no secret dump,
+and no live memory write.
+
+Validation commands: normal local run proves the smoke is skipped by default,
+the approved manual smoke command only if requested, `pnpm test:contracts`,
+`pnpm schemas:validate`, and `git diff --check`.
+
+Risk notes: this is compatibility evidence, not production readiness. Any
+failure should become the next narrow card rather than broad service redesign.
+
+Fake/scaffold/real boundary: one real disposable vertical proof under manual
+approval; Runtime file snapshot remains source of truth; Matrix is input and
+projection only; memory remains proposal-only.
+
 ## Operating Cadence
 
 For each item:

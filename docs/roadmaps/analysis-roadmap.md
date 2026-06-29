@@ -1633,6 +1633,14 @@ MCR-730 GitHub disposable PR create smoke 已通过一次：PR #1 in
 `Notyet1307/github-pr-smoke-sandbox` was created, then closed unmerged; base/head
 disposable branches were deleted; `protect-main` stayed active。当前仍不实现
 Octokit 或 Runtime `gh` write path。
+
+下一阶段 real-service MVP vertical slices 已记录在
+`docs/roadmaps/mvp-implementation-plan.md#next-real-service-mvp-vertical-slices`：
+MCR-800 到 MCR-850 共 6 张顺序任务卡。第一张实现任务是 MCR-800 Runtime
+Orchestrator CLI With File Snapshot Store：先组合现有本地组件和 MCR-106 file
+snapshot store，不默认调用真实 Matrix/GitHub/Codex。Postgres / DB migrations
+仍后置，因为当前 immediate vertical slice 只需要 single-writer replayable
+proof，file snapshot 已够用。
 ```
 
 ---
