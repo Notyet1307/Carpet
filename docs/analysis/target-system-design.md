@@ -78,12 +78,12 @@ a reviewed human or PR path, not an automatic live memory write.
 | Codex exec smoke runner | guarded scaffold; passed once manually | `apps/worker-runner/src/codex-exec-runner.ts`; `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2` | Further runs still require explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
 | Proof ledger and verifier | implemented fake | `packages/proof-ledger/**` | No object store, durable proof ledger, or verifier worker service. |
 | Approval gate | implemented fake | `packages/approval-gate/**` | No durable approval service, Matrix identity binding, or production authorization store. |
-| GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or GitHub API call, no real PR creation proof. |
+| GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or Runtime-owned GitHub API write path. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02` | Default path remains skipped; proof is local disposable compatibility only. |
 | Real Matrix integration | local disposable smoke proof only | MCR-720 run id `mcr-720-20260629t130000z-matrix-smoke-02`: local Synapse, local AppService listener, one transaction | Production Matrix integration, persistent Runtime service, and room/user lifecycle automation remain not implemented. |
-| Real GitHub PR integration | NO-GO for real smoke | `packages/github-adapter` is fake/in-memory only | Blocked by broad non-disposable local `gh` credentials and fake/contract-only PR path. Needs disposable target, scoped credential, one approval per run id, and close/delete cleanup proof. |
+| Real GitHub PR integration | disposable PR create smoke passed once | MCR-730 created PR #1 in `Notyet1307/github-pr-smoke-sandbox`, then closed it unmerged and deleted both disposable branches | Runtime adapter remains fake/in-memory; this proves one manual sandbox `gh` create/cleanup path only, not production GitHub integration. |
 | Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only | Needs separate persistence vertical slice. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
 
@@ -99,10 +99,8 @@ Replace one fake boundary at a time:
    proof, not a default worker path.
 2. Keep the MCR-720 disposable Matrix AppService smoke as one compatibility
    proof, not a production Matrix path.
-3. Replace the fake GitHub adapter with a disposable PR creation smoke only
-   after MCR-730 gates pass. Current MCR-730 status is NO-GO: the local `gh`
-   credential is not disposable/scoped, and the real GitHub PR path is still
-   fake/contract-only.
+3. Keep the MCR-730 disposable GitHub PR create smoke proof as one sandbox
+   compatibility proof, not a Runtime GitHub adapter implementation.
 4. Add durable Runtime storage only after the adapter gates still preserve the
    same state, proof, approval, and memory boundaries.
 
@@ -176,23 +174,41 @@ alive when Synapse submitted the transaction. The second run used a durable
 listener and direct transaction exit-code capture.
 
 This proof does not validate production Matrix integration, a persistent Runtime
-service, real room/user lifecycle automation, real GitHub PR/API calls, deploy,
-or live memory writes. It does not make MCR-720 production-ready.
+service, real room/user lifecycle automation, production GitHub PR/API calls,
+deploy, or live memory writes. It does not make MCR-720 production-ready.
 
 ## MCR-730 GitHub PR Smoke Boundary
 
-MCR-730 is design-only. It does not implement Octokit, a `gh pr create` wrapper,
-or any real GitHub write path.
+MCR-730 has one manual disposable GitHub PR create smoke pass on 2026-06-29. It
+does not implement Octokit, a `gh pr create` wrapper, or any Runtime-owned
+GitHub write path.
 
-Current status: NO-GO for real GitHub PR smoke.
+Current status: GO for the completed sandbox smoke only. Runtime GitHub adapter
+integration remains not implemented.
 
-Blockers:
+Proof:
 
-- The current local `gh` credential is a broad main-account credential, not a
-  disposable/scoped smoke credential.
-- The current `packages/github-adapter` path is fake and contract-only. It
-  records `SimulatedPullRequest` objects in memory and exports no real GitHub
-  API, push, or merge path.
+- Target repo: `Notyet1307/github-pr-smoke-sandbox`.
+- PR: https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/1.
+- Base branch:
+  `mcr-730-base-mcr-730-20260629t140000z-github-pr-smoke-01`.
+- Head branch:
+  `mcr-730-head-mcr-730-20260629t140000z-github-pr-smoke-01`.
+- Base SHA / sandbox `main` SHA before cleanup:
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
+- Head SHA: `d04d80e36881633c53f2f0c018be4b4653c503f2`.
+- Cleanup result: PR #1 is `closed`, `merged=false`; sandbox `main` SHA remains
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`; both disposable branch refs are
+  missing after deletion.
+- Branch protection proof: repo ruleset `protect-main` has `enforcement=active`
+  and `target=branch`.
+- Credential boundary: commands used
+  `GH_TOKEN="$MCR_GITHUB_DISPOSABLE_TOKEN"` with a temporary `GH_CONFIG_DIR`; no
+  token values or environment dumps were recorded.
+
+The current `packages/github-adapter` path is still fake and contract-only. It
+records `SimulatedPullRequest` objects in memory and exports no real GitHub API,
+push, or merge path.
 
 Required disposable target:
 

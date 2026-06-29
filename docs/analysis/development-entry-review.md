@@ -25,20 +25,24 @@ Key proof files: `transaction.exit_code`, `transaction.stdout`,
 and `cleanup-paths.stdout`.
 
 This is not production Matrix integration. Production Matrix integration,
-persistent Runtime service, real room/user lifecycle automation, GitHub
-PR/API, deploy, and live memory write remain not done. Any further real smoke
-still requires action-scoped human approval, disposable scoped credentials,
-opt-in execution, cleanup notes, and captured proof.
+persistent Runtime service, real room/user lifecycle automation, production
+GitHub PR/API, deploy, and live memory write remain not done. Any further real
+smoke still requires action-scoped human approval, disposable scoped
+credentials, opt-in execution, cleanup notes, and captured proof.
 
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 MCR-720 Matrix proof remains separate and does not authorize production Matrix,
 GitHub, deploy, live memory, or default real-service execution.
 
-MCR-730 GitHub PR smoke is currently NO-GO. The local preflight found a broad
-main-account `gh` credential with `repo` and `workflow` scope rather than a
-disposable/scoped smoke credential. The current GitHub PR path is still
-`packages/github-adapter` fake/contract-only; it records simulated PRs in
-memory and does not call GitHub.
+MCR-730 has one completed disposable GitHub PR create smoke on 2026-06-29. PR
+#1 in `Notyet1307/github-pr-smoke-sandbox` was created against disposable base
+branch `mcr-730-base-mcr-730-20260629t140000z-github-pr-smoke-01` from
+disposable head branch
+`mcr-730-head-mcr-730-20260629t140000z-github-pr-smoke-01`, then closed without
+merge. Sandbox `main` stayed at
+`4438b7a905d12fead4f539e6faf349b8a2464f60`, both disposable branches were
+deleted, and the `protect-main` ruleset remained active. The current Runtime
+GitHub PR path is still `packages/github-adapter` fake/contract-only.
 
 ## Target System Design Alignment
 
@@ -58,10 +62,11 @@ explicit:
 - Memory remains proposal-only; Runtime must not write live memory.
 
 The guarded MCR-310 real Codex exec smoke has produced one Codex-only proof.
-MCR-720 has produced one Matrix-only local disposable proof. These do not
-introduce an automatic commander loop, a separate review lane, default real
-Codex execution, production Matrix integration, real GitHub PR/API calls,
-deploy, or live memory writes.
+MCR-720 has produced one Matrix-only local disposable proof. MCR-730 has
+produced one sandbox GitHub PR create/cleanup proof. These do not introduce an
+automatic commander loop, a separate review lane, default real Codex execution,
+production Matrix integration, production GitHub PR/API calls, deploy, or live
+memory writes.
 
 ## Original Entry Verdict
 
@@ -226,10 +231,9 @@ Not yet complete:
 - Production Matrix integration.
 - Persistent Runtime service.
 - Real room/user lifecycle automation.
-- Real GitHub test-service compatibility proof.
-- Real GitHub PR smoke. MCR-730 design documents the safety gates, but the run
-  remains blocked until a disposable target, scoped credential, and one
-  action-scoped approval for a specific run id exist.
+- Production GitHub integration and any Runtime-owned real GitHub write path.
+- Additional GitHub PR smoke beyond the completed MCR-730 disposable sandbox
+  run.
 - Any production-like Codex worker execution.
 - GitHub PR/API, deploy, and live memory paths.
 - Disposable Synapse compose remains manual-only and no-default-start; the
@@ -250,6 +254,8 @@ Manual gate for any real smoke:
   secret dump, and live memory write.
 
 Do not treat the MCR-310 proof as approval for additional real Codex runs or as
-real Matrix, GitHub, deploy, or live memory validation. Do not treat the
-MCR-720 proof as production Matrix readiness, persistent Runtime validation,
-room/user lifecycle automation, GitHub, deploy, or live memory validation.
+real Matrix, production GitHub, deploy, or live memory validation. Do not treat
+the MCR-720 proof as production Matrix readiness, persistent Runtime validation,
+room/user lifecycle automation, production GitHub, deploy, or live memory
+validation. Do not treat the MCR-730 proof as Runtime GitHub adapter
+implementation, merge approval, deploy approval, or live memory validation.

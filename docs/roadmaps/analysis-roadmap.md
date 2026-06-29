@@ -412,10 +412,14 @@ MCR-302/MCR-703 推荐调度；MCR-720 Matrix-only real smoke 已在 2026-06-29
 通过一次，scope 仅为 local disposable Synapse + local AppService listener +
 one AppService transaction。证明目录是
 `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。
-后续真实服务 smoke 仍只能通过 MCR-310/MCR-720 的 manual、opt-in、
-action-scoped approval 路径执行，且 production Matrix integration、
-persistent Runtime service、real room/user lifecycle automation、GitHub PR/API、
-deploy 和 live memory write 仍未完成。
+MCR-730 GitHub disposable PR create smoke 已在 2026-06-29 通过一次：
+PR #1 in `Notyet1307/github-pr-smoke-sandbox` was created, then closed
+unmerged; sandbox `main` SHA stayed
+`4438b7a905d12fead4f539e6faf349b8a2464f60`; both disposable branch refs were
+deleted; `protect-main` remained active. 后续真实服务 smoke 仍只能通过 manual、
+opt-in、action-scoped approval 路径执行，且 production Matrix integration、
+persistent Runtime service、real room/user lifecycle automation、production
+GitHub PR/API、deploy 和 live memory write 仍未完成。
 
 ---
 
@@ -1198,12 +1202,10 @@ proof 可以独立审计
 ```text
 2026-06-29: Phase 8 contract baseline 已完成，本地 proof ledger、approval gate、
 fake GitHub adapter、memory proposal flow implementation 已通过
-MCR-400/MCR-500/MCR-510/MCR-600 并随本地 fake MVP 合并。真实 GitHub PR
-creation、external write 和 live memory writer 仍未完成，也不能由 scaffold 默认启用。
-MCR-730 GitHub disposable PR smoke design 当前结论是 NO-GO：本机 `gh`
-credential 不是 disposable/scoped，真实 GitHub PR path 仍是
-fake/contract-only。真实 smoke 只能在 disposable target、scoped credential、
-one action-scoped approval per run_id 和 cleanup proof 都满足后手动执行。
+MCR-400/MCR-500/MCR-510/MCR-600 并随本地 fake MVP 合并。MCR-730 GitHub
+disposable PR create smoke 已在 sandbox repo 通过一次并完成 close/delete
+cleanup proof。Runtime-owned real GitHub PR adapter、external write 和 live
+memory writer 仍未完成，也不能由 scaffold 默认启用。
 ```
 
 ---
@@ -1400,11 +1402,11 @@ disposable smoke 已在 2026-06-29 通过一次，scope 仅为 local disposable
 Synapse、local AppService listener 和 one AppService transaction，证明目录是
 `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。第一次 run 因 listener
 lifecycle 失败，第二次使用 durable listener 和 direct transaction exit-code
-capture 通过。production Matrix integration、persistent Runtime service、real
-room/user lifecycle automation、GitHub PR/API、deploy 和 live memory write 未完成。
-MCR-730 只补真实 GitHub PR smoke 的安全前置设计；当前 real GitHub PR smoke
-仍是 NO-GO，禁止 merge PR、push production main、deploy、secret dump 和 live
-memory write。
+capture 通过。MCR-730 disposable GitHub PR create smoke 已在 2026-06-29 通过
+一次，并证明 PR closed unmerged、sandbox main SHA unchanged、base/head
+disposable branches deleted、`protect-main` active。production Matrix
+integration、persistent Runtime service、real room/user lifecycle automation、
+production GitHub PR/API、deploy 和 live memory write 未完成。
 
 ---
 
@@ -1572,12 +1574,11 @@ disposable smoke 已在 2026-06-29 通过一次，证明目录是
 `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。这只证明 local disposable
 Synapse + local AppService listener + one AppService transaction；不表示
 production Matrix、persistent Runtime service、real room/user lifecycle
-automation、GitHub PR/API、deploy 或 live memory smoke 已通过。
-MCR-730 GitHub disposable PR smoke design 记录当前 NO-GO：需要 throwaway repo
-或明确 disposable branch policy、scoped disposable GitHub credential、每个
-run_id 一次 action-scoped human approval，以及 PR URL、branch、base/head SHA、
-approval id、close/delete branch cleanup proof；当前不实现 Octokit 或 `gh`
-write path。
+automation、production GitHub PR/API、deploy 或 live memory smoke 已通过。
+MCR-730 GitHub disposable PR create smoke 已通过一次：PR #1 in
+`Notyet1307/github-pr-smoke-sandbox` was created, then closed unmerged; base/head
+disposable branches were deleted; `protect-main` stayed active。当前仍不实现
+Octokit 或 Runtime `gh` write path。
 ```
 
 ---

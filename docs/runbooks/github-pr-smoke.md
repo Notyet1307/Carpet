@@ -2,18 +2,33 @@
 
 ## Status
 
-Current status: NO-GO for real GitHub PR smoke.
+Current status: MCR-730 disposable GitHub PR create smoke passed once on
+2026-06-29 and was cleaned up.
 
-MCR-730 is design-only. Do not run `gh pr create`, Octokit, push, merge, deploy,
-secret access, or live memory write from this task.
+Completed smoke proof:
 
-Current blockers:
+- Target: `Notyet1307/github-pr-smoke-sandbox`.
+- PR: https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/1.
+- Base branch:
+  `mcr-730-base-mcr-730-20260629t140000z-github-pr-smoke-01`.
+- Head branch:
+  `mcr-730-head-mcr-730-20260629t140000z-github-pr-smoke-01`.
+- Base SHA / sandbox `main` SHA before cleanup:
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
+- Head SHA: `d04d80e36881633c53f2f0c018be4b4653c503f2`.
+- Cleanup: PR #1 is `closed`, `merged=false`; sandbox `main` SHA after cleanup
+  is still `4438b7a905d12fead4f539e6faf349b8a2464f60`; both disposable branch
+  refs are missing.
+- Protection: repo ruleset `protect-main` remains `enforcement=active`,
+  `target=branch`.
+- Token boundary: commands used `GH_TOKEN="$MCR_GITHUB_DISPOSABLE_TOKEN"` and a
+  temporary `GH_CONFIG_DIR`; token values and environment dumps were not
+  recorded.
 
-- The local preflight credential is not disposable/scoped. `gh auth status`
-  shows a broad main-account credential with `repo` and `workflow` scope.
-- The current PR path is fake/contract-only. `packages/github-adapter` exports
-  `createFakeGitHubPrAdapter`, records in-memory `SimulatedPullRequest` objects,
-  and has no real GitHub API, push, or merge implementation.
+This proves one manual sandbox create/cleanup path only. The current Runtime PR
+path is still fake/contract-only. `packages/github-adapter` exports
+`createFakeGitHubPrAdapter`, records in-memory `SimulatedPullRequest` objects,
+and has no real GitHub API, push, or merge implementation.
 
 ## Required Target
 
@@ -70,8 +85,8 @@ secret access, or live memory write.
 
 ## Command Shape
 
-This is the future approved command shape only. Do not run it until every gate
-above passes.
+This is the approved command shape for future runs. Do not run it until every
+gate above passes for a new `run_id`.
 
 ```bash
 GH_TOKEN="$MCR_GITHUB_DISPOSABLE_TOKEN" \
@@ -126,15 +141,16 @@ the disposable target, only after approval, and with no secret exposure.
 Cleanup proof must record whether the smoke PR was closed and whether the smoke
 branch was deleted.
 
-Future cleanup command shape:
+Cleanup command shape:
 
 ```bash
 GH_TOKEN="$MCR_GITHUB_DISPOSABLE_TOKEN" \
   gh pr close "$MCR_GITHUB_PR_URL" --delete-branch
 ```
 
-Do not run cleanup from this design task. The command shape is here so the
-future smoke can prove close/delete behavior after an approved run.
+MCR-730 closeout used the equivalent close/delete behavior and verified that PR
+#1 is closed, unmerged, and both disposable branch refs are missing. Future
+smokes must repeat cleanup proof for their own `run_id`.
 
 ## Fake Adapter Boundary
 

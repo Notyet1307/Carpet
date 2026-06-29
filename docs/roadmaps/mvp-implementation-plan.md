@@ -30,7 +30,7 @@ explicit gates.
   rollback notes.
 - Approval is action-scoped.
 - Memory update is proposal-only.
-- Further production Matrix integration, real Codex exec, real GitHub PR
+- Further production Matrix integration, real Codex exec, production GitHub PR
   creation, merge, deploy, secret access, and live memory writes are not allowed
   until their explicit follow-up gates pass.
 
@@ -51,20 +51,25 @@ listener pre-transaction `kill -0`/`lsof`/bound checks,
 `8008`/`8448`/`9009`, `generated-cleanup.txt`, and `cleanup-paths.stdout`.
 
 Production Matrix integration, persistent Runtime service, real room/user
-lifecycle automation, GitHub PR/API, deploy, and live memory write have not
-passed by this plan. Further real-service smoke execution remains a manual
-compatibility check requiring action-scoped human approval, disposable scoped
-credentials, and captured proof.
-MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
-MCR-730 records the GitHub PR smoke design only. Real GitHub PR smoke remains
-NO-GO because the current local `gh` credential is broad/non-disposable and the
-current GitHub PR path is still fake/contract-only.
+lifecycle automation, production GitHub PR/API, deploy, and live memory write
+have not passed by this plan. Further real-service smoke execution remains a
+manual compatibility check requiring action-scoped human approval, disposable
+scoped credentials, and captured proof. MCR-310 Codex proof remains separate and
+does not authorize Matrix smoke.
+
+MCR-730 has one completed disposable GitHub PR create smoke on 2026-06-29:
+PR #1 in `Notyet1307/github-pr-smoke-sandbox` was created, then closed without
+merge. Sandbox `main` stayed at
+`4438b7a905d12fead4f539e6faf349b8a2464f60`; disposable base/head branch refs no
+longer exist; `protect-main` remained active. The Runtime GitHub PR path remains
+fake/contract-only.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
-compatibility proof only; Matrix and GitHub remain fake, and memory stays
-proposal-only. Do not add an automatic commander loop or independent review
-lane.
+compatibility proof only; MCR-720 closes one Matrix-only local disposable proof;
+MCR-730 closes one sandbox GitHub PR create/cleanup proof. Runtime GitHub remains
+fake, and memory stays proposal-only. Do not add an automatic commander loop or
+independent review lane.
 
 ---
 
@@ -150,8 +155,8 @@ Exit criteria:
 - [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold, including
   manual-only disposable Synapse compose scaffold, plus one Matrix-only local
   disposable smoke pass on 2026-06-29
-- [ ] MCR-730 GitHub Disposable PR Smoke Run. Current status: design-only
-  preflight documented; real GitHub PR smoke is NO-GO.
+- [x] MCR-730 GitHub Disposable PR Smoke Run, including one sandbox PR create
+  pass and close/delete cleanup proof on 2026-06-29
 
 Satisfied scaffold prerequisites:
 
@@ -166,6 +171,13 @@ Satisfied scaffold prerequisites:
   one AppService transaction.
 - MCR-720 first run failed due listener lifecycle; the second run used a durable
   listener and direct transaction exit-code capture.
+- MCR-730 proof: PR #1 at
+  `https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/1`; base branch
+  `mcr-730-base-mcr-730-20260629t140000z-github-pr-smoke-01`; head branch
+  `mcr-730-head-mcr-730-20260629t140000z-github-pr-smoke-01`; sandbox `main`
+  SHA before/after cleanup
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`; PR closed unmerged; both
+  disposable branches deleted; `protect-main` ruleset active.
 
 Remaining manual smoke entry criteria for any further run:
 
