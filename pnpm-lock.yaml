@@ -17,6 +17,8 @@ importers:
 
   apps/matrix-appservice: {}
 
+  apps/runtime-orchestrator: {}
+
   apps/worker-runner: {}
 
   packages/approval-gate:
