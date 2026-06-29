@@ -1143,12 +1143,16 @@ Development Phase 5
 ```text
 MCR-300 codex worker input schema
 MCR-301 codex proof output schema
-MCR-302 codex exec command builder
+MCR-310 guarded real Codex exec smoke runner scaffold
 MCR-303 codex JSONL parser
 MCR-304 worktree preparation fake
 MCR-305 worker timeout and failure model
 MCR-306 codex worker contract tests
 ```
+
+`MCR-302` 是旧示例编号，不再作为当前计划使用。当前真实 Codex exec 入口是
+`MCR-310`，且只表示 guarded scaffold / manual smoke path，不表示真实 Codex
+smoke 已完成。
 
 Worker-runner requirement:
 
@@ -1419,11 +1423,16 @@ Development Phase 9-10
 MCR-700 local e2e fixture flow
 MCR-701 Matrix fake homeserver test
 MCR-702 fake Codex worker e2e
-MCR-703 real codex exec smoke test manual
+MCR-720 real-service compatibility smoke scaffold
 MCR-704 dogfood task: fix a small repo issue
 MCR-705 incident and recovery docs
 MCR-706 beta hardening checklist
 ```
+
+`MCR-703` 是旧示例编号，不再作为当前计划使用。当前 real-service smoke 路径是
+`MCR-720`，并且只表示 skipped-by-default scaffold / runbook；真实
+Matrix/Codex/GitHub smoke 仍需 action-scoped human approval、disposable scoped
+credentials 和 captured proof。
 
 给 Codex 的任务示例：
 
@@ -1456,7 +1465,7 @@ Phase exit criteria：
 
 ```text
 本地 fake E2E 可跑
-真实 codex exec 有人工 smoke test
+MCR-310/MCR-720 scaffold 存在，但真实 service smoke 未标记完成
 README 能指导新环境启动
 失败恢复路径清楚
 Beta 前安全 checklist 完成
@@ -1914,6 +1923,9 @@ manual smoke test 任务足够小
 让 Codex 修改一个无风险 fixture 或测试文件，生成 proof，不创建 PR。
 ```
 
+当前对应 task 是 `MCR-310`。它是 guarded scaffold / manual smoke path；
+默认运行和自动真实 Codex 执行都不允许。
+
 ---
 
 ## 15. 什么时候可以接真实 Matrix homeserver
@@ -2215,7 +2227,12 @@ Step 12 Phase 11：prompt / skill pack
 Step 13 Phase 12：MVP backlog and development entry gate
 ```
 
-Only after the relevant analysis gate is complete should Codex execute implementation MCRs such as `MCR-101`, `MCR-200`, `MCR-250`, `MCR-300`, `MCR-400`, or `MCR-700`.
+The local fake MVP implementation tasks through `MCR-700` are now historical
+completed baseline on `main`. Before scheduling new implementation work, read
+`docs/roadmaps/mvp-implementation-plan.md` and `docs/analysis/09-mvp-backlog.md`
+for current status. Real-service smoke uses `MCR-310` / `MCR-720` only as
+manual, opt-in scaffold paths; no real Matrix, Codex, GitHub, or service smoke
+is marked complete here.
 
 不要提前做：
 
