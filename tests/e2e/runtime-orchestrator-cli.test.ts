@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -9,9 +9,16 @@ import { fileURLToPath } from "node:url";
 
 import {
   runRuntimeOrchestrator,
+  runRuntimeOrchestratorFromMatrixEvent,
   proveMainCheckoutWorkCellRejected,
 } from "../../apps/runtime-orchestrator/src/index.ts";
+import {
+  createFixtureTransactionHandler,
+  FakeRuntimeEventQueue,
+  IdempotencyStore,
+} from "../../apps/matrix-appservice/src/transaction-handler.ts";
 import { readRuntimeStoreSnapshotFile } from "../../packages/runtime-store/src/index.ts";
+import { loadJsonFile } from "../../packages/runtime-contracts/src/index.ts";
 
 const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const mainCheckoutPath = "/Users/yet/Test_drive_sales/Carpet";
@@ -65,6 +72,75 @@ test("runtime orchestrator writes and reads a schema-valid local snapshot", asyn
   assert.equal(written.proof_refs[0]?.status, "verified");
   assert.equal(written.approval_refs[0]?.status, "consumed");
   assert.equal(written.artifact_refs.some((artifact) => artifact.kind === "pr"), true);
+});
+
+test("runtime orchestrator accepts one queued Matrix runtime event into a Runtime-owned snapshot", async () => {
+  const snapshotPath = tempSnapshotPath();
+  const { handler, queue } = buildMatrixHandler("success");
+
+  const outcome = handler.handle(readMatrixFixture("success").request);
+  assert.equal(outcome.runtimeEvents.length, 1);
+  assert.equal(queue.events.length, 1);
+
+  const result = await runRuntimeOrchestratorFromMatrixEvent({
+    repoRoot: root,
+    snapshotPath,
+    runtimeEvent: outcome.runtimeEvents[0],
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    return;
+  }
+
+  const written = await readRuntimeStoreSnapshotFile(snapshotPath);
+
+  assert.deepEqual(written, result.snapshot);
+  assert.equal(written.source_of_truth, "runtime");
+  assert.equal(written.tasks[0]?.task_id, "task_matrix_success_001");
+  assert.equal(written.tasks[0]?.trace_id, "trace_matrix_success_001");
+  assert.equal(written.tasks[0]?.workspace_id, "ws_carpet");
+  assert.equal(
+    written.tasks[0]?.source_matrix_event_ref,
+    "matrix-event://txn_success_001/event_success_001",
+  );
+  assert.equal(result.worker.status, "success");
+  assert.equal(result.proof_verification.ok, true);
+});
+
+test("Matrix ingress rejection paths produce no runtime orchestrator work", () => {
+  for (const name of [
+    "invalid-hs-token",
+    "invalid-schema",
+    "duplicate-transaction",
+    "duplicate-event",
+    "unknown-room",
+  ]) {
+    const { handler, queue } = buildMatrixHandler(name);
+    const outcome = handler.handle(readMatrixFixture(name).request);
+
+    assert.equal(outcome.runtimeEvents.length, 0, name);
+    assert.equal(queue.events.length, 0, name);
+  }
+});
+
+test("runtime orchestrator rejects spoofed Matrix actor data before task state", async () => {
+  const snapshotPath = tempSnapshotPath();
+  const { handler } = buildMatrixHandler("spoofed-actor");
+  const outcome = handler.handle(readMatrixFixture("spoofed-actor").request);
+
+  assert.equal(outcome.runtimeEvents.length, 1);
+
+  const result = await runRuntimeOrchestratorFromMatrixEvent({
+    repoRoot: root,
+    snapshotPath,
+    runtimeEvent: outcome.runtimeEvents[0],
+  });
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "actor_spoof_rejected");
+  }
+  assert.equal(existsSync(snapshotPath), false);
 });
 
 test("runtime orchestrator opt-in Codex smoke adapter uses injected runner and persists evidence refs", async () => {
@@ -241,3 +317,34 @@ function tempSnapshotPath(): string {
     "runtime-store.snapshot.json",
   );
 }
+
+function readMatrixFixture(name: string) {
+  return loadJsonFile(
+    path.join(root, "fixtures/matrix-transactions", `${name}.json`),
+  ) as MatrixTransactionFixture;
+}
+
+function buildMatrixHandler(name: string) {
+  const fixture = readMatrixFixture(name);
+  const queue = new FakeRuntimeEventQueue();
+  const handler = createFixtureTransactionHandler({
+    idempotencyStore: new IdempotencyStore(fixture.preexisting),
+    runtimeEventQueue: queue,
+  });
+
+  return { handler, queue };
+}
+
+type MatrixTransactionFixture = {
+  preexisting?: {
+    processed_transaction_ids?: string[];
+    processed_event_ids?: string[];
+  };
+  request: {
+    params: { txn_id: string };
+    headers: { authorization?: string };
+    body: {
+      events: unknown[];
+    };
+  };
+};

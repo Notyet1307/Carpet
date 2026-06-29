@@ -48,12 +48,18 @@ import {
   type WorktreeManager,
 } from "../../../packages/work-cell-manager/src/index.ts";
 import { createMemoryProposal } from "../../../workers/memory-curator-worker/src/index.ts";
+import type { RuntimeEvent } from "../../matrix-appservice/src/runtime-event-mapper.ts";
 
 export type RunRuntimeOrchestratorInput = {
   snapshotPath: string;
   repoRoot?: string;
   worker_adapter?: RuntimeWorkerAdapter;
 };
+
+export type RunRuntimeOrchestratorFromMatrixEventInput =
+  RunRuntimeOrchestratorInput & {
+    runtimeEvent: RuntimeEvent;
+  };
 
 type RuntimeWorkerAdapter = {
   type: "codex_exec_smoke";
@@ -84,21 +90,151 @@ const prTarget = {
   base_ref: "refs/heads/main",
 };
 
-export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput) {
+type RuntimeOrchestratorContext = {
+  now: string;
+  taskId: string;
+  runId: string;
+  traceId: string;
+  proofId: string;
+  approvalId: string;
+  baseSha: string;
+  workspaceId: string;
+  sourceMatrixEventRef: string;
+  taskCardId: string;
+  slug: string;
+  title: string;
+  storeId: string;
+  validationLogUri: string;
+  memoryProposalId: string;
+  memoryProposalEventId: string;
+};
+
+function defaultRuntimeContext(): RuntimeOrchestratorContext {
+  return {
+    now,
+    taskId,
+    runId,
+    traceId,
+    proofId,
+    approvalId,
+    baseSha,
+    workspaceId: "ws_carpet",
+    sourceMatrixEventRef: "matrix-event://mcr-800/local-task",
+    taskCardId: "MCR-800",
+    slug: "runtime-orchestrator-cli",
+    title: "MCR-800 Runtime Orchestrator CLI",
+    storeId: "runtime_store_mcr_800_runtime_orchestrator_cli",
+    validationLogUri,
+    memoryProposalId: "memory_proposal_mcr_800_runtime_orchestrator_cli",
+    memoryProposalEventId: "event_memory_proposal_mcr_800_runtime_orchestrator_cli",
+  };
+}
+
+function runtimeContextFromMatrixEvent(event: RuntimeEvent): RuntimeOrchestratorContext {
+  const suffix = sanitizeRuntimeId(`${event.matrix.transaction_id}_${event.matrix.event_id}`);
+
+  return {
+    ...defaultRuntimeContext(),
+    taskId: event.task_id as string,
+    runId: `run_${suffix}`,
+    traceId: event.trace_id,
+    proofId: `proof_${suffix}`,
+    approvalId: `approval_${suffix}`,
+    workspaceId: event.workspace_id as string,
+    sourceMatrixEventRef: `matrix-event://${sanitizeRuntimeId(
+      event.matrix.transaction_id,
+    )}/${sanitizeMatrixEventId(event.matrix.event_id)}`,
+    taskCardId: "MCR-820",
+    slug: "matrix-ingress-runtime-orchestrator",
+    title: "MCR-820 Matrix Ingress Runtime Orchestrator",
+    storeId: `runtime_store_${suffix}`,
+    validationLogUri: "artifact://mcr-820/validation-log",
+    memoryProposalId: `memory_proposal_${suffix}`,
+    memoryProposalEventId: `event_memory_proposal_${suffix}`,
+  };
+}
+
+function validateAcceptedMatrixRuntimeEvent(event: RuntimeEvent) {
+  if (
+    event.source_component !== "matrix_appservice_gateway" ||
+    event.source_of_truth !== "runtime" ||
+    event.event_type !== "runtime.intent.received" ||
+    event.validation.status !== "accepted" ||
+    event.enqueue.status !== "queued" ||
+    event.enqueue.target !== "runtime_intake" ||
+    event.workspace_id === null ||
+    event.task_id === null ||
+    event.matrix.room_mapping.status !== "mapped"
+  ) {
+    return {
+      ok: false as const,
+      code: "not_accepted_runtime_intent",
+      reason: "Matrix runtime event is not an accepted queued runtime intent",
+    };
+  }
+
+  if (
+    event.actor.derived_from !== "matrix.sender" ||
+    event.actor.id !== event.matrix.sender ||
+    (event.actor.claimed_actor !== null &&
+      event.actor.claimed_actor.id !== event.matrix.sender)
+  ) {
+    return {
+      ok: false as const,
+      code: "actor_spoof_rejected",
+      reason: "claimed actor data conflicts with Matrix sender",
+    };
+  }
+
+  return { ok: true as const };
+}
+
+function sanitizeRuntimeId(value: string) {
+  return value.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9_-]/g, "_");
+}
+
+function sanitizeMatrixEventId(value: string) {
+  return sanitizeRuntimeId(value);
+}
+
+export async function runRuntimeOrchestratorFromMatrixEvent(
+  input: RunRuntimeOrchestratorFromMatrixEventInput,
+) {
+  const accepted = validateAcceptedMatrixRuntimeEvent(input.runtimeEvent);
+
+  if (!accepted.ok) {
+    return {
+      ok: false as const,
+      snapshot_path: input.snapshotPath,
+      code: accepted.code,
+      reason: accepted.reason,
+    };
+  }
+
+  return {
+    ok: true as const,
+    ...(await runRuntimeOrchestrator(input, runtimeContextFromMatrixEvent(input.runtimeEvent))),
+  };
+}
+
+export async function runRuntimeOrchestrator(
+  input: RunRuntimeOrchestratorInput,
+  context = defaultRuntimeContext(),
+) {
   const root = input.repoRoot ?? repoRoot;
   const store = createInMemoryTaskStore();
-  const artifacts = createArtifactRecorder();
+  const artifacts = createArtifactRecorder(context);
 
   store.putTaskSnapshot({
-    task_id: taskId,
-    workspace_id: "ws_carpet",
-    trace_id: traceId,
+    task_id: context.taskId,
+    workspace_id: context.workspaceId,
+    trace_id: context.traceId,
     state: "created",
     risk: "medium",
     current_transition_id: null,
-    source_matrix_event_ref: "matrix-event://mcr-800/local-task",
-    created_at: now,
-    updated_at: now,
+    source_matrix_event_ref: context.sourceMatrixEventRef,
+    created_at: context.now,
+    updated_at: context.now,
     artifact_refs: [],
     proof_refs: [],
     approval_refs: [],
@@ -118,11 +254,11 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
 
   const policy = loadPolicy(path.join(root, "runtime/policies/repo-patch.yaml"));
   const policyDecision = decidePolicy(policy, {
-    task_id: taskId,
-    run_id: runId,
+    task_id: context.taskId,
+    run_id: context.runId,
     capability_id: route.capability.id,
     action: "repo:write_patch",
-    requested_at: now,
+    requested_at: context.now,
     worktree: { path: "../.worktrees/Carpet/MCR-800-runtime-orchestrator-cli" },
     scope: {
       allowed_paths: [
@@ -138,10 +274,11 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
     },
   });
 
-  transition(store, "created", "accepted", "task.accepted", "human");
-  transition(store, "accepted", "scoped", "task.scoped", "runtime");
-  transition(store, "scoped", "graph_compiled", "task.graph_compiled", "runtime");
+  transition(context, store, "created", "accepted", "task.accepted", "human");
+  transition(context, store, "accepted", "scoped", "task.scoped", "runtime");
+  transition(context, store, "scoped", "graph_compiled", "task.graph_compiled", "runtime");
   transition(
+    context,
     store,
     "graph_compiled",
     "capability_selected",
@@ -150,14 +287,14 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   );
 
   const workCell = createWorkCell({
-    task_id: taskId,
-    run_id: runId,
-    trace_id: traceId,
+    task_id: context.taskId,
+    run_id: context.runId,
+    trace_id: context.traceId,
     capability: route.capability.id,
-    task_card_id: "MCR-800",
-    slug: "runtime-orchestrator-cli",
+    task_card_id: context.taskCardId,
+    slug: context.slug,
     base_branch: "main",
-    base_sha: baseSha,
+    base_sha: context.baseSha,
     policy_decision: policyDecision,
     worktree_manager: createFakeWorktreeManager({ repo_name: "Carpet" }),
   });
@@ -167,6 +304,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   }
 
   transition(
+    context,
     store,
     "capability_selected",
     "work_cell_created",
@@ -174,13 +312,14 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
     "runtime",
   );
   transition(
+    context,
     store,
     "work_cell_created",
     "worker_dispatched",
     "worker.dispatched",
     "runtime",
   );
-  transition(store, "worker_dispatched", "running", "worker.started", "worker");
+  transition(context, store, "worker_dispatched", "running", "worker.started", "worker");
 
   let codexExecSmoke: CodexExecSmokeResult | undefined;
   let finalOutput;
@@ -195,15 +334,15 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
     codexExecSmoke = await runCodexExecSmoke(
       {
         ...adapter,
-        task_id: taskId,
-        run_id: runId,
+        task_id: context.taskId,
+        run_id: context.runId,
       },
       processRunner,
     );
     proofArtifactRecords = recordCodexExecSmokeArtifacts(artifacts, codexExecSmoke);
     finalOutputArtifact = proofArtifactRecords[1];
     validationLog = proofArtifactRecords[2] as ArtifactRefRecord;
-    worker = workerResultFromCodexExecSmoke(codexExecSmoke);
+    worker = workerResultFromCodexExecSmoke(context, codexExecSmoke);
     finalOutput = worker.final_output;
   } else {
     const jsonl = await readFile(path.join(root, "fixtures/codex-jsonl/success.jsonl"), "utf8");
@@ -212,9 +351,9 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
       "artifact_mcr_800_validation_log",
       "log",
       "contracts passed",
-      validationLogUri,
+      context.validationLogUri,
     );
-    finalOutput = await createFinalOutput(root);
+    finalOutput = await createFinalOutput(root, context);
     finalOutputArtifact = artifacts.add(
       "artifact_mcr_800_final_output",
       "report",
@@ -232,6 +371,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
 
   if (worker.status !== "success") {
     transition(
+      context,
       store,
       "running",
       worker.status === "blocked" ? "needs_human_input" : "worker_failed",
@@ -255,11 +395,11 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   }
 
   const proofBuild = createProofFromWorkerArtifacts({
-    proof_id: proofId,
-    task_id: taskId,
-    run_id: runId,
-    trace_id: traceId,
-    created_at: now,
+    proof_id: context.proofId,
+    task_id: context.taskId,
+    run_id: context.runId,
+    trace_id: context.traceId,
+    created_at: context.now,
     capability: route.capability.id,
     forbidden_paths: [".env*", "secrets/**"],
     worktree: {
@@ -267,7 +407,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
       branch: workCell.work_cell.worktree.branch,
       base_branch: workCell.work_cell.worktree.base_branch,
       base_sha: workCell.work_cell.worktree.base_sha,
-      head_sha: baseSha,
+      head_sha: context.baseSha,
       cleanup_status: "kept_for_review",
     },
     artifacts: proofArtifactRecords.map(toProofArtifact),
@@ -279,6 +419,7 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   }
 
   transition(
+    context,
     store,
     "running",
     "artifact_submitted",
@@ -287,25 +428,31 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
     { artifact_ref: finalOutputArtifact.artifact_id },
   );
   transition(
+    context,
     store,
     "artifact_submitted",
     "proof_submitted",
     "proof.submitted",
     "worker",
-    { artifact_ref: finalOutputArtifact.artifact_id, proof_ref: proofId },
+    { artifact_ref: finalOutputArtifact.artifact_id, proof_ref: context.proofId },
   );
   transition(
+    context,
     store,
     "proof_submitted",
     "verifying",
     "verification.started",
     "verifier",
-    { proof_ref: proofId },
+    { proof_ref: context.proofId },
   );
 
   const ledger = createInMemoryProofLedger();
   const appended = ledger.append(proofBuild.proof, {
-    expected: { task_id: taskId, run_id: runId, trace_id: traceId },
+    expected: {
+      task_id: context.taskId,
+      run_id: context.runId,
+      trace_id: context.traceId,
+    },
     changed_files: finalOutput.files_changed,
   });
 
@@ -315,35 +462,40 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
 
   const proofVerification = verifyProof({
     proof: proofBuild.proof,
-    expected: { task_id: taskId, run_id: runId, trace_id: traceId },
+    expected: {
+      task_id: context.taskId,
+      run_id: context.runId,
+      trace_id: context.traceId,
+    },
   });
 
   transition(
+    context,
     store,
     "verifying",
     "waiting_approval",
     "approval.requested",
     "runtime",
-    { proof_ref: proofId },
+    { proof_ref: context.proofId },
   );
 
   const approvalGate = createInMemoryApprovalGate({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
-    verified_proof_ids: new Set([proofId]),
+    verified_proof_ids: new Set([context.proofId]),
   });
   const githubAdapter = createFakeGitHubPrAdapter({ approvalGate });
   const pullRequest = {
-    task_id: taskId,
+    task_id: context.taskId,
     proof: proofBuild.proof,
     target: prTarget,
-    title: "MCR-800 Runtime Orchestrator CLI",
+    title: context.title,
     requested_at: "2026-06-29T10:05:00.000Z",
   };
   const approvalBeforeGrant = githubAdapter.createPullRequest(pullRequest);
   const approval = {
-    approval_id: approvalId,
-    task_id: taskId,
-    proof_id: proofId,
+    approval_id: context.approvalId,
+    task_id: context.taskId,
+    proof_id: context.proofId,
     action: "create_pr",
     actor: { type: "human" as const, id: "@lead:carpet.test" },
     target: prTarget,
@@ -354,12 +506,13 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   const approvalGrant = approvalGate.grant(approval);
 
   transition(
+    context,
     store,
     "waiting_approval",
     "approved",
     "approval.granted",
     "human",
-    { proof_ref: proofId, approval_ref: approvalId },
+    { proof_ref: context.proofId, approval_ref: context.approvalId },
   );
 
   const approvalAfterGrant = githubAdapter.createPullRequest(pullRequest);
@@ -376,22 +529,23 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
   );
 
   transition(
+    context,
     store,
     "approved",
     "pr_created",
     "github.pr.create_requested",
     "runtime",
-    { proof_ref: proofId, approval_ref: approvalId },
+    { proof_ref: context.proofId, approval_ref: context.approvalId },
   );
-  transition(store, "pr_created", "completed", "task.completed", "runtime", {
+  transition(context, store, "pr_created", "completed", "task.completed", "runtime", {
     artifact_ref: prArtifact.artifact_id,
-    proof_ref: proofId,
-    approval_ref: approvalId,
+    proof_ref: context.proofId,
+    approval_ref: context.approvalId,
   });
 
   const memoryProposal = createMemoryProposal({
     proof: proofBuild.proof,
-    verified_proof_ids: new Set([proofId]),
+    verified_proof_ids: new Set([context.proofId]),
     lesson: {
       reusable: true,
       scope: "Carpet MCR runtime orchestrator",
@@ -400,22 +554,23 @@ export async function runRuntimeOrchestrator(input: RunRuntimeOrchestratorInput)
       review_target: "memory://carpet/mcr",
       confidence: "medium",
     },
-    proposal_id: "memory_proposal_mcr_800_runtime_orchestrator_cli",
-    event_id: "event_memory_proposal_mcr_800_runtime_orchestrator_cli",
-    created_at: now,
-    workspace_id: "ws_carpet",
+    proposal_id: context.memoryProposalId,
+    event_id: context.memoryProposalEventId,
+    created_at: context.now,
+    workspace_id: context.workspaceId,
   });
   const snapshot = exportRuntimeStoreSnapshot(store, {
-    store_id: "runtime_store_mcr_800_runtime_orchestrator_cli",
-    created_at: now,
+    store_id: context.storeId,
+    created_at: context.now,
     proof_refs: [
       proofRef(
+        context,
         proofBuild.proof,
         validationLog.uri,
         proofArtifactRecords.map((artifact) => artifact.artifact_id),
       ),
     ],
-    approval_refs: [approvalRef()],
+    approval_refs: [approvalRef(context)],
     artifact_refs: artifacts.records(),
   });
 
@@ -460,16 +615,16 @@ export function proveMainCheckoutWorkCellRejected() {
   });
 }
 
-async function createFinalOutput(root: string) {
+async function createFinalOutput(root: string, context: RuntimeOrchestratorContext) {
   const fixture = JSON.parse(
     await readFile(path.join(root, "fixtures/codex/valid/repo-patch-result.valid.json"), "utf8"),
   ) as Record<string, unknown>;
 
   return {
     ...fixture,
-    task_id: taskId,
-    run_id: runId,
-    root_cause: "MCR-800 needs one Runtime-owned local entrypoint.",
+    task_id: context.taskId,
+    run_id: context.runId,
+    root_cause: `${context.taskCardId} needs one Runtime-owned local entrypoint.`,
     changes_made: ["Added a local runtime orchestrator CLI."],
     files_changed: [
       { path: "apps/runtime-orchestrator/src/index.ts", action: "added" },
@@ -481,7 +636,7 @@ async function createFinalOutput(root: string) {
         command: "pnpm test:contracts",
         exit_code: 0,
         summary: "Contract tests passed.",
-        log_ref: validationLogUri,
+        log_ref: context.validationLogUri,
       },
     ],
     validation_results: [
@@ -490,7 +645,7 @@ async function createFinalOutput(root: string) {
         exit_code: 0,
         status: "passed",
         summary: "Contract tests passed.",
-        log_ref: validationLogUri,
+        log_ref: context.validationLogUri,
       },
     ],
     diff_summary: {
@@ -506,7 +661,7 @@ async function createFinalOutput(root: string) {
       {
         target: "memory://carpet/mcr",
         proposal: "Runtime orchestrator CLI composes fake adapters before real services.",
-        evidence_ref: validationLogUri,
+        evidence_ref: context.validationLogUri,
         requires_human_review: true,
       },
     ],
@@ -553,6 +708,7 @@ function recordCodexExecSmokeArtifacts(
 }
 
 function workerResultFromCodexExecSmoke(
+  context: RuntimeOrchestratorContext,
   result: CodexExecSmokeResult,
 ): WorkerRunnerResult {
   const artifact_refs = {
@@ -592,8 +748,8 @@ function workerResultFromCodexExecSmoke(
     ],
     final_output: {
       status: "success",
-      task_id: taskId,
-      run_id: runId,
+      task_id: context.taskId,
+      run_id: context.runId,
       ready_for_review: true,
       files_changed: [],
       validation_results: [
@@ -615,6 +771,7 @@ function workerResultFromCodexExecSmoke(
 }
 
 function transition(
+  context: RuntimeOrchestratorContext,
   store: InMemoryTaskStore,
   from: TaskStateName,
   to: TaskStateName,
@@ -628,16 +785,16 @@ function transition(
 ) {
   const result = store.appendTransition({
     command_id: `cmd_${from}_to_${to}`,
-    task_id: taskId,
+    task_id: context.taskId,
     expected_state: from,
-    occurred_at: now,
+    occurred_at: context.now,
     transition: {
       transition_id: `transition_${from}_to_${to}`,
-      task_id: taskId,
+      task_id: context.taskId,
       from,
       to,
       trigger_event: trigger,
-      actor: { type: actor, id: `${actor}_mcr_800` },
+      actor: { type: actor, id: `${actor}_${context.taskCardId.toLowerCase()}` },
       requirements: {
         artifact_ref: refs.artifact_ref ?? null,
         proof_ref: refs.proof_ref ?? null,
@@ -646,7 +803,7 @@ function transition(
       audit_event: {
         type: `task.transition.${to}`,
         event_id: `event_${from}_to_${to}`,
-        trace_id: traceId,
+        trace_id: context.traceId,
       },
     },
   });
@@ -656,7 +813,7 @@ function transition(
   }
 }
 
-function createArtifactRecorder() {
+function createArtifactRecorder(context: RuntimeOrchestratorContext) {
   const records: ArtifactRefRecord[] = [];
 
   return {
@@ -669,14 +826,14 @@ function createArtifactRecorder() {
       const record: ArtifactRefRecord = {
         record_type: "artifact_ref",
         artifact_id,
-        task_id: taskId,
-        run_id: runId,
+        task_id: context.taskId,
+        run_id: context.runId,
         kind,
         uri,
         sha256: createHash("sha256").update(content).digest("hex"),
         size_bytes: Buffer.byteLength(content),
         content_type: "application/json",
-        created_at: now,
+        created_at: context.now,
       };
 
       records.push(record);
@@ -697,6 +854,7 @@ function toProofArtifact(record: ArtifactRefRecord): ProofArtifact {
 }
 
 function proofRef(
+  context: RuntimeOrchestratorContext,
   proof: ProofLedgerEntry,
   validationLogRef: string,
   artifactRefs = [
@@ -712,7 +870,7 @@ function proofRef(
     run_id: proof.run_id,
     trace_id: proof.trace_id,
     status: "verified" as const,
-    ledger_uri: `proof://mcr-800/${proof.proof_id}`,
+    ledger_uri: `proof://${context.taskCardId.toLowerCase()}/${proof.proof_id}`,
     artifact_refs: artifactRefs,
     validation_summary: {
       command_count: proof.validation.length,
@@ -720,23 +878,23 @@ function proofRef(
       log_refs: [validationLogRef],
     },
     created_at: proof.created_at,
-    verified_at: now,
+    verified_at: context.now,
   };
 }
 
-function approvalRef() {
+function approvalRef(context: RuntimeOrchestratorContext) {
   return {
     record_type: "approval_ref" as const,
-    approval_id: approvalId,
-    task_id: taskId,
-    proof_id: proofId,
+    approval_id: context.approvalId,
+    task_id: context.taskId,
+    proof_id: context.proofId,
     action: "create_pr" as const,
     status: "consumed" as const,
     actor: { type: "human" as const, id: "@lead:carpet.test" },
     target: prTarget,
     conditions: ["Create only the simulated PR record."],
     replay_key_hash: createHash("sha256")
-      .update([taskId, runId, "create_pr", prTarget.ref, proofId].join(":"))
+      .update([context.taskId, context.runId, "create_pr", prTarget.ref, context.proofId].join(":"))
       .digest("hex"),
     created_at: "2026-06-29T10:04:00.000Z",
     expires_at: "2026-06-29T11:00:00.000Z",
