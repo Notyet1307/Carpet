@@ -52,6 +52,9 @@ importers:
 
   packages/runtime-store:
     dependencies:
+      runtime-contracts:
+        specifier: workspace:*
+        version: link:../runtime-contracts
       state-machine:
         specifier: workspace:*
         version: link:../state-machine

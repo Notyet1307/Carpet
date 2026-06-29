@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   applyTaskTransition,
   type TaskRisk,
@@ -8,9 +9,14 @@ import {
 
 export type TaskSnapshot = {
   task_id: string;
+  workspace_id?: string;
+  trace_id?: string;
   state: TaskStateName;
   risk: TaskRisk;
   current_transition_id: string | null;
+  source_matrix_event_ref?: string | null;
+  created_at?: string;
+  updated_at?: string;
   artifact_refs: string[];
   proof_refs: string[];
   approval_refs: string[];
@@ -21,6 +27,7 @@ export type AppendTransitionCommand = {
   task_id: string;
   expected_state: TaskStateName;
   transition: TaskStateTransition;
+  occurred_at?: string;
 };
 
 export type TransitionRecord = {
@@ -29,6 +36,19 @@ export type TransitionRecord = {
   task_id: string;
   transition: TaskStateTransition;
   task_snapshot: TaskSnapshot;
+  occurred_at?: string;
+};
+
+export type IdempotencyKeyRecord = {
+  record_type: "idempotency_key";
+  idempotency_key: string;
+  scope: "runtime_command";
+  operation: string;
+  request_hash: string;
+  result_ref: string;
+  status: "applied" | "duplicate" | "rejected" | "retryable_failure";
+  first_seen_at: string;
+  last_seen_at: string;
 };
 
 export type StoreTransitionErrorCode =
@@ -53,8 +73,10 @@ export type AppendTransitionResult =
 export type InMemoryTaskStore = {
   putTaskSnapshot(snapshot: TaskSnapshot): TaskSnapshot;
   getTaskSnapshot(task_id: string): TaskSnapshot | null;
+  listTaskSnapshots(): TaskSnapshot[];
   appendTransition(command: AppendTransitionCommand): AppendTransitionResult;
   listTransitionRecords(task_id: string): TransitionRecord[];
+  listIdempotencyRecords(): IdempotencyKeyRecord[];
   reset(): void;
 };
 
@@ -62,6 +84,7 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
   const tasks = new Map<string, TaskSnapshot>();
   const recordsByTask = new Map<string, TransitionRecord[]>();
   const commandResults = new Map<string, AppendTransitionResult>();
+  const idempotencyRecords = new Map<string, IdempotencyKeyRecord>();
 
   // ponytail: process-local Map store with O(n) current-transition lookup; use durable indexed storage when real concurrency/replay matters.
   return {
@@ -80,6 +103,10 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
       return task ? cloneSnapshot(task) : null;
     },
 
+    listTaskSnapshots() {
+      return [...tasks.values()].map(cloneSnapshot);
+    },
+
     appendTransition(command) {
       const priorResult = commandResults.get(command.command_id);
 
@@ -92,12 +119,14 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
       if (!task) {
         const result = fail("task_not_found", "task_not_found", null);
         commandResults.set(command.command_id, result);
+        idempotencyRecords.set(command.command_id, idempotencyRecord(command, "rejected"));
         return cloneResult(result);
       }
 
       if (task.state !== command.expected_state) {
         const result = fail("stale_expected_state", "stale_expected_state", task);
         commandResults.set(command.command_id, result);
+        idempotencyRecords.set(command.command_id, idempotencyRecord(command, "rejected"));
         return cloneResult(result);
       }
 
@@ -113,6 +142,7 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
       if (!applied.ok) {
         const result = fail(applied.code, applied.message, task);
         commandResults.set(command.command_id, result);
+        idempotencyRecords.set(command.command_id, idempotencyRecord(command, "rejected"));
         return cloneResult(result);
       }
 
@@ -124,6 +154,9 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
         },
         transition,
       );
+      if (command.occurred_at) {
+        nextTask.updated_at = command.occurred_at;
+      }
       const record =
         applied.kind === "applied"
           ? {
@@ -132,6 +165,7 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
               task_id: command.task_id,
               transition,
               task_snapshot: cloneSnapshot(nextTask),
+              occurred_at: command.occurred_at,
             }
           : null;
 
@@ -150,6 +184,14 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
       };
 
       commandResults.set(command.command_id, result);
+      idempotencyRecords.set(
+        command.command_id,
+        idempotencyRecord(
+          command,
+          applied.kind === "applied" ? "applied" : "duplicate",
+          record?.transition.transition_id ?? task.current_transition_id,
+        ),
+      );
       return cloneResult(result);
     },
 
@@ -157,10 +199,15 @@ export function createInMemoryTaskStore(): InMemoryTaskStore {
       return (recordsByTask.get(task_id) ?? []).map(cloneRecord);
     },
 
+    listIdempotencyRecords() {
+      return [...idempotencyRecords.values()].map(cloneIdempotencyRecord);
+    },
+
     reset() {
       tasks.clear();
       recordsByTask.clear();
       commandResults.clear();
+      idempotencyRecords.clear();
     },
   };
 }
@@ -223,7 +270,7 @@ function sanitizeTransition(transition: TaskStateTransition): TaskStateTransitio
 }
 
 function cloneSnapshot(snapshot: TaskSnapshot): TaskSnapshot {
-  return {
+  const cloned: TaskSnapshot = {
     task_id: snapshot.task_id,
     state: snapshot.state,
     risk: snapshot.risk,
@@ -232,16 +279,40 @@ function cloneSnapshot(snapshot: TaskSnapshot): TaskSnapshot {
     proof_refs: [...snapshot.proof_refs],
     approval_refs: [...snapshot.approval_refs],
   };
+
+  if (snapshot.workspace_id !== undefined) {
+    cloned.workspace_id = snapshot.workspace_id;
+  }
+  if (snapshot.trace_id !== undefined) {
+    cloned.trace_id = snapshot.trace_id;
+  }
+  if (snapshot.source_matrix_event_ref !== undefined) {
+    cloned.source_matrix_event_ref = snapshot.source_matrix_event_ref;
+  }
+  if (snapshot.created_at !== undefined) {
+    cloned.created_at = snapshot.created_at;
+  }
+  if (snapshot.updated_at !== undefined) {
+    cloned.updated_at = snapshot.updated_at;
+  }
+
+  return cloned;
 }
 
 function cloneRecord(record: TransitionRecord): TransitionRecord {
-  return {
+  const cloned: TransitionRecord = {
     sequence: record.sequence,
     command_id: record.command_id,
     task_id: record.task_id,
     transition: sanitizeTransition(record.transition),
     task_snapshot: cloneSnapshot(record.task_snapshot),
   };
+
+  if (record.occurred_at !== undefined) {
+    cloned.occurred_at = record.occurred_at;
+  }
+
+  return cloned;
 }
 
 function cloneResult(result: AppendTransitionResult): AppendTransitionResult {
@@ -262,4 +333,52 @@ function cloneResult(result: AppendTransitionResult): AppendTransitionResult {
       ? cloneRecord(result.transition_record)
       : null,
   };
+}
+
+function idempotencyRecord(
+  command: AppendTransitionCommand,
+  status: IdempotencyKeyRecord["status"],
+  transitionId?: string | null,
+): IdempotencyKeyRecord {
+  const seenAt = command.occurred_at ?? "1970-01-01T00:00:00.000Z";
+
+  return {
+    record_type: "idempotency_key",
+    idempotency_key: `runtime:${command.command_id}`,
+    scope: "runtime_command",
+    operation: command.transition.trigger_event,
+    request_hash: hashJson({
+      task_id: command.task_id,
+      expected_state: command.expected_state,
+      transition: sanitizeTransition(command.transition),
+    }),
+    result_ref: transitionId
+      ? `transition:${transitionId}`
+      : `runtime_event:${safeRefPart(command.command_id)}`,
+    status,
+    first_seen_at: seenAt,
+    last_seen_at: seenAt,
+  };
+}
+
+function cloneIdempotencyRecord(record: IdempotencyKeyRecord): IdempotencyKeyRecord {
+  return {
+    record_type: "idempotency_key",
+    idempotency_key: record.idempotency_key,
+    scope: record.scope,
+    operation: record.operation,
+    request_hash: record.request_hash,
+    result_ref: record.result_ref,
+    status: record.status,
+    first_seen_at: record.first_seen_at,
+    last_seen_at: record.last_seen_at,
+  };
+}
+
+function hashJson(value: unknown): string {
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function safeRefPart(value: string): string {
+  return value.replace(/[^A-Za-z0-9_-]/g, "_") || "unknown";
 }
