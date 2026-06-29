@@ -9,6 +9,15 @@ import addFormats from "ajv-formats";
 
 const root = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const schemaId = "https://notyet.dev/schemas/codex/repo-patch-result.schema.json";
+const smokeSchemaId =
+  "https://notyet.dev/schemas/codex/codex-exec-smoke-result.schema.json";
+const codexCliDisallowedKeywords = new Set([
+  "allOf",
+  "if",
+  "then",
+  "contains",
+  "not",
+]);
 
 function readJson(relativePath) {
   return JSON.parse(readFileSync(path.join(root, relativePath), "utf8"));
@@ -18,7 +27,26 @@ function createAjv() {
   const ajv = new Ajv({ allErrors: true, strict: true });
   addFormats(ajv);
   ajv.addSchema(readJson("schemas/codex/repo-patch-result.schema.json"));
+  ajv.addSchema(readJson("schemas/codex/codex-exec-smoke-result.schema.json"));
   return ajv;
+}
+
+function findDisallowedKeywords(value, location = "$") {
+  if (Array.isArray(value)) {
+    return value.flatMap((item, index) =>
+      findDisallowedKeywords(item, `${location}[${index}]`),
+    );
+  }
+
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  return Object.entries(value).flatMap(([key, child]) => {
+    const childLocation = `${location}.${key}`;
+    const current = codexCliDisallowedKeywords.has(key) ? [childLocation] : [];
+    return current.concat(findDisallowedKeywords(child, childLocation));
+  });
 }
 
 function baseResult(overrides = {}) {
@@ -65,12 +93,51 @@ function baseResult(overrides = {}) {
   };
 }
 
+function baseSmokeResult(overrides = {}) {
+  const { root_cause, memory_update_proposals, ...result } = baseResult();
+  void root_cause;
+  void memory_update_proposals;
+  return {
+    ...result,
+    ...overrides,
+  };
+}
+
 test("repo patch result schema is a valid JSON Schema", () => {
   const ajv = createAjv();
 
   assert.equal(
     ajv.validateSchema(readJson("schemas/codex/repo-patch-result.schema.json")),
     true,
+  );
+});
+
+test("codex exec smoke schema is valid and avoids Codex CLI-disallowed keywords", () => {
+  const smokeSchema = readJson("schemas/codex/codex-exec-smoke-result.schema.json");
+  const ajv = createAjv();
+
+  assert.equal(ajv.validateSchema(smokeSchema), true);
+  assert.deepEqual(findDisallowedKeywords(smokeSchema), []);
+});
+
+test("codex exec smoke schema accepts the smoke handoff fields", () => {
+  const validate = createAjv().getSchema(smokeSchemaId);
+
+  assert.equal(validate(baseSmokeResult()), true, JSON.stringify(validate.errors, null, 2));
+  assert.equal(
+    validate(
+      baseSmokeResult({
+        validation_results: [
+          {
+            command: "pnpm test:contracts",
+            status: "passed",
+            summary: "Contract tests passed.",
+          },
+        ],
+      }),
+    ),
+    false,
+    "smoke validation evidence without exit_code must reject",
   );
 });
 

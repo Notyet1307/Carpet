@@ -1,6 +1,6 @@
 import path from "node:path";
 
-const outputSchema = "./schemas/codex/repo-patch-result.schema.json";
+const outputSchema = "./schemas/codex/codex-exec-smoke-result.schema.json";
 const secretEnvKeyPattern =
   /(TOKEN|SECRET|PASSWORD|CREDENTIAL|COOKIE|SESSION|API_KEY|ACCESS_KEY|PRIVATE_KEY|AUTH)/i;
 const secretEnvValuePattern = /(sk-[a-z0-9_-]+|BEGIN [A-Z ]*PRIVATE KEY)/i;

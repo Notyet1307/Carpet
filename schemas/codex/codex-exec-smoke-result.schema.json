@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/codex/codex-exec-smoke-result.schema.json",
+  "title": "Codex Exec Smoke Result",
+  "type": "object",
+  "required": [
+    "status",
+    "task_id",
+    "run_id",
+    "changes_made",
+    "files_changed",
+    "commands_run",
+    "validation_results",
+    "diff_summary",
+    "risk_notes",
+    "rollback_notes",
+    "security_notes",
+    "blockers",
+    "ready_for_review"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "failed", "blocked", "needs_human_input"]
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "changes_made": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "action"],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["added", "modified", "deleted", "renamed"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exit_code", "summary"],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "validation_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exit_code", "status", "summary"],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "failed", "skipped"]
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "diff_summary": {
+      "type": "object",
+      "required": ["summary", "files_added", "files_modified", "files_deleted"],
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "files_added": {
+          "type": "integer"
+        },
+        "files_modified": {
+          "type": "integer"
+        },
+        "files_deleted": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "risk_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rollback_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "security_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ready_for_review": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

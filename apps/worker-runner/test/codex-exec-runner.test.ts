@@ -30,7 +30,7 @@ test("builds codex exec command with worktree cwd and required CLI flags", () =>
     "--sandbox",
     "workspace-write",
     "--output-schema",
-    "./schemas/codex/repo-patch-result.schema.json",
+    "./schemas/codex/codex-exec-smoke-result.schema.json",
     "-",
   ]);
   equal(command.stdin_file, ".mcr/runs/run_mcr_310_smoke/task.md");

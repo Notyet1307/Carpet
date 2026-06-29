@@ -17,7 +17,7 @@ The runner builds this command shape:
 codex exec \
   --json \
   --sandbox workspace-write \
-  --output-schema ./schemas/codex/repo-patch-result.schema.json \
+  --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json \
   -
 ```
 
@@ -56,7 +56,7 @@ For `evidence_dir=.mcr/runs/<run_id>`, record these refs before execution:
 6. Pass only a minimal explicit environment, such as `PATH`.
 7. Capture stdout JSONL, final output, validation log, diff, and proof refs.
 8. Validate final output against
-   `./schemas/codex/repo-patch-result.schema.json`.
+   `./schemas/codex/codex-exec-smoke-result.schema.json`.
 9. Stop before PR creation, push, merge, deploy, Matrix real-service writes, or
    memory writes.
 
