@@ -47,6 +47,14 @@ append-only transitions, idempotency keys, proof refs, approval refs, and
 artifact refs. It is contract-only: no Postgres startup, database service, SQL
 migration, Matrix/GitHub/Codex call, or live memory write is introduced.
 
+MCR-105 is merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`.
+It adds a Runtime Store snapshot exporter from the in-memory task store to the
+durable schema envelope. The export is schema-valid and ref-only: it carries
+task, transition, idempotency, proof, approval, and artifact references, not raw
+logs, diffs, Matrix event bodies, token material, or live memory writes. It does
+not add file persistence, DB persistence, Postgres, migrations, a persistent
+Runtime service, or Matrix/GitHub/Codex external calls.
+
 MCR-720 scope was exactly local disposable Synapse, a local AppService listener,
 and one AppService transaction. Evidence:
 `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
@@ -114,6 +122,7 @@ Exit criteria:
 - [x] MCR-100 Runtime State Machine Package
 - [x] MCR-101 In-Memory Runtime Task Store
 - [x] MCR-104 Durable Runtime Store Schema Contract
+- [x] MCR-105 Runtime Store Snapshot Exporter
 - [x] MCR-250 Capability Registry Loader And Router
 - [x] MCR-260 Minimal Policy Engine
 - [x] MCR-270 Work Cell Manager With Fake Worktree Manager
@@ -125,6 +134,9 @@ Exit criteria:
 - Durable Runtime Store records are schema-contracted before any database
   implementation, and unsafe raw logs, raw diffs, secrets, Matrix event bodies,
   and GitHub token material are rejected by contract fixtures.
+- The in-memory Runtime Store can export a schema-valid, ref-only durable
+  snapshot; persistence of that snapshot to files or a database remains future
+  work.
 - No database, real git worktree execution, real worker process, or external
   adapter exists yet.
 

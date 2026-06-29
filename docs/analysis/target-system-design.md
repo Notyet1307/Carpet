@@ -70,7 +70,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Matrix projection adapter | implemented fake | `apps/matrix-appservice/src/projection-adapter.ts` | No real Matrix send-event path. |
 | Runtime event queue | implemented fake | `tests/e2e/fakes/fake-runtime-event-queue.ts` | No durable queue or replay worker. |
 | Runtime task state machine | implemented fake | `packages/state-machine/**` | No production Runtime API or durable transaction boundary. |
-| Runtime task store | implemented fake | `packages/runtime-store/src/in-memory-task-store.ts` | No Postgres store, migrations, locking, or replay recovery. |
+| Runtime task store | implemented fake; ref-only snapshot exporter merged | `packages/runtime-store/src/in-memory-task-store.ts`, `packages/runtime-store/src/durable-snapshot-exporter.ts`, `packages/runtime-store/test/durable-snapshot-exporter.test.ts` | No file persistence, DB persistence, Postgres store, migrations, locking, replay recovery, or persistent Runtime service. |
 | Capability registry and router | implemented fake | `packages/capability-router/**`, `runtime/capabilities.yaml` | No service-side graph compiler or runtime dispatch API. |
 | Policy engine | implemented fake | `packages/policy-engine/**`, `runtime/policies/*.yaml` | No production policy service, no external identity or secret broker. |
 | Work Cell manager | implemented fake | `packages/work-cell-manager/src/fake-worktree-manager.ts` | No real git worktree create/remove implementation in the Runtime path. |
@@ -84,7 +84,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02` | Default path remains skipped; proof is local disposable compatibility only. |
 | Real Matrix integration | local disposable smoke proof only | MCR-720 run id `mcr-720-20260629t130000z-matrix-smoke-02`: local Synapse, local AppService listener, one transaction | Production Matrix integration, persistent Runtime service, and room/user lifecycle automation remain not implemented. |
 | Real GitHub PR integration | disposable PR create smoke passed once | MCR-730 created PR #1 in `Notyet1307/github-pr-smoke-sandbox`, then closed it unmerged and deleted both disposable branches | Runtime adapter remains fake/in-memory; this proves one manual sandbox `gh` create/cleanup path only, not production GitHub integration. |
-| Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only | Needs separate persistence vertical slice. |
+| Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only; Runtime Store can export a schema-valid ref-only snapshot | Needs separate file or DB persistence vertical slice. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
 
 ## Fake MVP To Real System Evolution
@@ -101,12 +101,40 @@ Replace one fake boundary at a time:
    proof, not a production Matrix path.
 3. Keep the MCR-730 disposable GitHub PR create smoke proof as one sandbox
    compatibility proof, not a Runtime GitHub adapter implementation.
-4. Add durable Runtime storage only after the adapter gates still preserve the
+4. Treat MCR-105 Runtime Store snapshot export as a ref-only bridge from the
+   in-memory store to the durable schema contract. Add file or DB persistence
+   only as a later vertical slice after the adapter gates still preserve the
    same state, proof, approval, and memory boundaries.
 
 Do not start with broad service orchestration. Do not add an automatic commander
 loop. Do not add a separate review lane. The existing verifier/proof path is the
 review boundary for the next slice.
+
+## MCR-105 Runtime Store Snapshot Export Boundary
+
+MCR-105 is merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. It
+adds `exportRuntimeStoreSnapshot(...)`, which exports current in-memory Runtime
+Store state into the durable Runtime Store schema envelope.
+
+That closes one local contract proof only:
+
+```text
+in-memory Runtime task store
+-> task snapshots and append-only transition records
+-> runtime command idempotency records
+-> supplied proof, approval, and artifact refs
+-> schema-valid durable Runtime Store snapshot
+```
+
+The snapshot remains ref-only. It must not embed raw logs, raw diffs, Matrix
+event bodies, PR bodies, worker stdout/stderr, token material, or live memory
+content. The exporter rejects unsafe strings that would leak those classes of
+data into exported fields.
+
+This does not implement file persistence, DB persistence, Postgres startup,
+SQL migrations, a persistent Runtime service, Matrix/GitHub/Codex external
+calls, or live memory writes. Persisting exported snapshots to files or a
+database remains future work.
 
 ## MCR-310 Closeout Boundary
 

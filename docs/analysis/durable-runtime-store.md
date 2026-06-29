@@ -1,13 +1,17 @@
-# Durable Runtime Store Schema Contract
+# Durable Runtime Store Schema Contract And Snapshot Export
 
 Version: 2026-06-29
 
-Task ID: MCR-104
+Task ID: MCR-104 / MCR-105
 
 ## Purpose
 
 This document defines the minimum durable Runtime Store schema contract before a
 database service, Postgres startup, or migrations exist.
+
+MCR-105 is merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. It adds
+a snapshot exporter from the in-memory Runtime Store to this schema contract.
+The exporter is not a persistence layer.
 
 The Runtime Store is the source of truth for task state, transition history,
 idempotency, artifact references, proof references, and action-scoped approval
@@ -20,7 +24,8 @@ token material must not become the Runtime source of truth.
 This task does not implement:
 
 - a Runtime API, worker, queue, or app service;
-- Postgres startup, SQL DDL, migrations, indexes, locks, or backups;
+- file persistence, DB persistence, Postgres startup, SQL DDL, migrations,
+  indexes, locks, replay recovery, or backups;
 - Matrix, GitHub, Codex, object store, or live memory calls;
 - raw log, raw diff, raw Matrix event, secret, or token storage.
 
@@ -43,6 +48,25 @@ This task does not implement:
 The snapshot is a contract artifact, not a preferred physical database layout.
 Future SQL tables may normalize these records, but they must preserve the same
 fields and rejection rules before replacing the fake/in-memory store.
+
+## MCR-105 Snapshot Exporter
+
+`packages/runtime-store/src/durable-snapshot-exporter.ts` exports current
+in-memory Runtime Store state into this durable snapshot envelope:
+
+- current task snapshots;
+- append-only transition records;
+- runtime command idempotency records;
+- supplied proof refs, approval refs, and artifact refs.
+
+The exporter remains ref-only. It maps known safe fields into the snapshot and
+does not copy raw caller extras such as raw Matrix bodies, raw diffs, raw logs,
+worker stdout/stderr, PR bodies, token material, or live memory content. It also
+rejects unsafe strings that would otherwise become exported fields.
+
+This is still not durable storage. Persisting exported snapshots to files,
+Postgres, or another database is future work and must keep the same source of
+truth and unsafe-data rejection boundaries.
 
 ## Durable Records
 
@@ -146,7 +170,10 @@ of those external systems can be replayed as the Runtime task database.
 ## Validation
 
 `tests/contracts/runtime-store.test.mjs` validates the schema, the valid minimal
-snapshot, and the unsafe rejection fixtures. The standard repo validation remains:
+snapshot, and the unsafe rejection fixtures.
+`packages/runtime-store/test/durable-snapshot-exporter.test.ts` validates that
+the MCR-105 exporter produces a schema-valid, ref-only snapshot and rejects
+unsafe exported strings. The standard repo validation remains:
 
 ```bash
 pnpm test:contracts

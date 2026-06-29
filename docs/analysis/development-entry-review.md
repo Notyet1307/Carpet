@@ -44,6 +44,12 @@ merge. Sandbox `main` stayed at
 deleted, and the `protect-main` ruleset remained active. The current Runtime
 GitHub PR path is still `packages/github-adapter` fake/contract-only.
 
+MCR-105 has merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. The
+Runtime Store can now export schema-valid durable snapshots from the in-memory
+task store. That export remains ref-only and does not add file persistence, DB
+persistence, Postgres, migrations, a persistent Runtime service,
+Matrix/GitHub/Codex external calls, or live memory writes.
+
 ## Target System Design Alignment
 
 Target system alignment is recorded in
@@ -60,6 +66,8 @@ explicit:
 - Proof must be verified before approval can be requested.
 - External actions require matching approval before they run.
 - Memory remains proposal-only; Runtime must not write live memory.
+- Runtime Store snapshot export is ref-only; file persistence and DB
+  persistence remain future work.
 
 The guarded MCR-310 real Codex exec smoke has produced one Codex-only proof.
 MCR-720 has produced one Matrix-only local disposable proof. MCR-730 has
@@ -81,6 +89,9 @@ Evidence:
 
 - Matrix schemas exist under `schemas/matrix/*.schema.json`.
 - Runtime schemas exist under `schemas/runtime/*.schema.json`.
+- MCR-105 exports in-memory Runtime Store state into the runtime-store schema
+  envelope without embedding raw logs, diffs, Matrix event bodies, token
+  material, or live memory content.
 - Codex output schema exists at `schemas/codex/repo-patch-result.schema.json`.
 - Proof and approval schemas exist under `schemas/proof/*.schema.json`.
 - Fixture coverage exists across `fixtures/matrix-events`,
@@ -230,6 +241,8 @@ Not yet complete:
 
 - Production Matrix integration.
 - Persistent Runtime service.
+- Runtime Store file persistence, DB persistence, Postgres migrations, locking,
+  and replay recovery.
 - Real room/user lifecycle automation.
 - Production GitHub integration and any Runtime-owned real GitHub write path.
 - Additional GitHub PR smoke beyond the completed MCR-730 disposable sandbox
