@@ -88,6 +88,8 @@ test("runtime orchestrator writes and reads a schema-valid local snapshot", asyn
   assert.equal(result.approval_grant.ok, true);
   assert.equal(result.approval_after_grant.ok, true);
   assert.equal(result.prs.length, 1);
+  assert.equal("simulated_pr_id" in result.prs[0], true);
+  assert.equal("url" in result.prs[0], false);
   assert.equal(result.memory_proposal.ok, true);
   if (result.memory_proposal.ok) {
     assert.equal(result.memory_proposal.status, "proposed");
@@ -395,6 +397,51 @@ test("runtime orchestrator opt-in Codex smoke adapter uses injected runner and p
     ),
   );
   assert.deepEqual(written, result.snapshot);
+});
+
+test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after proof and approval", async () => {
+  const snapshotPath = tempSnapshotPath();
+  const token = "fake-runtime-disposable-token";
+  const calls: unknown[] = [];
+  const result = await runRuntimeOrchestrator({
+    repoRoot: root,
+    snapshotPath,
+    github_pr_adapter: {
+      enabled: true,
+      repository: "Notyet1307/github-pr-smoke-sandbox",
+      disposable_target: { kind: "repository" },
+      credential_scope: "disposable",
+      env: { GH_TOKEN: token },
+      evidence_dir: "artifact://mcr-840/runtime-github-pr",
+      body_file: ".mcr/runs/run_mcr_800_runtime_orchestrator_cli/pr-body.md",
+      base_sha: "b".repeat(40),
+      head_sha: "c".repeat(40),
+      cleanup_status: "not_started",
+      runner: async (command: unknown) => {
+        calls.push(command);
+        return {
+          exit_code: 0,
+          stdout: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3\n",
+          stderr: "",
+        };
+      },
+    },
+  } as Parameters<typeof runRuntimeOrchestrator>[0]);
+
+  assert.equal(calls.length, 1);
+  assert.equal(result.approval_before_grant.ok, false);
+  if (!result.approval_before_grant.ok) {
+    assert.equal(result.approval_before_grant.code, "approval_required");
+  }
+  assert.equal(result.approval_grant.ok, true);
+  assert.equal(result.approval_after_grant.ok, true);
+  assert.equal(result.prs.length, 1);
+  assert.equal(result.prs[0]?.url, "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3");
+  assert.equal(result.prs[0]?.approval_id, "approval_mcr_800_runtime_orchestrator_cli");
+  assert.equal(result.prs[0]?.base_sha, "b".repeat(40));
+  assert.equal(result.prs[0]?.head_sha, "c".repeat(40));
+  assert.equal(result.prs[0]?.cleanup_status, "not_started");
+  assert.equal(JSON.stringify(result).includes(token), false);
 });
 
 test("runtime orchestrator Codex smoke adapter blocks without approval before runner execution", async () => {

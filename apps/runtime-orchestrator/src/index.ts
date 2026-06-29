@@ -16,7 +16,12 @@ import {
   loadCapabilityRegistry,
   routeCapability,
 } from "../../../packages/capability-router/src/index.ts";
-import { createFakeGitHubPrAdapter } from "../../../packages/github-adapter/src/index.ts";
+import {
+  createFakeGitHubPrAdapter,
+  createRuntimeOwnedGitHubPrAdapter,
+  type DisposableGitHubPrTarget,
+  type RuntimeOwnedGitHubPrRunner,
+} from "../../../packages/github-adapter/src/index.ts";
 import {
   decidePolicy,
   loadPolicy,
@@ -63,6 +68,7 @@ export type RunRuntimeOrchestratorInput = {
   snapshotPath: string;
   repoRoot?: string;
   worker_adapter?: RuntimeWorkerAdapter;
+  github_pr_adapter?: RuntimeGitHubPrAdapter;
 };
 
 export type RunRuntimeOrchestratorFromMatrixEventInput =
@@ -82,6 +88,20 @@ type RuntimeWorkerAdapter = {
   credential_scope?: string;
   env?: Record<string, string>;
   process_runner?: CodexExecProcessRunner;
+};
+
+type RuntimeGitHubPrAdapter = {
+  enabled?: boolean;
+  repository: string;
+  disposable_target: DisposableGitHubPrTarget;
+  credential_scope?: "disposable" | "scoped";
+  env?: Record<string, string>;
+  evidence_dir: string;
+  body_file: string;
+  base_sha: string;
+  head_sha: string;
+  cleanup_status: "not_started" | "kept_for_review";
+  runner?: RuntimeOwnedGitHubPrRunner;
 };
 
 const repoRoot = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
@@ -516,15 +536,24 @@ export async function runRuntimeOrchestrator(
     now: () => new Date("2026-06-29T10:05:00.000Z"),
     verified_proof_ids: new Set([context.proofId]),
   });
-  const githubAdapter = createFakeGitHubPrAdapter({ approvalGate });
-  const pullRequest = {
-    task_id: context.taskId,
-    proof: proofBuild.proof,
-    target: prTarget,
-    title: context.title,
-    requested_at: "2026-06-29T10:05:00.000Z",
-  };
-  const approvalBeforeGrant = githubAdapter.createPullRequest(pullRequest);
+  const githubAdapter = input.github_pr_adapter
+    ? createRuntimeOwnedGitHubPrAdapter({
+        enabled: input.github_pr_adapter.enabled,
+        approvalGate,
+        runner: input.github_pr_adapter.runner,
+        now: () => new Date("2026-06-29T10:05:00.000Z"),
+      })
+    : createFakeGitHubPrAdapter({ approvalGate });
+  const pullRequest = input.github_pr_adapter
+    ? runtimeOwnedGitHubPrRequest(context, proofBuild.proof, input.github_pr_adapter)
+    : {
+        task_id: context.taskId,
+        proof: proofBuild.proof,
+        target: prTarget,
+        title: context.title,
+        requested_at: "2026-06-29T10:05:00.000Z",
+      };
+  const approvalBeforeGrant = await githubAdapter.createPullRequest(pullRequest as never);
   const approvalIntake = createRuntimeApprovalIntake({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
   });
@@ -556,7 +585,7 @@ export async function runRuntimeOrchestrator(
     { proof_ref: context.proofId, approval_ref: context.approvalId },
   );
 
-  const approvalAfterGrant = githubAdapter.createPullRequest(pullRequest);
+  const approvalAfterGrant = await githubAdapter.createPullRequest(pullRequest as never);
 
   if (!approvalAfterGrant.ok) {
     throw new Error(approvalAfterGrant.reason);
@@ -566,7 +595,7 @@ export async function runRuntimeOrchestrator(
     "artifact_mcr_800_simulated_pr",
     "pr",
     JSON.stringify(approvalAfterGrant.pr),
-    `github-pr://mcr-800/${approvalAfterGrant.pr.simulated_pr_id}`,
+    prArtifactUri(context, approvalAfterGrant.pr),
   );
 
   transition(
@@ -710,6 +739,41 @@ async function createFinalOutput(root: string, context: RuntimeOrchestratorConte
     ],
     ready_for_review: true,
   };
+}
+
+function runtimeOwnedGitHubPrRequest(
+  context: RuntimeOrchestratorContext,
+  proof: ProofLedgerEntry,
+  adapter: RuntimeGitHubPrAdapter,
+) {
+  return {
+    action: "create_pr",
+    task_id: context.taskId,
+    proof,
+    target: prTarget,
+    repository: adapter.repository,
+    title: context.title,
+    body_file: adapter.body_file,
+    base_sha: adapter.base_sha,
+    head_sha: adapter.head_sha,
+    cleanup_status: adapter.cleanup_status,
+    disposable_target: adapter.disposable_target,
+    credential_scope: adapter.credential_scope,
+    env: adapter.env,
+    evidence_dir: adapter.evidence_dir,
+    requested_at: "2026-06-29T10:05:00.000Z",
+  };
+}
+
+function prArtifactUri(context: RuntimeOrchestratorContext, pr: Record<string, unknown>) {
+  if (typeof pr.simulated_pr_id === "string") {
+    return `github-pr://mcr-800/${pr.simulated_pr_id}`;
+  }
+  if (typeof pr.url === "string") {
+    return `github-pr://${context.taskCardId.toLowerCase()}/${sanitizeRuntimeId(pr.url)}`;
+  }
+
+  return `github-pr://${context.taskCardId.toLowerCase()}/unknown`;
 }
 
 function recordCodexExecSmokeArtifacts(
