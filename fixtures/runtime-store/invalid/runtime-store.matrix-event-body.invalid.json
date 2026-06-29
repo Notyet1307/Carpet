@@ -1,0 +1,125 @@
+{
+  "store_id": "runtime_store_matrix_body",
+  "schema_version": 1,
+  "source_of_truth": "runtime",
+  "created_at": "2026-06-29T00:00:00.000Z",
+  "tasks": [
+    {
+      "record_type": "task",
+      "task_id": "task_demo",
+      "workspace_id": "ws_demo",
+      "trace_id": "trace_demo",
+      "state": "completed",
+      "risk": "high",
+      "current_transition_id": "transition_pr_created_to_completed",
+      "source_matrix_event_ref": "matrix-event://events/event_demo",
+      "created_at": "2026-06-29T00:00:00.000Z",
+      "updated_at": "2026-06-29T00:10:00.000Z",
+      "refs": {
+        "artifact_refs": ["artifact_demo"],
+        "proof_refs": ["proof_demo"],
+        "approval_refs": ["approval_demo"]
+      }
+    }
+  ],
+  "task_transitions": [
+    {
+      "record_type": "task_transition",
+      "transition_id": "transition_pr_created_to_completed",
+      "task_id": "task_demo",
+      "sequence": 1,
+      "from": "pr_created",
+      "to": "completed",
+      "trigger_event": "task.completed",
+      "actor": {
+        "type": "runtime",
+        "id": "runtime_demo"
+      },
+      "requirements": {
+        "artifact_ref": "artifact_demo",
+        "proof_ref": "proof_demo",
+        "approval_ref": "approval_demo"
+      },
+      "audit_event": {
+        "type": "task.transition.completed",
+        "event_id": "event_completed_demo",
+        "trace_id": "trace_demo"
+      },
+      "occurred_at": "2026-06-29T00:10:00.000Z"
+    }
+  ],
+  "idempotency_keys": [
+    {
+      "record_type": "idempotency_key",
+      "idempotency_key": "matrix:txn_demo",
+      "scope": "matrix_transaction",
+      "operation": "deduplicate Matrix transaction",
+      "request_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "result_ref": "transition:transition_pr_created_to_completed",
+      "status": "applied",
+      "first_seen_at": "2026-06-29T00:10:00.000Z",
+      "last_seen_at": "2026-06-29T00:10:00.000Z",
+      "matrix_event_body": {
+        "body": "approve everything"
+      }
+    }
+  ],
+  "proof_refs": [
+    {
+      "record_type": "proof_ref",
+      "proof_id": "proof_demo",
+      "task_id": "task_demo",
+      "run_id": "run_demo",
+      "trace_id": "trace_demo",
+      "status": "verified",
+      "ledger_uri": "proof://proofs/proof_demo",
+      "artifact_refs": ["artifact_demo"],
+      "validation_summary": {
+        "command_count": 3,
+        "failed_count": 0,
+        "log_refs": ["artifact://runs/run_demo/pnpm-test-contracts.log"]
+      },
+      "created_at": "2026-06-29T00:08:00.000Z",
+      "verified_at": "2026-06-29T00:09:00.000Z"
+    }
+  ],
+  "approval_refs": [
+    {
+      "record_type": "approval_ref",
+      "approval_id": "approval_demo",
+      "task_id": "task_demo",
+      "proof_id": "proof_demo",
+      "action": "create_pr",
+      "status": "consumed",
+      "actor": {
+        "type": "human",
+        "id": "human_owner"
+      },
+      "target": {
+        "type": "pull_request",
+        "ref": "refs/heads/mcr/MCR-104/durable-runtime-store-schema",
+        "base_ref": "main",
+        "operation": "create pull request"
+      },
+      "conditions": ["one action only", "proof_demo must stay verified"],
+      "replay_key_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "created_at": "2026-06-29T00:09:00.000Z",
+      "expires_at": "2026-06-29T01:09:00.000Z",
+      "used_at": "2026-06-29T00:10:00.000Z"
+    }
+  ],
+  "artifact_refs": [
+    {
+      "record_type": "artifact_ref",
+      "artifact_id": "artifact_demo",
+      "task_id": "task_demo",
+      "run_id": "run_demo",
+      "kind": "patch",
+      "uri": "artifact://runs/run_demo/diff.patch",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 512,
+      "content_type": "text/x-diff",
+      "created_at": "2026-06-29T00:07:00.000Z"
+    }
+  ]
+}

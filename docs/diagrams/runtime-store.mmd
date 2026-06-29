@@ -1,0 +1,16 @@
+flowchart LR
+  Matrix["Matrix events<br/>untrusted input"] --> Gateway["Gateway validation<br/>schema and provenance"]
+  Gateway --> RuntimeStore["Runtime Store<br/>source_of_truth = runtime"]
+
+  RuntimeStore --> Task["task records"]
+  RuntimeStore --> Transition["task transition records"]
+  RuntimeStore --> Idempotency["idempotency keys<br/>request hashes only"]
+  RuntimeStore --> ArtifactRef["artifact refs<br/>uri + sha256"]
+  RuntimeStore --> ProofRef["proof refs<br/>ledger uri + validation refs"]
+  RuntimeStore --> ApprovalRef["approval refs<br/>one action + replay hash"]
+
+  ArtifactObject["Object/artifact storage<br/>raw logs and diffs"] -. "artifact:// refs" .-> ArtifactRef
+  GitHub["GitHub PR/checks<br/>external artifacts"] -. "github-pr:// refs" .-> ArtifactRef
+  Projection["Matrix/GitHub projections<br/>not source of truth"] <-- "summaries and refs only" --> RuntimeStore
+
+  Unsafe["Rejected inline data<br/>raw logs, raw diffs, secrets,<br/>Matrix bodies, GitHub tokens"] -. "schema rejects" .-> RuntimeStore

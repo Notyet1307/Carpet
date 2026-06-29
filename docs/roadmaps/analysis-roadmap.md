@@ -361,7 +361,7 @@ MCR   = 可执行任务 / issue 编号
 | Phase 1 | 产品语言与范围锁定 | 已完成：product language baseline、Matrix collaboration ADR 已完成 |
 | Phase 2 | 架构边界与组件分解 | 已完成：bounded contexts、component interfaces、Mermaid diagrams 已完成 |
 | Phase 3 | Matrix Event Contract 分析 | 已完成：04 Matrix integration analysis 已完成；event envelope、task.created、task.accepted、task.rejected、capability.selected、worker.dispatched、worker.progress、artifact.submitted、proof.submitted、verification.completed、approval.requested、approval.granted、approval.denied、memory.update.proposed、incident.created baseline 已完成；closeout schema hardening 已完成 |
-| Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline 均已完成 |
+| Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline、durable Runtime Store schema contract 均已完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 已完成：capability registry baseline 与 closeout routing hardening 已完成（registry/schema/fixtures/routing analysis/contract tests）；本地 fake capability router implementation 已通过 MCR-250；真实服务路由集成仍未证明 |
 | Phase 6 | Codex Worker Contract 分析 | 已完成：Codex worker contract baseline 已完成；proof-verifier prompt 明确 deferred 到 Phase 8/11 |
 | Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；本地 fake Matrix transaction/projection implementation 已通过 MCR-200/MCR-201；MCR-720 Matrix-only local disposable Synapse + AppService listener + one transaction smoke 已在 2026-06-29 通过一次；production Matrix integration、persistent Runtime service、real room/user lifecycle automation 未完成 |
@@ -733,8 +733,13 @@ runtime/workflows/ci-recovery.yaml
 schemas/runtime/task.schema.json
 schemas/runtime/task-state-transition.schema.json
 schemas/runtime/task-graph.schema.json
+schemas/runtime/runtime-store.schema.json
+fixtures/runtime-store/**
 tests/contracts/task-state-machine.test.mjs
 tests/contracts/task-graph.test.mjs
+tests/contracts/runtime-store.test.mjs
+docs/analysis/durable-runtime-store.md
+docs/diagrams/runtime-store.mmd
 ```
 
 ### MVP 状态机
@@ -794,7 +799,18 @@ cancelled
 - runtime/workflows/ci-recovery.yaml
 - tests/contracts/ci-recovery-workflow.test.mjs
 
-Phase 4 完成：产物清单已补齐，并由 contract tests 覆盖。
+2026-06-29: MCR-104 durable Runtime Store schema contract 已完成：
+- docs/analysis/durable-runtime-store.md
+- docs/diagrams/runtime-store.mmd
+- schemas/runtime/runtime-store.schema.json
+- fixtures/runtime-store/valid/minimal-store.valid.json
+- fixtures/runtime-store/invalid/*.json
+- tests/contracts/runtime-store.test.mjs
+
+Phase 4 完成：产物清单已补齐，并由 contract tests 覆盖。Runtime Store
+schema contract 明确 Runtime 是 task、transition、idempotency、proof ref、
+approval ref、artifact ref 的 source of truth；Matrix/GitHub 只能作为输入、
+投影或外部 artifact 引用，不能作为 Runtime state source of truth。
 ```
 
 ### Codex Task Card 4.1：状态机分析

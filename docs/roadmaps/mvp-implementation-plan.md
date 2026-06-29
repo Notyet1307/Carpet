@@ -42,6 +42,11 @@ Tracked proof: `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in
 commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 has one
 Matrix-only local disposable smoke pass on 2026-06-29.
 
+MCR-104 adds the durable Runtime Store schema contract for task snapshots,
+append-only transitions, idempotency keys, proof refs, approval refs, and
+artifact refs. It is contract-only: no Postgres startup, database service, SQL
+migration, Matrix/GitHub/Codex call, or live memory write is introduced.
+
 MCR-720 scope was exactly local disposable Synapse, a local AppService listener,
 and one AppService transaction. Evidence:
 `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
@@ -108,6 +113,7 @@ Exit criteria:
 
 - [x] MCR-100 Runtime State Machine Package
 - [x] MCR-101 In-Memory Runtime Task Store
+- [x] MCR-104 Durable Runtime Store Schema Contract
 - [x] MCR-250 Capability Registry Loader And Router
 - [x] MCR-260 Minimal Policy Engine
 - [x] MCR-270 Work Cell Manager With Fake Worktree Manager
@@ -116,6 +122,9 @@ Exit criteria:
 
 - State transitions, idempotency, routing, policy decisions, and Work Cell
   provenance are executable through local tests.
+- Durable Runtime Store records are schema-contracted before any database
+  implementation, and unsafe raw logs, raw diffs, secrets, Matrix event bodies,
+  and GitHub token material are rejected by contract fixtures.
 - No database, real git worktree execution, real worker process, or external
   adapter exists yet.
 

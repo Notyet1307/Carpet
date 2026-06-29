@@ -1,0 +1,672 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://notyet.dev/schemas/runtime/runtime-store.schema.json",
+  "title": "Durable Runtime Store Snapshot",
+  "type": "object",
+  "required": [
+    "store_id",
+    "schema_version",
+    "source_of_truth",
+    "created_at",
+    "tasks",
+    "task_transitions",
+    "idempotency_keys",
+    "proof_refs",
+    "approval_refs",
+    "artifact_refs"
+  ],
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "pattern": "^runtime_store_[A-Za-z0-9_-]+$"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "source_of_truth": {
+      "const": "runtime"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/task_record"
+      }
+    },
+    "task_transitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/task_transition_record"
+      }
+    },
+    "idempotency_keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/idempotency_key_record"
+      }
+    },
+    "proof_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/proof_ref_record"
+      }
+    },
+    "approval_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/approval_ref_record"
+      }
+    },
+    "artifact_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/artifact_ref_record"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "safe_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "not": {
+        "pattern": "([\\r\\n]|diff --git|DATABASE_URL=|postgres://|PASS tests/|FAIL tests/|stdout:|stderr:|ghp_|github_pat_|GITHUB_TOKEN|MATRIX_ACCESS_TOKEN|BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|sk-[A-Za-z0-9])"
+      }
+    },
+    "safe_uri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^(artifact|proof|approval|matrix-event|github-pr)://",
+      "not": {
+        "pattern": "([\\r\\n]|diff --git|DATABASE_URL=|postgres://|PASS tests/|FAIL tests/|stdout:|stderr:|ghp_|github_pat_|GITHUB_TOKEN|MATRIX_ACCESS_TOKEN|BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|sk-[A-Za-z0-9])"
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task_[A-Za-z0-9_-]+$"
+    },
+    "workspace_id": {
+      "type": "string",
+      "pattern": "^ws_[A-Za-z0-9_-]+$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run_[A-Za-z0-9_-]+$"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trace_[A-Za-z0-9_-]+$"
+    },
+    "transition_id": {
+      "type": "string",
+      "pattern": "^transition_[A-Za-z0-9_-]+$"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^artifact_[A-Za-z0-9_-]+$"
+    },
+    "proof_id": {
+      "type": "string",
+      "pattern": "^proof_[A-Za-z0-9_-]+$"
+    },
+    "approval_id": {
+      "type": "string",
+      "pattern": "^approval_[A-Za-z0-9_-]+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "created",
+        "accepted",
+        "scoped",
+        "graph_compiled",
+        "capability_selected",
+        "work_cell_created",
+        "worker_dispatched",
+        "running",
+        "artifact_submitted",
+        "proof_submitted",
+        "verifying",
+        "waiting_approval",
+        "approved",
+        "pr_created",
+        "completed",
+        "rejected",
+        "blocked",
+        "needs_human_input",
+        "policy_denied",
+        "worker_failed",
+        "verification_failed",
+        "approval_denied",
+        "cancelled"
+      ]
+    },
+    "optional_transition_id": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/transition_id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["human", "runtime", "worker", "verifier", "system"]
+        },
+        "id": {
+          "$ref": "#/definitions/safe_text"
+        }
+      },
+      "additionalProperties": false
+    },
+    "task_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "task_id",
+        "workspace_id",
+        "trace_id",
+        "state",
+        "risk",
+        "current_transition_id",
+        "created_at",
+        "updated_at",
+        "refs"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "task"
+        },
+        "task_id": {
+          "$ref": "#/definitions/task_id"
+        },
+        "workspace_id": {
+          "$ref": "#/definitions/workspace_id"
+        },
+        "trace_id": {
+          "$ref": "#/definitions/trace_id"
+        },
+        "state": {
+          "$ref": "#/definitions/state"
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "current_transition_id": {
+          "$ref": "#/definitions/optional_transition_id"
+        },
+        "source_matrix_event_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/safe_uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "refs": {
+          "type": "object",
+          "required": ["artifact_refs", "proof_refs", "approval_refs"],
+          "properties": {
+            "artifact_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/artifact_id"
+              }
+            },
+            "proof_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/proof_id"
+              }
+            },
+            "approval_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/approval_id"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "task_transition_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "transition_id",
+        "task_id",
+        "sequence",
+        "from",
+        "to",
+        "trigger_event",
+        "actor",
+        "requirements",
+        "audit_event",
+        "occurred_at"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "task_transition"
+        },
+        "transition_id": {
+          "$ref": "#/definitions/transition_id"
+        },
+        "task_id": {
+          "$ref": "#/definitions/task_id"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "$ref": "#/definitions/state"
+        },
+        "to": {
+          "$ref": "#/definitions/state"
+        },
+        "trigger_event": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "actor": {
+          "$ref": "#/definitions/actor"
+        },
+        "requirements": {
+          "type": "object",
+          "required": ["artifact_ref", "proof_ref", "approval_ref"],
+          "properties": {
+            "artifact_ref": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/artifact_id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "proof_ref": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/proof_id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "approval_ref": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/approval_id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "audit_event": {
+          "type": "object",
+          "required": ["type", "event_id", "trace_id"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "pattern": "^task\\.transition\\.[a-z_]+$"
+            },
+            "event_id": {
+              "type": "string",
+              "pattern": "^event_[A-Za-z0-9_-]+$"
+            },
+            "trace_id": {
+              "$ref": "#/definitions/trace_id"
+            }
+          },
+          "additionalProperties": false
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "idempotency_key",
+        "scope",
+        "operation",
+        "request_hash",
+        "result_ref",
+        "status",
+        "first_seen_at",
+        "last_seen_at"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "idempotency_key"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^(matrix|runtime|external):[A-Za-z0-9:_.=$-]+$"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "matrix_transaction",
+            "matrix_event",
+            "runtime_command",
+            "external_action"
+          ]
+        },
+        "operation": {
+          "$ref": "#/definitions/safe_text"
+        },
+        "request_hash": {
+          "$ref": "#/definitions/sha256"
+        },
+        "result_ref": {
+          "type": "string",
+          "pattern": "^(transition|runtime_event|approval|proof|artifact):[A-Za-z0-9_-]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["applied", "duplicate", "rejected", "retryable_failure"]
+        },
+        "first_seen_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_seen_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "proof_ref_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "proof_id",
+        "task_id",
+        "run_id",
+        "trace_id",
+        "status",
+        "ledger_uri",
+        "artifact_refs",
+        "validation_summary",
+        "created_at"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "proof_ref"
+        },
+        "proof_id": {
+          "$ref": "#/definitions/proof_id"
+        },
+        "task_id": {
+          "$ref": "#/definitions/task_id"
+        },
+        "run_id": {
+          "$ref": "#/definitions/run_id"
+        },
+        "trace_id": {
+          "$ref": "#/definitions/trace_id"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "verified", "rejected"]
+        },
+        "ledger_uri": {
+          "$ref": "#/definitions/safe_uri"
+        },
+        "artifact_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/artifact_id"
+          }
+        },
+        "validation_summary": {
+          "type": "object",
+          "required": ["command_count", "failed_count", "log_refs"],
+          "properties": {
+            "command_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "failed_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "log_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/safe_uri"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verified_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "approval_ref_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "approval_id",
+        "task_id",
+        "proof_id",
+        "action",
+        "status",
+        "actor",
+        "target",
+        "conditions",
+        "replay_key_hash",
+        "created_at",
+        "expires_at"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "approval_ref"
+        },
+        "approval_id": {
+          "$ref": "#/definitions/approval_id"
+        },
+        "task_id": {
+          "$ref": "#/definitions/task_id"
+        },
+        "proof_id": {
+          "$ref": "#/definitions/proof_id"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "push_branch",
+            "create_pr",
+            "external_write",
+            "secret_access",
+            "memory_write"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["requested", "granted", "denied", "expired", "consumed"]
+        },
+        "actor": {
+          "type": "object",
+          "required": ["type", "id"],
+          "properties": {
+            "type": {
+              "const": "human"
+            },
+            "id": {
+              "$ref": "#/definitions/safe_text"
+            }
+          },
+          "additionalProperties": false
+        },
+        "target": {
+          "type": "object",
+          "required": ["type", "ref"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "git_branch",
+                "pull_request",
+                "external_system",
+                "secret",
+                "memory_proposal"
+              ]
+            },
+            "ref": {
+              "$ref": "#/definitions/safe_text"
+            },
+            "base_ref": {
+              "$ref": "#/definitions/safe_text"
+            },
+            "operation": {
+              "$ref": "#/definitions/safe_text"
+            }
+          },
+          "additionalProperties": false
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/safe_text"
+          }
+        },
+        "replay_key_hash": {
+          "$ref": "#/definitions/sha256"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "used_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifact_ref_record": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "artifact_id",
+        "task_id",
+        "run_id",
+        "kind",
+        "uri",
+        "sha256",
+        "size_bytes",
+        "created_at"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "artifact_ref"
+        },
+        "artifact_id": {
+          "$ref": "#/definitions/artifact_id"
+        },
+        "task_id": {
+          "$ref": "#/definitions/task_id"
+        },
+        "run_id": {
+          "$ref": "#/definitions/run_id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["patch", "log", "report", "schema", "fixture", "pr", "object"]
+        },
+        "uri": {
+          "$ref": "#/definitions/safe_uri"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "content_type": {
+          "$ref": "#/definitions/safe_text"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
