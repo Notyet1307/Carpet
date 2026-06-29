@@ -9,6 +9,10 @@ Do not start a real Matrix service, real Codex execution, GitHub API client,
 database, secret manager, or live memory writer from the default local test
 path.
 
+MCR-720 has one approved Matrix-only real smoke pass on 2026-06-29. That pass
+does not change the default path: future real-service runs remain manual,
+opt-in, action-scoped, and disabled by default.
+
 ## Purpose
 
 MCR-720 exists to preflight whether the local Matrix contracts can later be
@@ -21,6 +25,47 @@ verification, and human review.
 
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke,
 GitHub smoke, deploy, live memory writes, or any further real Codex execution.
+
+## Passed Run Record
+
+Run id: `mcr-720-20260629t130000z-matrix-smoke-02`.
+
+Scope:
+
+- local disposable Synapse
+- local AppService listener
+- one AppService transaction
+
+Evidence dir:
+
+```text
+/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02
+```
+
+Key proof files:
+
+- `transaction.exit_code`: `exit_code=0`
+- `transaction.stdout`: `status=200` and `{"code":"ok","retryable":false}`
+- `listener.kill0.before-transaction.exit_code`
+- `listener.lsof.before-transaction.stdout`
+- `listener.bound.before-transaction.exit_code`
+- `docker-compose-down.cleanup.exit_code`
+- `cleanup-lsof-8008.proof`
+- `cleanup-lsof-8448.proof`
+- `cleanup-lsof-9009.proof`
+- `generated-cleanup.txt`
+- `cleanup-paths.stdout`
+
+Cleanup proof records `docker compose down` exit code 0, no listeners on
+8008/8448/9009, and removed generated credentials/data.
+
+Non-blocking note: the first run failed because the listener process was not
+alive when Synapse submitted the transaction. The second run used a durable
+listener and direct transaction exit-code capture.
+
+This is compatibility proof only. Production Matrix integration, persistent
+Runtime service, real room/user lifecycle automation, GitHub/deploy/live memory,
+and production readiness remain not done.
 
 ## Required Gate
 

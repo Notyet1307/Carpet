@@ -364,12 +364,12 @@ MCR   = 可执行任务 / issue 编号
 | Phase 4 | Runtime State Machine 与 Task Graph | 已完成：task state machine baseline、runtime task schemas、transition contract tests、task graph contract baseline、repo-patch workflow baseline、ci-recovery workflow baseline 均已完成 |
 | Phase 5 | Capability Registry 与 Routing 规则 | 已完成：capability registry baseline 与 closeout routing hardening 已完成（registry/schema/fixtures/routing analysis/contract tests）；本地 fake capability router implementation 已通过 MCR-250；真实服务路由集成仍未证明 |
 | Phase 6 | Codex Worker Contract 分析 | 已完成：Codex worker contract baseline 已完成；proof-verifier prompt 明确 deferred 到 Phase 8/11 |
-| Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；本地 fake Matrix transaction/projection implementation 已通过 MCR-200/MCR-201；真实 Matrix homeserver smoke 未完成 |
+| Phase 7 | Matrix AppService Gateway 分析 | 已完成：Matrix AppService Gateway contract baseline 已完成；本地 fake Matrix transaction/projection implementation 已通过 MCR-200/MCR-201；MCR-720 Matrix-only local disposable Synapse + AppService listener + one transaction smoke 已在 2026-06-29 通过一次；production Matrix integration、persistent Runtime service、real room/user lifecycle automation 未完成 |
 | Phase 8 | Proof Ledger 与 Approval 分析 | 已完成：proof ledger baseline 与 approval gate contract baseline 已完成；本地 proof ledger、approval gate、fake GitHub adapter、memory proposal flow implementation 已通过 MCR-400/MCR-500/MCR-510/MCR-600；真实 GitHub automation、live memory writer 未完成 |
 | Phase 9 | Security Threat Model 与 Policy 分析 | 已完成：worktree policy baseline、security threat model、deny-by-default policy matrix、policy decision fixtures/contract tests 已完成；本地 minimal policy engine implementation 已通过 MCR-260；secret broker 与真实服务 policy enforcement 未完成 |
-| Phase 10 | Testing Strategy 与 Test Matrix | 已完成：测试分层、contract baseline 映射、fixtures 规则、fake adapter 计划、MVP E2E 场景与 failure scenarios 已完成；本地 fake MVP E2E 已通过 MCR-700；MCR-310 real Codex exec smoke 已在 2026-06-29 通过一次；MCR-720 real-service smoke scaffold 已合并但保持 skipped-by-default，真实 Matrix/GitHub/API/deploy/live-memory smoke 未完成 |
+| Phase 10 | Testing Strategy 与 Test Matrix | 已完成：测试分层、contract baseline 映射、fixtures 规则、fake adapter 计划、MVP E2E 场景与 failure scenarios 已完成；本地 fake MVP E2E 已通过 MCR-700；MCR-310 real Codex exec smoke 已在 2026-06-29 通过一次；MCR-720 Matrix-only local disposable smoke 已在 2026-06-29 通过一次；production Matrix integration、GitHub/API、deploy、live-memory smoke 未完成 |
 | Phase 11 | Prompt / Skill 设计分析 | 已完成：analyst、verifier、repo.patch.codex、proof.verify、memory.curator prompt baseline 与四个 reusable skill baseline 已完成；prompt 仍不作为权限 enforcement |
-| Phase 12 | MVP Backlog 与开发入口 | 已完成：MVP backlog、implementation plan、development entry review 已完成；本地 fake MVP through MCR-700 已合并；ADR-0006 已关闭 Codex exec before SDK blocker；MCR-310 scaffold 已合并且 real Codex exec smoke 已通过一次；MCR-720 scaffold 已合并但真实 Matrix/GitHub/API/deploy/live-memory smoke 未完成 |
+| Phase 12 | MVP Backlog 与开发入口 | 已完成：MVP backlog、implementation plan、development entry review 已完成；本地 fake MVP through MCR-700 已合并；ADR-0006 已关闭 Codex exec before SDK blocker；MCR-310 scaffold 已合并且 real Codex exec smoke 已通过一次；MCR-720 scaffold 已合并且 Matrix-only local disposable smoke 已通过一次；production Matrix/GitHub/API/deploy/live-memory smoke 未完成 |
 
 ### 5.2 MCR 编号范围
 
@@ -408,9 +408,14 @@ smoke runner scaffold 与 MCR-720 real-service smoke scaffold。MCR-310 real
 Codex exec smoke 已在 2026-06-29 通过一次，证明文件是
 `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt`，commit 是
 `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`。下一步不能再按旧
-MCR-302/MCR-703 推荐调度；后续真实服务 smoke 仍只能通过 MCR-310/MCR-720 的
-manual、opt-in、action-scoped approval 路径执行，且真实 Matrix、GitHub PR/API、
-deploy、live memory write 与 MCR-720 real-service smoke 仍未完成。
+MCR-302/MCR-703 推荐调度；MCR-720 Matrix-only real smoke 已在 2026-06-29
+通过一次，scope 仅为 local disposable Synapse + local AppService listener +
+one AppService transaction。证明目录是
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。
+后续真实服务 smoke 仍只能通过 MCR-310/MCR-720 的 manual、opt-in、
+action-scoped approval 路径执行，且 production Matrix integration、
+persistent Runtime service、real room/user lifecycle automation、GitHub PR/API、
+deploy 和 live memory write 仍未完成。
 
 ---
 
@@ -1102,7 +1107,10 @@ Gateway 可以被 fake Matrix transaction 测试
 Phase 7 完成：认证、幂等、schema validation、room mapping、actor spoofing、
 Runtime event translation 和 failure reply 行为已由 fixtures + contract tests 覆盖；
 本地 fake Matrix transaction/projection implementation 已通过 MCR-200/MCR-201；
-真实 Matrix homeserver / AppService smoke 仍未完成。
+MCR-720 Matrix-only local disposable Synapse + AppService listener + one
+transaction smoke 已在 2026-06-29 通过一次。该 proof 不表示 production Matrix
+integration、persistent Runtime service 或 real room/user lifecycle automation
+完成。
 ```
 
 ---
@@ -1383,9 +1391,13 @@ Verifier prompt:
 本地 fake MVP E2E runner 已通过 MCR-700；MCR-310 real Codex exec smoke 已在
 2026-06-29 通过一次，证明文件是
 `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt`，commit 是
-`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`；MCR-720 real-service smoke
-scaffold 已合并但 skipped/opt-in，真实 Matrix、GitHub PR/API、deploy、live
-memory write 与 MCR-720 smoke 未完成。
+`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`；MCR-720 Matrix-only local
+disposable smoke 已在 2026-06-29 通过一次，scope 仅为 local disposable
+Synapse、local AppService listener 和 one AppService transaction，证明目录是
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。第一次 run 因 listener
+lifecycle 失败，第二次使用 durable listener 和 direct transaction exit-code
+capture 通过。production Matrix integration、persistent Runtime service、real
+room/user lifecycle automation、GitHub PR/API、deploy 和 live memory write 未完成。
 
 ---
 
@@ -1548,9 +1560,12 @@ Codex 可以按 backlog 逐个 issue 开发
 MCR-310 guarded Codex exec smoke runner scaffold 与 MCR-720 real-service smoke
 scaffold 已合并。MCR-310 real Codex exec smoke 已在 2026-06-29 通过一次，
 证明文件是 `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt`，commit
-是 `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`；MCR-720 仍只是
-scaffold/manual gate，不表示真实 Matrix、GitHub PR/API、deploy 或 live memory
-smoke 已通过。
+是 `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`；MCR-720 Matrix-only local
+disposable smoke 已在 2026-06-29 通过一次，证明目录是
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`。这只证明 local disposable
+Synapse + local AppService listener + one AppService transaction；不表示
+production Matrix、persistent Runtime service、real room/user lifecycle
+automation、GitHub PR/API、deploy 或 live memory smoke 已通过。
 ```
 
 ---

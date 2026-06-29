@@ -30,22 +30,31 @@ explicit gates.
   rollback notes.
 - Approval is action-scoped.
 - Memory update is proposal-only.
-- Further real Matrix, real Codex exec, real GitHub PR creation, merge, deploy,
-  secret access, and live memory writes are not allowed until their explicit
-  follow-up gates pass.
+- Further production Matrix integration, real Codex exec, real GitHub PR
+  creation, merge, deploy, secret access, and live memory writes are not allowed
+  until their explicit follow-up gates pass.
 
 ## Current Closeout Status
 
 As of 2026-06-29, local fake MVP work through MCR-700 is merged on `main`.
 MCR-310 scaffold is merged and one manual real Codex exec smoke has passed.
 Tracked proof: `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in
-commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 remains only a
-guarded runbook and skipped-test scaffold.
+commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 has one
+Matrix-only local disposable smoke pass on 2026-06-29.
 
-No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
-real-service smoke has passed by this plan. Further real-service smoke execution
-remains a manual compatibility check requiring action-scoped human approval,
-disposable scoped credentials, and captured proof.
+MCR-720 scope was exactly local disposable Synapse, a local AppService listener,
+and one AppService transaction. Evidence:
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
+Key proof files include `transaction.exit_code`, `transaction.stdout`,
+listener pre-transaction `kill -0`/`lsof`/bound checks,
+`docker-compose-down.cleanup.exit_code`, cleanup lsof proofs for
+`8008`/`8448`/`9009`, `generated-cleanup.txt`, and `cleanup-paths.stdout`.
+
+Production Matrix integration, persistent Runtime service, real room/user
+lifecycle automation, GitHub PR/API, deploy, and live memory write have not
+passed by this plan. Further real-service smoke execution remains a manual
+compatibility check requiring action-scoped human approval, disposable scoped
+credentials, and captured proof.
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 
 Target system alignment now lives in
@@ -136,7 +145,8 @@ Exit criteria:
 - [x] MCR-310 Real Codex Exec Smoke Runner scaffold plus one manual real Codex
   exec smoke pass on 2026-06-29
 - [x] MCR-720 Real-Service Compatibility Smoke Tests scaffold, including
-  manual-only disposable Synapse compose scaffold
+  manual-only disposable Synapse compose scaffold, plus one Matrix-only local
+  disposable smoke pass on 2026-06-29
 
 Satisfied scaffold prerequisites:
 
@@ -145,8 +155,14 @@ Satisfied scaffold prerequisites:
 - MCR-310 proof exists at
   `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
   `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
+- MCR-720 proof exists at
+  `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
+  The passed scope was local disposable Synapse, local AppService listener, and
+  one AppService transaction.
+- MCR-720 first run failed due listener lifecycle; the second run used a durable
+  listener and direct transaction exit-code capture.
 
-Remaining manual smoke entry criteria:
+Remaining manual smoke entry criteria for any further run:
 
 - Human owner explicitly approves each further real-service smoke.
 - Credentials are disposable and scoped.
@@ -157,10 +173,11 @@ Manual smoke exit criteria:
 - Real-service tests are opt-in and skipped by default.
 - Smoke evidence is recorded as compatibility proof, not the correctness source.
 - No merge, deploy, or live memory write is automated.
-- MCR-720 remains scaffold/skipped-by-default unless separately approved.
+- MCR-720 remains manual and skipped-by-default for future runs unless
+  separately approved.
 - MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 - Disposable Synapse compose has no default service start and is not
-  compatibility proof by itself.
+  production-ready by itself.
 
 ## Operating Cadence
 

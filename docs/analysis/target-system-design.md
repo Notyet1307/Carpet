@@ -65,8 +65,8 @@ a reviewed human or PR path, not an automatic live memory write.
 
 | Component | Status | Current evidence | Real gap |
 |---|---|---|---|
-| Matrix event schemas and fixtures | implemented fake | `schemas/matrix/*.schema.json`, `fixtures/matrix-events/**`, contract tests | No live homeserver compatibility proof. |
-| Fake Matrix transaction handler | implemented fake | `apps/matrix-appservice/src/transaction-handler.ts` | No real AppService registration, HTTP server, Synapse room setup, or durable ingress store. |
+| Matrix event schemas and fixtures | implemented fake | `schemas/matrix/*.schema.json`, `fixtures/matrix-events/**`, contract tests; one MCR-720 local disposable Matrix-only smoke pass | No production homeserver compatibility, room/user lifecycle, or persistent Runtime proof. |
+| Fake Matrix transaction handler | implemented fake | `apps/matrix-appservice/src/transaction-handler.ts`; MCR-720 exercised one real AppService transaction through the local listener | No production AppService registration, durable ingress store, real room/user lifecycle automation, or persistent Runtime service. |
 | Matrix projection adapter | implemented fake | `apps/matrix-appservice/src/projection-adapter.ts` | No real Matrix send-event path. |
 | Runtime event queue | implemented fake | `tests/e2e/fakes/fake-runtime-event-queue.ts` | No durable queue or replay worker. |
 | Runtime task state machine | implemented fake | `packages/state-machine/**` | No production Runtime API or durable transaction boundary. |
@@ -81,8 +81,8 @@ a reviewed human or PR path, not an automatic live memory write.
 | GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or GitHub API call, no real PR creation proof. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
-| Real-service smoke runbook and tests | guarded scaffold | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts` | Scaffold explicitly does not call real services. |
-| Real Matrix integration | not implemented real integration | No real service proof in current review | Needs separately approved disposable homeserver/room smoke. |
+| Real-service smoke runbook and tests | guarded scaffold; MCR-720 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02` | Default path remains skipped; proof is local disposable compatibility only. |
+| Real Matrix integration | local disposable smoke proof only | MCR-720 run id `mcr-720-20260629t130000z-matrix-smoke-02`: local Synapse, local AppService listener, one transaction | Production Matrix integration, persistent Runtime service, and room/user lifecycle automation remain not implemented. |
 | Real GitHub PR integration | not implemented real integration | Fake adapter only | Needs action-scoped approval and disposable repo/branch smoke. |
 | Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only | Needs separate persistence vertical slice. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
@@ -97,7 +97,8 @@ Replace one fake boundary at a time:
 
 1. Keep the MCR-310 real Codex exec smoke proof as a one-time compatibility
    proof, not a default worker path.
-2. Replace fake Matrix ingress with a disposable Matrix AppService smoke.
+2. Keep the MCR-720 disposable Matrix AppService smoke as one compatibility
+   proof, not a production Matrix path.
 3. Replace the fake GitHub adapter with a disposable PR creation smoke.
 4. Add durable Runtime storage only after the adapter gates still preserve the
    same state, proof, approval, and memory boundaries.
@@ -140,5 +141,37 @@ Acceptance boundary:
 This proof does not make real Codex execution the default worker path and does
 not validate real Matrix, real GitHub PR/API calls, deploy, or live memory
 writes. MCR-310 Codex proof remains separate and does not authorize Matrix
-smoke. MCR-720 remains Matrix-only scaffold/skipped-by-default unless
-separately approved.
+smoke. MCR-720 Matrix proof is separate; future MCR-720 runs remain manual and
+skipped-by-default unless separately approved.
+
+## MCR-720 Closeout Boundary
+
+MCR-720 has produced one manual Matrix-only real smoke proof on 2026-06-29:
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
+
+That closes one compatibility proof around local Matrix ingress only:
+
+```text
+local disposable Synapse
+-> generated run-scoped AppService registration
+-> local AppService listener on 127.0.0.1:9009
+-> one PUT /_matrix/app/v1/transactions/txn_mcr_720_smoke_02
+-> transaction handler returns status=200 and {"code":"ok","retryable":false}
+-> cleanup stops compose, removes generated files/data, and leaves no 8008/8448/9009 listeners
+```
+
+Decisive proof files include `transaction.exit_code`, `transaction.stdout`,
+`listener.kill0.before-transaction.exit_code`,
+`listener.lsof.before-transaction.stdout`,
+`listener.bound.before-transaction.exit_code`,
+`docker-compose-down.cleanup.exit_code`, `cleanup-lsof-8008.proof`,
+`cleanup-lsof-8448.proof`, `cleanup-lsof-9009.proof`, `generated-cleanup.txt`,
+and `cleanup-paths.stdout`.
+
+Non-blocking note: the first run failed because the listener process was not
+alive when Synapse submitted the transaction. The second run used a durable
+listener and direct transaction exit-code capture.
+
+This proof does not validate production Matrix integration, a persistent Runtime
+service, real room/user lifecycle automation, real GitHub PR/API calls, deploy,
+or live memory writes. It does not make MCR-720 production-ready.

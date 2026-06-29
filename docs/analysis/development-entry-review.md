@@ -10,16 +10,29 @@ Local fake MVP implementation through MCR-700 has merged into `main`. MCR-310
 has merged as a guarded scaffold and one manual real Codex exec smoke passed on
 2026-06-29. Tracked proof:
 `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit
-`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 remains a guarded,
-skipped-by-default scaffold.
+`8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`. MCR-720 has one approved
+Matrix-only real smoke pass on 2026-06-29.
 
-No real Matrix, GitHub PR/API, deploy, live memory write, or MCR-720
-Matrix-only real-service smoke is marked complete here. Scaffold presence is not
-compatibility proof. Any further real smoke still requires action-scoped human
-approval, disposable scoped credentials, opt-in execution, cleanup notes, and
-captured proof.
+MCR-720 scope was exactly local disposable Synapse, a local AppService listener,
+and one AppService transaction. Evidence:
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
+Key proof files: `transaction.exit_code`, `transaction.stdout`,
+`listener.kill0.before-transaction.exit_code`,
+`listener.lsof.before-transaction.stdout`,
+`listener.bound.before-transaction.exit_code`,
+`docker-compose-down.cleanup.exit_code`, `cleanup-lsof-8008.proof`,
+`cleanup-lsof-8448.proof`, `cleanup-lsof-9009.proof`, `generated-cleanup.txt`,
+and `cleanup-paths.stdout`.
+
+This is not production Matrix integration. Production Matrix integration,
+persistent Runtime service, real room/user lifecycle automation, GitHub
+PR/API, deploy, and live memory write remain not done. Any further real smoke
+still requires action-scoped human approval, disposable scoped credentials,
+opt-in execution, cleanup notes, and captured proof.
 
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
+MCR-720 Matrix proof remains separate and does not authorize production Matrix,
+GitHub, deploy, live memory, or default real-service execution.
 
 ## Target System Design Alignment
 
@@ -38,10 +51,11 @@ explicit:
 - External actions require matching approval before they run.
 - Memory remains proposal-only; Runtime must not write live memory.
 
-The guarded MCR-310 real Codex exec smoke has now produced one proof while
-Matrix and GitHub remained fake. This does not introduce an automatic commander
-loop, a separate review lane, default real Codex execution, real GitHub PR/API
-calls, real Matrix writes, deploy, or live memory writes.
+The guarded MCR-310 real Codex exec smoke has produced one Codex-only proof.
+MCR-720 has produced one Matrix-only local disposable proof. These do not
+introduce an automatic commander loop, a separate review lane, default real
+Codex execution, production Matrix integration, real GitHub PR/API calls,
+deploy, or live memory writes.
 
 ## Original Entry Verdict
 
@@ -163,17 +177,19 @@ Evidence:
 Notes:
 
 - MCR-310 and MCR-720 scaffolds are merged. MCR-310 has one tracked real Codex
-  exec smoke proof, but MCR-310 Codex proof remains separate and does not
-  authorize Matrix smoke, more real Codex, GitHub, secrets, PR creation, merge,
-  deploy, or live memory writes.
+  exec smoke proof. MCR-720 has one tracked Matrix-only local disposable smoke
+  proof. Neither proof authorizes default real-service execution, production
+  Matrix, more real Codex, GitHub, secrets, PR creation, merge, deploy, or live
+  memory writes.
 
 Smallest follow-up if this gate regresses: split the oversized task and restore
 allowed/forbidden files plus tests-first requirements.
 
 ## Real-Service Smoke Gate
 
-Status: partially satisfied for MCR-310 Codex exec smoke only; manual execution
-still gated for every further real-service smoke.
+Status: partially satisfied for MCR-310 Codex exec smoke and MCR-720
+Matrix-only local disposable smoke only; manual execution still gated for every
+further real-service smoke.
 
 Evidence now present:
 
@@ -185,15 +201,30 @@ Evidence now present:
   `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2`.
 - MCR-720 Matrix-only real-service smoke preflight runbook, skipped-test
   scaffold, and manual-only disposable Synapse compose scaffold have merged.
+- MCR-720 Matrix-only real smoke passed once on 2026-06-29 for run id
+  `mcr-720-20260629t130000z-matrix-smoke-02`. Scope was local disposable
+  Synapse, local AppService listener, and one AppService transaction.
+- MCR-720 proof exists under
+  `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`.
+  Decisive files include `transaction.exit_code` (`exit_code=0`),
+  `transaction.stdout` (`status=200` with `{"code":"ok","retryable":false}`),
+  listener pre-transaction `kill -0`/`lsof`/bound checks, cleanup
+  `docker-compose-down.cleanup.exit_code`, cleanup lsof proofs for
+  `8008`/`8448`/`9009`, `generated-cleanup.txt`, and `cleanup-paths.stdout`.
+- Non-blocking note: the first run failed because the listener process was not
+  alive when Synapse submitted the transaction. The second run used a durable
+  listener and direct transaction exit-code capture.
 
 Not yet complete:
 
-- Real Matrix and GitHub test-service compatibility proof.
+- Production Matrix integration.
+- Persistent Runtime service.
+- Real room/user lifecycle automation.
+- Real GitHub test-service compatibility proof.
 - Any production-like Codex worker execution.
-- MCR-720 Matrix-only real-service smoke execution; it remains
-  scaffold/skipped-by-default unless separately approved.
-- Disposable Synapse compose is not proof of compatibility; it is a
-  manual-only, no-default-start scaffold for a future approved run.
+- GitHub PR/API, deploy, and live memory paths.
+- Disposable Synapse compose remains manual-only and no-default-start; the
+  passed MCR-720 proof does not make it production-ready.
 
 Manual gate for any real smoke:
 
@@ -204,5 +235,6 @@ Manual gate for any real smoke:
   rollback notes.
 
 Do not treat the MCR-310 proof as approval for additional real Codex runs or as
-real Matrix, GitHub, deploy, or live memory validation. Do not treat MCR-720
-scaffold completion as real-service compatibility validation.
+real Matrix, GitHub, deploy, or live memory validation. Do not treat the
+MCR-720 proof as production Matrix readiness, persistent Runtime validation,
+room/user lifecycle automation, GitHub, deploy, or live memory validation.
