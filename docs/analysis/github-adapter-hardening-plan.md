@@ -192,9 +192,11 @@ internal compatibility and not proposing source removal now. MCR-1055 Post-GitHu
 Adapter Backlog Source-of-Truth Review is now later/backlog after MCR-1056.
 MCR-1058 completed the local fake MVP docs/runbook closeout, MCR-1059 completed
 as a read-only GO audit, and MCR-1061 completed the local fake evidence artifact
-design. The active next step is MCR-1062 minimal `summary.json` implementation
-only if explicitly assigned. This plan still does not authorize source removal,
-real GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a
-network-capable client, external process runner execution, merge, deploy,
+design. MCR-1062 completed the minimal `summary.json` implementation in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`; the current source-of-truth next
+step is MCR-1064 read-only single-command readiness audit, and GitHub adapter
+deepening is paused by the current direction. This plan still does not authorize
+source removal, real GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`,
+a network-capable client, external process runner execution, merge, deploy,
 branch deletion, production `main` writes,
 token/env dumps, secret reads, raw payload logging, or live memory writes.

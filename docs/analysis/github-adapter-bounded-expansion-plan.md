@@ -48,8 +48,10 @@ read-only/design-only legacy stdout fallback removal decision by keeping bounded
 internal compatibility. MCR-1055 is now later/backlog after MCR-1056. MCR-1058
 completed the local fake MVP docs/runbook closeout. MCR-1059 completed as a
 read-only GO audit, and MCR-1061 completed the local fake evidence artifact
-design; the active next step is MCR-1062 minimal `summary.json` implementation
-only if explicitly assigned.
+design. MCR-1062 completed the minimal `summary.json` implementation in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`; the current source-of-truth next
+step is MCR-1064 read-only single-command readiness audit, and GitHub adapter
+deepening is paused by the current direction.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -258,10 +260,13 @@ task with new local evidence and an explicit allowlist. MCR-1055 Post-GitHub
 Adapter Backlog Source-of-Truth Review is now later/backlog after MCR-1056.
 MCR-1058 completed the local fake MVP docs/runbook closeout, MCR-1059 completed
 as a read-only GO audit, and MCR-1061 completed the local fake evidence artifact
-design. The active next step is MCR-1062 minimal `summary.json` implementation
-only if explicitly assigned. This remains read-only/planning-only; no current
-doc authorizes source removal, real GitHub writes, Octokit, `fetch`, `gh api`,
-`gh pr create`, a network-capable client, or external process runner execution.
+design. MCR-1062 completed the minimal `summary.json` implementation in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`; the current source-of-truth next
+step is MCR-1064 read-only single-command readiness audit, and GitHub adapter
+deepening is paused by the current direction. This remains
+read-only/planning-only; no current doc authorizes source removal, real GitHub
+writes, Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable client, or
+external process runner execution.
 
 Validation commands for the docs closeout and decision task:
 
