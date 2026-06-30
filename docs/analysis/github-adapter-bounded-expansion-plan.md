@@ -31,13 +31,18 @@ remove it immediately: fallback may remain only for legacy local runner results
 that omit `api_summary`; present-but-invalid or mismatched `api_summary` should
 reject instead of recovering from stdout.
 
+MCR-1050 completed that local-only restriction and merged at commit
+`d584579566782aa7cbd51c00e59e53966b64b95d`. It did not add a real GitHub
+adapter, a network-capable client, or an external process execution path.
+
 ## Scope Boundary
 
 MCR-1040 itself was planning/design only and did not authorize source or test
-changes. After the MCR-1049 decision, the next bounded slice is MCR-1050: a
-local github-adapter restriction test/source guard only. It may not change
-schemas, fixtures, package files, smoke runners, Matrix code, Runtime
-orchestration, GitHub workflows, deployment logic, or secret handling.
+changes. MCR-1050 has now completed the local github-adapter restriction
+test/source guard. The next bounded slice is MCR-1052: a read-only
+post-restriction readiness audit. It may not change schemas, fixtures, package
+files, smoke runners, Matrix code, Runtime orchestration, GitHub workflows,
+deployment logic, or secret handling.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -170,7 +175,7 @@ Runtime-orchestrator GitHub PR integration now uses public `api_summary`.
 Legacy stdout PR URL fallback coverage remains only inside github-adapter
 package tests and internal compatibility.
 
-## MCR-1049 Decision Result And MCR-1050 Boundary
+## MCR-1049 Decision Result And MCR-1050 Completion
 
 MCR-1049 solved one question: should the legacy stdout PR URL fallback be kept
 as bounded internal compatibility, further restricted, or proposed for later
@@ -186,13 +191,12 @@ Decision: further restrict it. The current inventory showed:
 - `tests/e2e/runtime-orchestrator-cli.test.ts` uses public `api_summary` for
   runtime-orchestrator GitHub PR integration.
 
-Reason: removal is not justified while package tests still define internal
+Reason: removal was not justified while package tests still defined internal
 compatibility, but the fallback should not hide a structured summary mismatch.
-The MCR-1050 restriction should keep fallback only when `api_summary` is absent;
-if `api_summary` is present but invalid or mismatched, the adapter should reject
-instead of recovering from stdout.
-
-Allowed files for MCR-1050:
+MCR-1050 implemented the restriction: fallback is used only when `api_summary`
+is absent; if `api_summary` is present but invalid or mismatched, the adapter
+rejects with `pr_url_missing` instead of recovering from stdout. The change was
+local to:
 
 - `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`
 - `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
@@ -215,7 +219,8 @@ Forbidden files and actions:
 
 ## Acceptance And Validation
 
-The MCR-1050 local restriction worker is acceptable only if it:
+MCR-1050 is complete. The post-restriction audit is acceptable only if it
+confirms that MCR-1050:
 
 - proves legacy stdout fallback succeeds only when `api_summary` is absent and
   stdout contains a repo-scoped PR URL

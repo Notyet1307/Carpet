@@ -236,14 +236,16 @@ github-adapter internal compatibility only.
 
 MCR-1049 completed the docs/design decision: further restrict the legacy stdout
 fallback rather than remove it now. The current refusal matrix and package tests
-still cover bounded internal compatibility, but the adapter should not let
+still covered bounded internal compatibility, but the adapter should not let
 stdout hide a present invalid or mismatched `api_summary`.
 
-The First Recommended Task is MCR-1050 GitHub Adapter Legacy Stdout Fallback
-Restriction Tests. It should add local github-adapter package coverage proving
-fallback succeeds only when `api_summary` is absent and stdout has a repo-scoped
-PR URL, and proving present-but-invalid or mismatched `api_summary` rejects even
-when stdout has a valid repo-scoped PR URL. This plan still does not permit real
+MCR-1050 completed that local github-adapter restriction and merged at commit
+`d584579566782aa7cbd51c00e59e53966b64b95d`. Package coverage now proves fallback
+succeeds only when `api_summary` is absent and stdout has a repo-scoped PR URL,
+and present-but-invalid or mismatched `api_summary` rejects with
+`pr_url_missing` even when stdout has a valid repo-scoped PR URL.
+Runtime-orchestrator still uses public `api_summary`. MCR-1052 is the next
+read-only post-restriction readiness audit. This plan still does not permit real
 GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
 external process runner execution, merge, deploy, production `main` writes,
 broad credential use, secret reads, token/env dumps, raw payload logging, or live

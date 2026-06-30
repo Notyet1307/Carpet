@@ -78,7 +78,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Codex exec smoke runner | guarded scaffold; passed once manually | `apps/worker-runner/src/codex-exec-runner.ts`; `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2` | Further runs still require explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
 | Proof ledger and verifier | implemented fake | `packages/proof-ledger/**` | No object store, durable proof ledger, or verifier worker service. |
 | Approval gate | implemented fake | `packages/approval-gate/**` | No durable approval service, Matrix identity binding, or production authorization store. |
-| GitHub PR adapter | fake default plus disabled scaffold; local refusal matrix complete; MCR-1046 audit GO; MCR-1047 aligned runtime-orchestrator coverage to public `api_summary`; MCR-1049 chose further restriction of internal legacy stdout compatibility | `packages/github-adapter/src/fake-github-adapter.ts`; `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`; `fixtures/github-adapter/refusals/GH-REF-001` through `GH-REF-026`; package tests assert no runner calls; runtime-orchestrator integration now uses `api_summary` | No production GitHub adapter, Octokit path, default real GitHub write, merge, deploy, production main write, branch deletion, fetch-capable path, broad-token path, or stdout/stderr public runner-result contract. Legacy stdout PR URL fallback remains github-adapter internal compatibility only and should be restricted by MCR-1050 to absent-`api_summary` legacy local runner results. |
+| GitHub PR adapter | fake default plus disabled scaffold; local refusal matrix complete; MCR-1046 audit GO; MCR-1047 aligned runtime-orchestrator coverage to public `api_summary`; MCR-1049 chose further restriction of internal legacy stdout compatibility; MCR-1050 completed that local restriction in commit `d584579566782aa7cbd51c00e59e53966b64b95d` | `packages/github-adapter/src/fake-github-adapter.ts`; `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`; `fixtures/github-adapter/refusals/GH-REF-001` through `GH-REF-026`; package tests assert no runner calls; runtime-orchestrator integration now uses `api_summary` | No production GitHub adapter, Octokit path, default real GitHub write, merge, deploy, production main write, branch deletion, fetch-capable path, broad-token path, or stdout/stderr public runner-result contract. Legacy stdout PR URL fallback remains github-adapter internal compatibility only and is restricted to absent-`api_summary` legacy local runner results; present invalid or mismatched `api_summary` returns `pr_url_missing`. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 and MCR-850 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; MCR-720 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`; MCR-850 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01` | Default path remains skipped; proof is disposable compatibility only, not production readiness. |
@@ -437,17 +437,21 @@ fallback coverage remains only inside github-adapter package tests and internal
 compatibility.
 
 MCR-1049 completed that docs/design decision. Decision: further restrict, not
-remove now. Evidence does not support removal because github-adapter package
-tests still intentionally cover bounded internal compatibility, but the target
+remove now. Evidence did not support removal because github-adapter package
+tests still intentionally covered bounded internal compatibility, but the target
 system should not let legacy stdout mask a present invalid structured
-`api_summary`. The First Recommended Task is MCR-1050 GitHub Adapter Legacy
-Stdout Fallback Restriction Tests: fallback may remain only for legacy local
-runner results that omit `api_summary`; present-but-invalid or mismatched
-`api_summary` must reject instead of recovering from stdout. This boundary still
-does not authorize real GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`,
-PR creation, branch deletion, merge, deploy, production `main` writes, token
-reads, secret reads, env dumps, raw payload logging, a network-capable client, or
-live memory writes.
+`api_summary`. MCR-1050 completed and merged at commit
+`d584579566782aa7cbd51c00e59e53966b64b95d`. It made the restriction local to the
+github-adapter: fallback may remain only for legacy local runner results that
+omit `api_summary`; present-but-invalid or mismatched `api_summary` rejects with
+`pr_url_missing` instead of recovering from stdout; runtime-orchestrator remains
+on the public `api_summary`; no real GitHub, network-capable client, external
+process execution path, Octokit, `fetch`, `gh api`, or `gh pr create` path was
+added. The next active task is MCR-1052 GitHub Adapter Post-Restriction
+Readiness Audit, a read-only audit. This boundary still does not authorize real
+GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR creation, branch
+deletion, merge, deploy, production `main` writes, token reads, secret reads,
+env dumps, raw payload logging, a network-capable client, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

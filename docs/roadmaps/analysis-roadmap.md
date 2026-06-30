@@ -442,15 +442,22 @@ PR integration uses the public `api_summary` runner result. Legacy stdout PR URL
 fallback coverage remains only inside github-adapter package tests and internal
 compatibility. MCR-1049 completed the docs/design decision: further restrict the
 internal fallback rather than remove it now. The conservative reason is that the
-fallback still has explicit github-adapter package compatibility coverage, while
-runtime-orchestrator no longer uses it. The First Recommended Task is MCR-1050
-GitHub Adapter Legacy Stdout Fallback Restriction Tests: keep fallback only for
-legacy local runner results with no `api_summary`, and reject present-but-invalid
-or mismatched `api_summary` instead of recovering from stdout. Do not treat this
-as authorization for real GitHub implementation, Octokit, `fetch`, `gh api`,
-`gh pr create`, merge, deploy, production `main` writes, branch deletion,
-token/env dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or
-live memory writes.
+fallback still had explicit github-adapter package compatibility coverage, while
+runtime-orchestrator no longer used it. MCR-1050 completed that local-only
+restriction and merged at commit `d584579566782aa7cbd51c00e59e53966b64b95d`:
+legacy stdout fallback now applies only when the runner result lacks
+`api_summary`; present-but-invalid or mismatched `api_summary` returns
+`pr_url_missing` instead of recovering from stdout; runtime-orchestrator remains
+on the public `api_summary`; no real GitHub, network-capable client, external
+process execution path, Octokit, `fetch`, `gh api`, or `gh pr create` path was
+added. MCR-1051 is the docs-only closeout for that merged status. The First
+Recommended Task is MCR-1052 GitHub Adapter Post-Restriction Readiness Audit, a
+read-only audit to verify MCR-1050 behavior, no real GitHub/network/process
+execution path, runtime-orchestrator `api_summary` usage, docs authorization
+boundaries, and local validation. Do not treat this as authorization for real
+GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, merge,
+deploy, production `main` writes, branch deletion, token/env dumps, raw payload
+logging, DB/Postgres, Matrix/Codex real smoke, or live memory writes.
 
 ---
 

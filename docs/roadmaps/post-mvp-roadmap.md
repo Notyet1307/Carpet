@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1049, the First Recommended Task is MCR-1050 GitHub Adapter Legacy
-Stdout Fallback Restriction Tests.
+After MCR-1051, the First Recommended Task is MCR-1052 GitHub Adapter
+Post-Restriction Readiness Audit.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -49,7 +49,14 @@ merged in commit `56f76f7a6354f074589fc126076ba767711689f5`; it changed only
 integration reads the public `api_summary` runner result. Source changes needed:
 no. MCR-1049 completed the docs/design decision: keep the fallback only as
 bounded github-adapter internal compatibility, but further restrict it before any
-later removal decision. No real GitHub implementation is authorized.
+later removal decision. MCR-1050 completed that local-only restriction and
+merged at commit `d584579566782aa7cbd51c00e59e53966b64b95d`: fallback now
+applies only when the runner result lacks `api_summary`; present invalid or
+mismatched `api_summary` returns `pr_url_missing`; runtime-orchestrator remains
+on the public `api_summary`; no real GitHub, network-capable client, external
+process execution path, Octokit, `fetch`, `gh api`, or `gh pr create` path was
+added. MCR-1051 is this docs-only closeout so future workers do not repeat
+MCR-1050. No real GitHub implementation is authorized.
 
 ## Cards
 
@@ -749,8 +756,10 @@ not authorize removing code.
   keep is too broad. The fallback should only apply when a legacy local runner
   returns no `api_summary`; if an `api_summary` is present but invalid or
   mismatched, the adapter should reject instead of recovering from stdout.
-- Next step: MCR-1050 should add the local restriction tests and the minimal
-  source guard if needed. Production GitHub readiness remains unauthorized.
+- Follow-up result: MCR-1050 added the local restriction tests and source guard
+  in commit `d584579566782aa7cbd51c00e59e53966b64b95d`. The next active step is
+  the MCR-1052 read-only post-restriction audit. Production GitHub readiness
+  remains unauthorized.
 - Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
   `git diff --check`, stale-text `rg`, and authorization-drift `rg`.
 - Fake/scaffold/real boundary: docs/design/readiness only; no code, fixture,
@@ -759,7 +768,8 @@ not authorize removing code.
 
 ### MCR-1050: GitHub Adapter Legacy Stdout Fallback Restriction Tests
 
-Status: First Recommended Task after MCR-1049. This is a local-only
+Status: completed and merged in commit
+`d584579566782aa7cbd51c00e59e53966b64b95d`. This was a local-only
 github-adapter restriction slice, not production GitHub readiness.
 
 - Problem: the current adapter has a private legacy stdout PR URL fallback after
@@ -791,6 +801,65 @@ github-adapter restriction slice, not production GitHub readiness.
 - Fake/scaffold/real boundary: local package behavior only; no real GitHub call,
   no network-capable client, no external process runner execution, no
   Matrix/Codex smoke, no DB, and no live memory behavior.
+
+### MCR-1051: GitHub Stdout Fallback Closeout Docs Sync
+
+Status: docs-only closeout prepared for review in branch
+`mcr/DOCS/mcr-1051-github-stdout-fallback-closeout`.
+
+- Problem solved: MCR-1050 is merged, but roadmap and analysis docs still point
+  future workers at the already completed restriction task.
+- Why now: without this closeout, commander sessions can repeat MCR-1050 instead
+  of auditing the post-restriction state.
+- Allowed files: `docs/roadmaps/post-mvp-roadmap.md`,
+  `docs/roadmaps/analysis-roadmap.md`,
+  `docs/analysis/target-system-design.md`,
+  `docs/analysis/github-adapter-bounded-expansion-plan.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`, and
+  `docs/analysis/github-adapter-refusal-test-plan.md`.
+- Forbidden files/actions: code, tests, schemas, fixtures, runtime, packages,
+  lockfiles, `.codex.local.env`, real GitHub, Octokit, `fetch`, `gh api`,
+  `gh pr create`, network-capable client, external process runner execution,
+  merge, deploy, branch deletion, production `main` write, token/env dump,
+  secret read, raw payload logging, DB/Postgres, Matrix/Codex real smoke, live
+  memory, commit, push, PR.
+- Acceptance criteria: docs record MCR-1050 as completed and merged at
+  `d584579566782aa7cbd51c00e59e53966b64b95d`; docs summarize the completed
+  local-only behavior; First Recommended Task no longer points to MCR-1050; next
+  step is a read-only audit.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, stale-text `rg`, and authorization-drift `rg`.
+- Fake/scaffold/real boundary: docs-only status synchronization; no production
+  GitHub implementation or automation permission.
+
+### MCR-1052: GitHub Adapter Post-Restriction Readiness Audit
+
+Status: First Recommended Task after MCR-1051. This is read-only and does not
+authorize production GitHub implementation.
+
+- Problem solved: after MCR-1050, the repo needs one clean audit proving the
+  local restriction landed without widening the GitHub boundary.
+- Why now: the next safe step is evidence, not new adapter capability.
+- Allowed files: none by default; this is a read-only audit. If the audit finds
+  docs drift, propose a separate docs-only closeout instead of editing in place.
+- Forbidden files/actions: source, tests, schemas, fixtures, runtime, packages,
+  lockfiles, `.codex.local.env`, real GitHub, Octokit, `fetch`, `gh api`,
+  `gh pr create`, network-capable client, external process runner execution,
+  merge, deploy, branch deletion, production `main` write, token/env dump,
+  secret read, raw payload logging, DB/Postgres, Matrix/Codex real smoke, live
+  memory, commit, push, PR.
+- Acceptance criteria: verify MCR-1050 behavior in source/tests; verify no real
+  GitHub, network, or process execution path was added; verify
+  runtime-orchestrator still uses public `api_summary`; verify docs do not
+  authorize production GitHub writes or automation; verify local tests are
+  green.
+- Validation/proof: `pnpm --filter github-adapter test`,
+  `pnpm --filter runtime-orchestrator test`, `pnpm test:contracts`,
+  `pnpm schemas:validate`, `pnpm test`, `git diff --check`, stale-text `rg`,
+  and authorization-drift/source-drift `rg`.
+- Fake/scaffold/real boundary: read-only audit only; no real GitHub call, no
+  network-capable client, no external process runner execution, no production
+  automation, and no live memory behavior.
 
 ## Global Deny List
 
