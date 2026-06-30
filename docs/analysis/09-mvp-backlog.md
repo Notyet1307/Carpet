@@ -16,15 +16,16 @@ It does not authorize implementation in this branch.
 
 As of 2026-06-29, MCR-030 through MCR-700 local fake MVP work is merged on
 `main`. The MCR-310 guarded Codex exec runner scaffold, MCR-720 real-service
-smoke scaffold, and MCR-730 disposable GitHub PR smoke proof are also merged or
-closed out in the roadmap.
+smoke scaffold, MCR-730 disposable GitHub PR smoke proof, and MCR-850 vertical
+compatibility proof are also merged or closed out in the roadmap.
 
 Wave 0-6 now has one manual proof each for real Codex exec, local disposable
-Matrix ingress, and disposable GitHub PR creation. Those proofs are narrow
-compatibility evidence, not production readiness and not approval for default
-real-service execution. Further real Matrix, Codex, GitHub, or service smoke
-execution still requires action-scoped human approval, disposable scoped
-credentials, opt-in commands, cleanup notes, and captured proof.
+Matrix ingress, disposable GitHub PR creation, and one approved vertical
+compatibility pass. Those proofs are narrow compatibility evidence, not
+production readiness and not approval for default real-service execution.
+Further real Matrix, Codex, GitHub, or service smoke execution still requires
+action-scoped human approval, disposable scoped credentials, opt-in commands,
+cleanup notes, and captured proof.
 
 The sequence is:
 
@@ -1094,30 +1095,31 @@ Expected proof / validation evidence:
 - Cleanup log
 - `git diff --check`
 
-## Next Real-Service MVP Vertical Slices
+## Closed Real-Service MVP Vertical Slice Wave
 
-The canonical next task cards are in
-`docs/roadmaps/mvp-implementation-plan.md#next-real-service-mvp-vertical-slices`.
-They are intentionally limited to six ordered cards:
+The MCR-800 through MCR-850 vertical-slice wave in
+`docs/roadmaps/mvp-implementation-plan.md#next-real-service-mvp-vertical-slices`
+is complete and closed out. Do not restart MCR-800 as the next implementation
+task.
 
-1. MCR-800 Runtime Orchestrator CLI With File Snapshot Store
-2. MCR-810 Approved Codex Exec Adapter In Runtime Orchestrator
-3. MCR-820 Matrix Ingress To Runtime Orchestrator
-4. MCR-830 Runtime Approval Projection And Intake
-5. MCR-840 Runtime-Owned GitHub PR Create Adapter For Disposable Targets
-6. MCR-850 One Real-Service MVP Vertical Smoke
+MCR-730 produced one disposable sandbox GitHub PR create/cleanup proof. MCR-850
+produced one approved vertical compatibility proof across the local
+fixture/runtime Matrix path, one approved Codex exec attempt, proof/approval,
+disposable sandbox GitHub PR creation, and cleanup.
 
-The first implementation task is MCR-800. It must compose existing local
-components and the MCR-106 file snapshot store without default real
-Matrix/GitHub/Codex calls. Postgres and DB migrations remain later because the
-immediate vertical slice needs single-writer replayable proof, which the file
-snapshot adapter already provides.
+MCR-850 remains compatibility proof only, not production readiness. It does not
+authorize production Matrix/GitHub, DB/Postgres migration, merge, deploy, live
+memory, production main push, secret dump, or default automation.
+
+Next work should start with a post-MCR-850 closeout/gap scan or the next
+explicitly bounded roadmap/backlog card. Do not infer production work from the
+compatibility pass.
 
 ## Closed Architecture Follow-Up
 
 ADR-0006 exists at `docs/adr/0006-codex-exec-before-sdk.md`, closing the
 previous architecture-decision blocker for adding the MCR-310 scaffold.
 
-This does not approve or prove real service compatibility. MCR-310 and MCR-720
-remain manual, opt-in smoke paths until a human owner approves disposable
-credentials and the run records compatibility proof.
+This does not approve production service integration. MCR-310, MCR-720, MCR-730,
+and MCR-850 remain manual, opt-in compatibility proof paths unless a human owner
+approves disposable credentials and the run records bounded proof.
