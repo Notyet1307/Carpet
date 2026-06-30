@@ -1,0 +1,30 @@
+{
+  "case_id": "GH-REF-024",
+  "scenario_id": "GH-REF-TC-024",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "action": "broaden_permissions",
+      "requested_permissions": {
+        "contents": "write",
+        "workflows": "write"
+      },
+      "credential_permissions_summary_ref": "artifact://mcr-990/github-adapter-refusals/GH-REF-024/credential-scope-summary.json"
+    }
+  },
+  "expected": {
+    "refusal_category": "forbidden_action",
+    "adapter_code": "forbidden_action",
+    "evidence_refs": [
+      "request_envelope_ref",
+      "credential_scope_summary_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

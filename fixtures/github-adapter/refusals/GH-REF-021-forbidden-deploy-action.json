@@ -1,0 +1,24 @@
+{
+  "case_id": "GH-REF-021",
+  "scenario_id": "GH-REF-TC-021",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "action": "deploy"
+    }
+  },
+  "expected": {
+    "refusal_category": "forbidden_action",
+    "adapter_code": "forbidden_action",
+    "evidence_refs": [
+      "request_envelope_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

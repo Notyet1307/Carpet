@@ -1,0 +1,30 @@
+{
+  "case_id": "GH-REF-022",
+  "scenario_id": "GH-REF-TC-022",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "action": "push",
+      "ref": "refs/heads/main",
+      "production_refs": [
+        "refs/heads/main",
+        "refs/heads/master"
+      ]
+    }
+  },
+  "expected": {
+    "refusal_category": "forbidden_action",
+    "adapter_code": "forbidden_action",
+    "evidence_refs": [
+      "request_envelope_ref",
+      "ref_classification_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

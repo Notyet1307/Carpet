@@ -96,6 +96,15 @@ Supported by the current adapter API and local fixture runner:
 - `GH-REF-018` uses PR body safety input and maps `unsafe_body`.
 - `GH-REF-019` uses evidence safety input and maps `unsafe_evidence`.
 - `GH-REF-020` uses current `forbidden_action` directly.
+- `GH-REF-021` uses current `forbidden_action` for deploy requests.
+- `GH-REF-022` uses current `forbidden_action` for direct production push
+  requests.
+- `GH-REF-023` uses current `forbidden_action` for remote ref deletion
+  requests.
+- `GH-REF-024` uses current `forbidden_action` for permission broadening
+  requests.
+- `GH-REF-025` uses current `forbidden_action` for secret read requests.
+- `GH-REF-026` uses current `forbidden_action` for live memory write requests.
 
 No local refusal fixture in this directory is currently marked deferred.
 

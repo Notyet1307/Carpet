@@ -13,13 +13,16 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After accepting MCR-980, start with **MCR-990 GitHub Adapter Remaining Refusal
-Fixture Expansion Plan**. MCR-901 is complete, MCR-910 and MCR-920 have design
+After accepting MCR-990, start with **MCR-1000 GitHub Adapter Approval Mismatch
+Refusal Fixture Plan**. MCR-901 is complete, MCR-910 and MCR-920 have design
 artifacts, MCR-930 has a policy artifact for evidence retention and cleanup,
 MCR-940 has a hardening plan artifact, MCR-950 has a refusal matrix artifact,
 MCR-960 has a docs-only test-plan artifact, MCR-970 adds the first local
-refusal fixtures and tests, and MCR-980 hardens the deferred local refusal
-source boundary.
+refusal fixtures and tests, MCR-980 hardens the deferred local refusal source
+boundary, and MCR-990 adds the local forbidden-action fixture slice for
+GH-REF-021 through GH-REF-026. The remaining uncovered MCR-950 rows are
+GH-REF-004 through GH-REF-009, GH-REF-013, GH-REF-015, GH-REF-016, and
+GH-REF-017.
 
 ## Cards
 
@@ -257,10 +260,12 @@ Status: completed; pending review and merge.
 
 ### MCR-990: GitHub Adapter Remaining Refusal Fixture Expansion Plan
 
-Status: proposed next after MCR-980 is reviewed.
+Status: completed forbidden-action fixture slice; pending review.
 
-- Problem solved: MCR-950 still has refusal rows that are planned but not yet
-  represented as executable local fixtures.
+- Problem solved: MCR-950 had forbidden-action refusal rows that were planned
+  but not yet represented as executable local fixtures. GH-REF-021 through
+  GH-REF-026 now have supported local fixtures for the adapter's existing
+  `forbidden_action` guard.
 - Why now: expanding one-denial-cause local fixtures is the smallest next safety
   step before any broader adapter behavior.
 - Allowed files: `docs/analysis/github-adapter-refusal-test-plan.md`,
@@ -279,6 +284,37 @@ Status: proposed next after MCR-980 is reviewed.
   authorization drift and token/env dump language.
 - Fake/scaffold/real boundary: local fixture/test planning or local refusal
   tests only; no real GitHub write path.
+
+### MCR-1000: GitHub Adapter Approval Mismatch Refusal Fixture Plan
+
+Status: proposed next after MCR-990 acceptance.
+
+- Problem solved: MCR-950 approval mismatch rows GH-REF-004 through GH-REF-009
+  remain planned but not yet represented as executable local fixtures.
+- Why now: approval binding is the next smallest uncovered local refusal slice
+  after forbidden actions, and it should be locked before target, ref,
+  protection, or dirty-worktree cases broaden the fixture surface.
+- Allowed files: `docs/analysis/github-adapter-refusal-test-plan.md`,
+  `docs/roadmaps/post-mvp-roadmap.md`, and, only if explicitly approved by the
+  task brief, `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
+  plus `fixtures/github-adapter/refusals/**`.
+- Conditional source/harness note: if mismatched approval records cannot be
+  represented by the current fixture harness, the future task must explicitly
+  scope any required test-harness or adapter-source change before editing those
+  files.
+- Forbidden files/actions: adapter real-write behavior, Runtime/app/package
+  files outside an explicit allowlist, schemas, Octokit, `gh pr create`,
+  `gh api` writes, push, merge, deploy, production main write, remote branch
+  deletion, token/env dump, live memory, and real GitHub smoke.
+- Acceptance criteria: GH-REF-004 through GH-REF-009 are planned or implemented
+  as one-denial-cause local refusal fixtures, each asserting
+  `approval_mismatch` before runner execution without raw approval payloads,
+  token values, env dumps, or real GitHub calls.
+- Validation/proof: `pnpm --filter github-adapter test`, `pnpm test:contracts`,
+  `pnpm schemas:validate`, `git diff --check`, and `rg` evidence for stale
+  next-task text, GitHub authorization drift, and token/env dump language.
+- Fake/scaffold/real boundary: local fixture/test planning or local fixture/test
+  work only; no adapter real-write behavior and no real GitHub write path.
 
 ## Global Deny List
 
