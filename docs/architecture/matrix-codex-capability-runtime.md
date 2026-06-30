@@ -95,9 +95,10 @@ Approval = external action 前置条件
 Memory = proposal-only，不能自动写 live memory
 ```
 
-下一阶段最小 vertical slice 是真实 Codex exec smoke：仍保留 fake Matrix
-和 fake GitHub，只替换 fake Codex worker 边界，并证明 main checkout、
-secret env、无 approval 外部调用、无 live memory write 都被阻止。
+下一阶段任务以 `docs/roadmaps/post-mvp-roadmap.md` 为准。MCR-310、
+MCR-720、MCR-730、MCR-850 都只是 manual / disposable compatibility proof；
+MCR-850 不授权 production Matrix/GitHub、DB/Postgres、deploy、merge、
+live memory、production main push、secret dump 或 default automation。
 
 ---
 

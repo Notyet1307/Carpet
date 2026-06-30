@@ -265,15 +265,17 @@ Manual smoke exit criteria:
   DB/Postgres migration, live memory write, production main push, secret dump,
   production Matrix integration, or persistent Runtime service operation.
 
-## Next Real-Service MVP Vertical Slices
+## Closed Real-Service MVP Vertical Slices
 
-These are the next implementation cards after Wave 0-6 closeout. They move one
-fake boundary at a time while keeping the Runtime-owned store as source of truth.
+MCR-800 through MCR-850 is closed out. Keep this section as historical context
+for the completed vertical-slice wave, not as the current next-task queue. The
+current post-MVP backlog and first recommended task are in
+`docs/roadmaps/post-mvp-roadmap.md`.
+
 Postgres, DB migrations, queues, object storage, production deploy, commander
-automation, independent review lanes, and live memory writes stay out of this
-slice set. The MCR-106 file snapshot adapter is sufficient for the immediate
-single-writer MVP because the next slices need replayable local proof, not
-multi-writer production durability.
+automation, independent review lanes, and live memory writes remain out of scope
+unless a later explicit card authorizes them with allowed files, forbidden
+actions, gates, and proof.
 
 ### MCR-800: Runtime Orchestrator CLI With File Snapshot Store
 

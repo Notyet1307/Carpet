@@ -1646,14 +1646,13 @@ Matrix path 是 local fixture/runtime path，不是真实 Synapse；GitHub path 
 disposable sandbox PR #2，已 closed unmerged 且删除 disposable branches。这是
 compatibility proof，不是 production readiness。
 
-下一阶段 real-service MVP vertical slices 已记录在
-`docs/roadmaps/mvp-implementation-plan.md#next-real-service-mvp-vertical-slices`：
 MCR-800 到 MCR-850 vertical-slice wave 已完成/close out，并产出一次 approved
-MCR-850 compatibility pass。下一步应先做 post-MCR-850 closeout/gap scan，或从
-后续 roadmap/backlog 中选择下一张有明确边界的任务卡；不要重启 MCR-800，也不要
-因为 MCR-850 通过就跳到 production integration。Postgres / DB migrations、
-production Matrix/GitHub、deploy、merge、live memory、default automation 仍未
-完成，也未被这次 compatibility proof 授权。
+MCR-850 compatibility pass。当前 post-MVP backlog 已记录在
+`docs/roadmaps/post-mvp-roadmap.md`；下一步推荐 MCR-901 Post-MVP
+Source-of-Truth Audit。不要重启 MCR-800，也不要因为 MCR-850 通过就跳到
+production integration。Postgres / DB migrations、production Matrix/GitHub、
+deploy、merge、live memory、default automation 仍未完成，也未被这次
+compatibility proof 授权。
 ```
 
 ---

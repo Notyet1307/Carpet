@@ -1111,9 +1111,9 @@ MCR-850 remains compatibility proof only, not production readiness. It does not
 authorize production Matrix/GitHub, DB/Postgres migration, merge, deploy, live
 memory, production main push, secret dump, or default automation.
 
-Next work should start with a post-MCR-850 closeout/gap scan or the next
-explicitly bounded roadmap/backlog card. Do not infer production work from the
-compatibility pass.
+Next work should start from `docs/roadmaps/post-mvp-roadmap.md`. Its first
+recommended task is MCR-901 Post-MVP Source-of-Truth Audit. Do not infer
+production work from the compatibility pass.
 
 ## Closed Architecture Follow-Up
 
