@@ -234,8 +234,17 @@ commit `56f76f7a6354f074589fc126076ba767711689f5`, changing only
 integration uses public `api_summary`. Legacy stdout PR URL compatibility is
 github-adapter internal compatibility only.
 
-The next recommended task is MCR-1049 GitHub Adapter Legacy Stdout
-Compatibility Decision, a docs/design/readiness task. This plan still does not
-permit real GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`,
-fetch calls, merge, deploy, production `main` writes, broad credential use,
-secret reads, token/env dumps, raw payload logging, or live memory writes.
+MCR-1049 completed the docs/design decision: further restrict the legacy stdout
+fallback rather than remove it now. The current refusal matrix and package tests
+still cover bounded internal compatibility, but the adapter should not let
+stdout hide a present invalid or mismatched `api_summary`.
+
+The First Recommended Task is MCR-1050 GitHub Adapter Legacy Stdout Fallback
+Restriction Tests. It should add local github-adapter package coverage proving
+fallback succeeds only when `api_summary` is absent and stdout has a repo-scoped
+PR URL, and proving present-but-invalid or mismatched `api_summary` rejects even
+when stdout has a valid repo-scoped PR URL. This plan still does not permit real
+GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
+external process runner execution, merge, deploy, production `main` writes,
+broad credential use, secret reads, token/env dumps, raw payload logging, or live
+memory writes.

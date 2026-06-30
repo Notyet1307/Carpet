@@ -26,11 +26,18 @@ only runtime-orchestrator E2E coverage so the GitHub PR integration path uses
 the public `api_summary` runner result. Legacy stdout PR URL fallback is now
 github-adapter internal compatibility only.
 
+MCR-1049 decided to further restrict that internal compatibility rather than
+remove it immediately: fallback may remain only for legacy local runner results
+that omit `api_summary`; present-but-invalid or mismatched `api_summary` should
+reject instead of recovering from stdout.
+
 ## Scope Boundary
 
-The next phase may only plan or design a bounded adapter slice. It may not
-change source, tests, schemas, fixtures, packages, smoke runners, Matrix code,
-Runtime orchestration, GitHub workflows, deployment logic, or secret handling.
+MCR-1040 itself was planning/design only and did not authorize source or test
+changes. After the MCR-1049 decision, the next bounded slice is MCR-1050: a
+local github-adapter restriction test/source guard only. It may not change
+schemas, fixtures, package files, smoke runners, Matrix code, Runtime
+orchestration, GitHub workflows, deployment logic, or secret handling.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -163,49 +170,58 @@ Runtime-orchestrator GitHub PR integration now uses public `api_summary`.
 Legacy stdout PR URL fallback coverage remains only inside github-adapter
 package tests and internal compatibility.
 
-## MCR-1049 Decision Boundary
+## MCR-1049 Decision Result And MCR-1050 Boundary
 
-MCR-1049 should solve one question: should the legacy stdout PR URL fallback be
-kept as bounded internal compatibility, further restricted, or proposed for
-later removal?
+MCR-1049 solved one question: should the legacy stdout PR URL fallback be kept
+as bounded internal compatibility, further restricted, or proposed for later
+removal?
 
-Allowed files for that docs/design/readiness worker:
+Decision: further restrict it. The current inventory showed:
 
-- `docs/analysis/github-adapter-bounded-expansion-plan.md`
-- `docs/analysis/github-adapter-hardening-plan.md`
-- `docs/analysis/github-adapter-refusal-test-plan.md`
-- `docs/analysis/target-system-design.md`
-- `docs/roadmaps/analysis-roadmap.md`
-- `docs/roadmaps/post-mvp-roadmap.md`
+- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` accepts valid
+  public `api_summary` first and then calls private legacy stdout helpers.
+- `packages/github-adapter/test/runtime-github-pr-adapter.test.ts` intentionally
+  covers bounded internal legacy stdout compatibility and cross-repository
+  rejection.
+- `tests/e2e/runtime-orchestrator-cli.test.ts` uses public `api_summary` for
+  runtime-orchestrator GitHub PR integration.
+
+Reason: removal is not justified while package tests still define internal
+compatibility, but the fallback should not hide a structured summary mismatch.
+The MCR-1050 restriction should keep fallback only when `api_summary` is absent;
+if `api_summary` is present but invalid or mismatched, the adapter should reject
+instead of recovering from stdout.
+
+Allowed files for MCR-1050:
+
+- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`
+- `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
 
 Forbidden files and actions:
 
-- `packages/**`
 - `apps/**`
 - `workers/**`
 - `runtime/**`
 - `schemas/**`
 - `fixtures/**`
-- `tests/**`
+- `tests/e2e/**`
 - `package.json`
 - `pnpm-lock.yaml`
 - `.codex.local.env`
 - real GitHub, Octokit, `fetch`, `gh api`, `gh pr create`, network-capable
   client, GitHub, Matrix, Codex, cloud, deploy, merge, push, PR, token, secret,
-  DB/Postgres, Matrix/Codex real smoke, raw payload logging, or live memory
-  actions
+  external process runner execution, DB/Postgres, Matrix/Codex real smoke, raw
+  payload logging, or live memory actions
 
 ## Acceptance And Validation
 
-The MCR-1049 docs/design/readiness worker is acceptable only if it:
+The MCR-1050 local restriction worker is acceptable only if it:
 
-- keeps the result design-only
-- inventories current legacy stdout fallback references without editing source
-- states that runtime-orchestrator uses public `api_summary`
-- states that legacy stdout PR URL fallback is github-adapter internal
-  compatibility only
-- chooses keep, further restrict, or propose later removal
-- defines the next MCR allowlist if code/test changes are needed
+- proves legacy stdout fallback succeeds only when `api_summary` is absent and
+  stdout contains a repo-scoped PR URL
+- proves present-but-invalid or mismatched `api_summary` returns `pr_url_missing`
+  even if stdout contains a valid repo-scoped PR URL
+- keeps runtime-orchestrator on public `api_summary`
 - keeps real GitHub calls out of scope
 - keeps Octokit, `fetch`, `gh api`, and `gh pr create` out of scope
 - preserves explicit scoped/disposable credential input
@@ -217,6 +233,8 @@ The MCR-1049 docs/design/readiness worker is acceptable only if it:
 Validation commands:
 
 ```bash
+pnpm --filter github-adapter test
+pnpm --filter runtime-orchestrator test
 pnpm test:contracts
 pnpm schemas:validate
 git diff --check

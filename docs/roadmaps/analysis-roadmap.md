@@ -440,12 +440,17 @@ MCR-1047 merged at commit `56f76f7a6354f074589fc126076ba767711689f5` and changed
 only `tests/e2e/runtime-orchestrator-cli.test.ts` so runtime-orchestrator GitHub
 PR integration uses the public `api_summary` runner result. Legacy stdout PR URL
 fallback coverage remains only inside github-adapter package tests and internal
-compatibility. The next recommended task is MCR-1049 GitHub Adapter Legacy
-Stdout Compatibility Decision, a docs/design/readiness task before any fallback
-removal or retention decision. Do not treat this as authorization for real
-GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, merge,
-deploy, production `main` writes, branch deletion, token/env dumps, raw payload
-logging, DB/Postgres, Matrix/Codex real smoke, or live memory writes.
+compatibility. MCR-1049 completed the docs/design decision: further restrict the
+internal fallback rather than remove it now. The conservative reason is that the
+fallback still has explicit github-adapter package compatibility coverage, while
+runtime-orchestrator no longer uses it. The First Recommended Task is MCR-1050
+GitHub Adapter Legacy Stdout Fallback Restriction Tests: keep fallback only for
+legacy local runner results with no `api_summary`, and reject present-but-invalid
+or mismatched `api_summary` instead of recovering from stdout. Do not treat this
+as authorization for real GitHub implementation, Octokit, `fetch`, `gh api`,
+`gh pr create`, merge, deploy, production `main` writes, branch deletion,
+token/env dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or
+live memory writes.
 
 ---
 
