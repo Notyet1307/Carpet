@@ -43,8 +43,9 @@ test/source guard. MCR-1052 completed the read-only post-restriction audit as
 GO at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`. It did not
 change schemas, fixtures, package files, smoke runners, Matrix code, Runtime
 orchestration, GitHub workflows, deployment logic, or secret handling. MCR-1053
-is the docs-only closeout for that audit. The next bounded slice is MCR-1054: a
-read-only/design-only legacy stdout fallback removal decision.
+is the docs-only closeout for that audit. MCR-1054 completed the
+read-only/design-only legacy stdout fallback removal decision by keeping bounded
+internal compatibility. The next bounded planning task is MCR-1055.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -244,9 +245,14 @@ MCR-1052 proof at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`:
 or external process execution path; docs/test mentions are forbidden or negative
 context.
 
-MCR-1054 should decide whether to keep the bounded internal fallback, propose a
-later removal slice, or require more local evidence first. It remains
-read-only/design-only because no current doc authorizes source removal, real
+MCR-1054 completed the removal decision: keep the bounded internal fallback.
+Immediate source removal is not proposed because the private fallback is already
+limited to absent-`api_summary` legacy local runner results, package tests still
+deliberately cover that compatibility path, and runtime-orchestrator uses public
+`api_summary`. Any future removal must be a separate human-approved source/test
+task with new local evidence and an explicit allowlist. The next recommended
+task is MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review. This
+remains read-only/planning-only; no current doc authorizes source removal, real
 GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable
 client, or external process runner execution.
 

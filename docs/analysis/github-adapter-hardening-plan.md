@@ -186,9 +186,12 @@ read-only audit at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`:
 `pnpm schemas:validate` 84/84,
 `pnpm test` 233/233, and `git diff --check` passed; no real GitHub,
 network-capable client, or external process execution path was found. MCR-1053
-is the docs-only closeout for that audit. The next recommended task is MCR-1054,
-a read-only/design-only legacy stdout fallback removal decision, because this
-plan still does not authorize source removal, real GitHub writes, Octokit,
-`fetch`, `gh api`, `gh pr create`, a network-capable client, external process
-runner execution, merge, deploy, branch deletion, production `main` writes,
-token/env dumps, secret reads, raw payload logging, or live memory writes.
+is the docs-only closeout for that audit. MCR-1054 completed the
+read-only/design-only legacy stdout fallback removal decision by keeping bounded
+internal compatibility and not proposing source removal now. The next
+recommended task is MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review,
+because this plan still does not authorize source removal, real GitHub writes,
+Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable client, external
+process runner execution, merge, deploy, branch deletion, production `main`
+writes, token/env dumps, secret reads, raw payload logging, or live memory
+writes.

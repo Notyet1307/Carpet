@@ -458,14 +458,16 @@ completed as a GO read-only post-restriction audit at repository SHA
 and `git diff --check` passed; the audit found no real GitHub/network/process
 execution path, confirmed runtime-orchestrator public `api_summary` usage, and
 kept docs from authorizing production GitHub writes or automation. MCR-1053 is
-the docs-only closeout for that audit. The First Recommended Task after MCR-1053
-is MCR-1054 GitHub Adapter Legacy Stdout Fallback Removal Decision, a
-read-only/design-only decision because no current doc authorizes a source-change
-removal slice or production GitHub implementation. Do not treat this as
-authorization for real GitHub implementation, Octokit, `fetch`, `gh api`,
-`gh pr create`, merge, deploy, production `main` writes, branch deletion,
-token/env dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or
-live memory writes.
+the docs-only closeout for that audit. MCR-1054 completed the read-only/design
+decision: keep the legacy stdout fallback as bounded github-adapter internal
+compatibility, do not propose source removal now, and require any future removal
+attempt to start from new local evidence plus an explicit source/test allowlist.
+The First Recommended Task after MCR-1054 is MCR-1055 Post-GitHub Adapter
+Backlog Source-of-Truth Review. Do not treat this as authorization for real
+GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
+removal, merge, deploy, production `main` writes, branch deletion, token/env
+dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
+writes.
 
 ---
 

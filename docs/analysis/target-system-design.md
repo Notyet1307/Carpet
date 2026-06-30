@@ -453,13 +453,15 @@ runtime-orchestrator tests were 13/13, contract/schema validation was 84/84
 under both commands, top-level tests were 233/233, `git diff --check` passed, no
 real GitHub/network/process execution path was found, and runtime-orchestrator
 still used public `api_summary`. MCR-1053 is the docs-only closeout for that
-audit. The next recommended task is MCR-1054 GitHub Adapter Legacy Stdout
-Fallback Removal Decision, a read-only/design-only decision because no current
-doc authorizes a source removal slice or production GitHub implementation. This
-boundary still does not authorize real GitHub calls, Octokit, `fetch`, `gh api`,
-`gh pr create`, PR creation, branch deletion, merge, deploy, production `main`
-writes, token reads, secret reads, env dumps, raw payload logging, a
-network-capable client, or live memory writes.
+audit. MCR-1054 completed the read-only/design removal decision: keep the
+fallback as bounded github-adapter internal compatibility, do not propose source
+removal now, and require any future removal attempt to start from new local
+evidence plus an explicit source/test allowlist. The next recommended task is
+MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review. This boundary still
+does not authorize real GitHub calls, Octokit, `fetch`, `gh api`,
+`gh pr create`, PR creation, source removal, branch deletion, merge, deploy,
+production `main` writes, token reads, secret reads, env dumps, raw payload
+logging, a network-capable client, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1053, the First Recommended Task is MCR-1054 GitHub Adapter Legacy
-Stdout Fallback Removal Decision.
+After MCR-1054, the First Recommended Task is MCR-1055 Post-GitHub Adapter
+Backlog Source-of-Truth Review.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -63,9 +63,11 @@ runtime-orchestrator tests were 13/13,
 and `git diff --check` all passed; source/docs inspection found no real
 GitHub, network-capable client, or external process execution path, and
 runtime-orchestrator still uses public `api_summary`. MCR-1053 is this docs-only
-closeout so future workers do not repeat MCR-1052. MCR-1054 is design/read-only
-only because no current doc authorizes a source-change removal slice or
-production GitHub implementation; real GitHub implementation remains
+closeout so future workers do not repeat MCR-1052. MCR-1054 completed the
+read-only/design-only removal decision: keep the fallback as bounded
+github-adapter internal compatibility, do not propose source removal now, and
+require any future removal attempt to start from new local evidence plus an
+explicit source/test allowlist. Production GitHub implementation remains
 unauthorized.
 
 ## Cards
@@ -913,8 +915,9 @@ Status: docs-only closeout prepared for review in branch
 
 ### MCR-1054: GitHub Adapter Legacy Stdout Fallback Removal Decision
 
-Status: First Recommended Task after MCR-1053. This is read-only/design-only and
-does not authorize source removal or production GitHub implementation.
+Status: completed; decision is keep bounded internal compatibility. This was
+read-only/design-only and does not authorize source removal or production GitHub
+implementation.
 
 - Problem solved: MCR-1049 deferred legacy stdout fallback removal, MCR-1050
   restricted the fallback, and MCR-1052 proved that restriction clean. The repo
@@ -940,12 +943,75 @@ does not authorize source removal or production GitHub implementation.
   source; choose keep, remove-later, or require more local evidence; if a later
   code slice is warranted, define its allowlist and proof commands; state that
   production GitHub writes remain unauthorized.
+- Inventory summary: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`
+  first accepts a valid public `api_summary`; only when the runner result lacks
+  `api_summary` does it call the private legacy stdout URL helper. The package
+  tests in `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
+  intentionally cover localized legacy stdout compatibility, cross-repository
+  rejection, and the MCR-1050 guard that present invalid or mismatched
+  `api_summary` returns `pr_url_missing`. `tests/e2e/runtime-orchestrator-cli.test.ts`
+  uses public `api_summary` for runtime-orchestrator GitHub PR integration.
+  Docs already describe this as github-adapter internal compatibility, not a
+  public runner contract or production GitHub readiness signal.
+- Decision: keep bounded internal compatibility. Immediate deletion is not
+  justified because the only live source reference is already private/local,
+  package tests still deliberately cover absent-`api_summary` compatibility,
+  runtime-orchestrator no longer relies on stdout, and MCR-1052 found no real
+  GitHub, network-capable client, or external process execution path.
+- Later removal boundary: no removal slice is proposed now. If future evidence
+  proves the absent-`api_summary` compatibility path has no supported local
+  consumer, a separate human-approved task must explicitly allow only
+  `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` and
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and must run
+  `pnpm --filter github-adapter test`,
+  `pnpm --filter runtime-orchestrator test`, `pnpm test:contracts`,
+  `pnpm schemas:validate`, `git diff --check`, stale-text `rg`, and
+  authorization/source-drift `rg`. Until that explicit future task exists,
+  source removal remains unauthorized.
+- New First Recommended Task: MCR-1055 Post-GitHub Adapter Backlog
+  Source-of-Truth Review, because the GitHub stdout fallback question is closed
+  without code work and the next safe step is selecting the next bounded
+  post-MVP gap from current docs, not deleting source by inertia.
 - Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
   `git diff --check`, stale-text `rg`, and authorization-drift/source-drift
   `rg`.
 - Fake/scaffold/real boundary: read-only/design-only decision; no source
   removal, no real GitHub write path, no network-capable client, and no
   production automation.
+
+### MCR-1055: Post-GitHub Adapter Backlog Source-of-Truth Review
+
+Status: First Recommended Task after MCR-1054. This is read-only and does not
+authorize implementation, source removal, or production GitHub writes.
+
+- Problem solved: the GitHub adapter local-expansion chain now has a bounded
+  keep decision for the legacy stdout fallback. Future sessions need a current
+  source-of-truth review before selecting the next post-MVP gap, otherwise they
+  can infer deletion or production GitHub work from stale GitHub-specific text.
+- Why now: MCR-1054 closed the fallback decision without code work. The smallest
+  useful next task is to re-read the roadmap and target-system gaps and name the
+  next bounded design/contract slice.
+- Allowed files: none by default; this is a read-only review. If the review
+  finds docs drift, propose a separate docs-only closeout instead of editing in
+  place.
+- Forbidden files/actions: source, tests, schemas, fixtures, runtime, packages,
+  lockfiles, `.codex.local.env`, real GitHub, Octokit, `fetch`, `gh api`,
+  `gh pr create`, network-capable client, external process runner execution,
+  source removal, merge, deploy, branch deletion, production `main` write,
+  token/env dump, secret read, raw payload logging, DB/Postgres,
+  Matrix/Codex real smoke, live memory, commit, push, PR.
+- Acceptance criteria: verify MCR-1054 is no longer the active First
+  Recommended Task; inventory the remaining target-system real gaps from
+  `docs/analysis/target-system-design.md` and this backlog; recommend one next
+  bounded design/contract task; state that production GitHub writes and legacy
+  stdout fallback source removal remain unauthorized unless a later explicit
+  task says otherwise.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, stale-text `rg`, and authorization-drift/source-drift
+  `rg`.
+- Fake/scaffold/real boundary: read-only planning review only; no source,
+  fixture, schema, package, runtime, smoke, external-service, or live-memory
+  behavior changes.
 
 ## Global Deny List
 
