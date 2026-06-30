@@ -254,9 +254,10 @@ external process execution path was found. MCR-1053 is the docs-only closeout fo
 that audit. MCR-1054 completed the read-only/design-only decision: keep the
 bounded internal fallback, do not propose a later removal slice now, and require
 new local evidence plus an explicit source/test allowlist before any future
-removal attempt. The next recommended task is MCR-1055 Post-GitHub Adapter
-Backlog Source-of-Truth Review. This plan still does not permit real GitHub,
-network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
+removal attempt. MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review is
+now later/backlog after MCR-1056; the active next step is MCR-1058 Local Fake MVP
+Root Command Acceptance/Runbook Closeout. This plan still does not permit real
+GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
 external process runner execution, source removal, merge, deploy, production
 `main` writes, broad credential use, secret reads, token/env dumps, raw payload
 logging, or live memory writes.

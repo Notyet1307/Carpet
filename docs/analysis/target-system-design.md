@@ -456,12 +456,19 @@ still used public `api_summary`. MCR-1053 is the docs-only closeout for that
 audit. MCR-1054 completed the read-only/design removal decision: keep the
 fallback as bounded github-adapter internal compatibility, do not propose source
 removal now, and require any future removal attempt to start from new local
-evidence plus an explicit source/test allowlist. The next recommended task is
-MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review. This boundary still
-does not authorize real GitHub calls, Octokit, `fetch`, `gh api`,
-`gh pr create`, PR creation, source removal, branch deletion, merge, deploy,
-production `main` writes, token reads, secret reads, env dumps, raw payload
-logging, a network-capable client, or live memory writes.
+evidence plus an explicit source/test allowlist. MCR-1056 completed and merged
+in commit `4406e79a6a324b492de845f1c0a071f3eadfc809`, adding the root command
+`pnpm mvp:local`. This command is a local fake MVP root command that writes
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and does not call real
+Matrix, Codex, GitHub, DB, or live memory. It is not production MVP, not a
+real-service smoke, not database persistence, and not authorization to continue
+GitHub adapter expansion. MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth
+Review is later/backlog; the next recommended task is MCR-1058 Local Fake MVP
+Root Command Acceptance/Runbook Closeout. This boundary still does not authorize
+real GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR creation,
+source removal, branch deletion, merge, deploy, production `main` writes, token
+reads, secret reads, env dumps, raw payload logging, a network-capable client,
+or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

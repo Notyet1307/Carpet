@@ -76,6 +76,13 @@ locking. It does not add DB persistence, Postgres, migrations, a persistent
 Runtime service, Matrix/GitHub/Codex calls, live memory writes, production
 durable Runtime Store semantics, or replay recovery.
 
+MCR-1056 has merged at commit `4406e79a6a324b492de845f1c0a071f3eadfc809`. It
+adds the root command `pnpm mvp:local`, which writes
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` through the local fake MVP
+path. This does not add production MVP readiness, real-service smoke coverage,
+DB persistence, real Matrix/Codex/GitHub calls, live memory writes, or
+authorization to continue GitHub adapter expansion.
+
 ## Target System Design Alignment
 
 Target system alignment is recorded in

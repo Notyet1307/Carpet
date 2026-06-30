@@ -99,6 +99,16 @@ count for that head at 0. Sandbox `main` stayed at
 after commander review while the evidence directory was kept. This is
 compatibility proof only, not production readiness.
 
+MCR-1056 completed and merged in commit
+`4406e79a6a324b492de845f1c0a071f3eadfc809`. It added the root command
+`pnpm mvp:local`, which runs the local fake MVP path and writes
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`. This is a local fake MVP
+root command only: it does not call real Matrix, Codex, GitHub, DB, or live
+memory. It is not production MVP, not a real-service smoke, not database
+persistence, and not authorization to continue GitHub adapter expansion. The
+next bounded work should document and accept the one-command local experience
+before returning to GitHub adapter backlog refinement.
+
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
 compatibility proof only; MCR-720 closes one Matrix-only local disposable proof;

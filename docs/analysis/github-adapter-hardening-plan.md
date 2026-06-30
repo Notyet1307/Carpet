@@ -188,9 +188,10 @@ read-only audit at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`:
 network-capable client, or external process execution path was found. MCR-1053
 is the docs-only closeout for that audit. MCR-1054 completed the
 read-only/design-only legacy stdout fallback removal decision by keeping bounded
-internal compatibility and not proposing source removal now. The next
-recommended task is MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review,
-because this plan still does not authorize source removal, real GitHub writes,
+internal compatibility and not proposing source removal now. MCR-1055 Post-GitHub
+Adapter Backlog Source-of-Truth Review is now later/backlog after MCR-1056; the
+active next step is MCR-1058 Local Fake MVP Root Command Acceptance/Runbook
+Closeout. This plan still does not authorize source removal, real GitHub writes,
 Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable client, external
 process runner execution, merge, deploy, branch deletion, production `main`
 writes, token/env dumps, secret reads, raw payload logging, or live memory

@@ -462,9 +462,16 @@ the docs-only closeout for that audit. MCR-1054 completed the read-only/design
 decision: keep the legacy stdout fallback as bounded github-adapter internal
 compatibility, do not propose source removal now, and require any future removal
 attempt to start from new local evidence plus an explicit source/test allowlist.
-The First Recommended Task after MCR-1054 is MCR-1055 Post-GitHub Adapter
-Backlog Source-of-Truth Review. Do not treat this as authorization for real
-GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
+MCR-1056 completed and merged in commit
+`4406e79a6a324b492de845f1c0a071f3eadfc809`, adding the root command
+`pnpm mvp:local`. This is a local fake MVP root command that writes
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and does not call real
+Matrix, Codex, GitHub, DB, or live memory. It is not production MVP, not a
+real-service smoke, not database persistence, and not authorization to continue
+GitHub adapter expansion. MCR-1055 GitHub adapter backlog review is later/backlog
+for now. The First Recommended Task after MCR-1057 is MCR-1058 Local Fake MVP
+Root Command Acceptance/Runbook Closeout. Do not treat this as authorization for
+real GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
 removal, merge, deploy, production `main` writes, branch deletion, token/env
 dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
 writes.

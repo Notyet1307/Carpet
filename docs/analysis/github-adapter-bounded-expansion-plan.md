@@ -45,7 +45,8 @@ change schemas, fixtures, package files, smoke runners, Matrix code, Runtime
 orchestration, GitHub workflows, deployment logic, or secret handling. MCR-1053
 is the docs-only closeout for that audit. MCR-1054 completed the
 read-only/design-only legacy stdout fallback removal decision by keeping bounded
-internal compatibility. The next bounded planning task is MCR-1055.
+internal compatibility. MCR-1055 is now later/backlog after MCR-1056; the active
+next step is MCR-1058 Local Fake MVP Root Command Acceptance/Runbook Closeout.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -250,11 +251,12 @@ Immediate source removal is not proposed because the private fallback is already
 limited to absent-`api_summary` legacy local runner results, package tests still
 deliberately cover that compatibility path, and runtime-orchestrator uses public
 `api_summary`. Any future removal must be a separate human-approved source/test
-task with new local evidence and an explicit allowlist. The next recommended
-task is MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review. This
-remains read-only/planning-only; no current doc authorizes source removal, real
-GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable
-client, or external process runner execution.
+task with new local evidence and an explicit allowlist. MCR-1055 Post-GitHub
+Adapter Backlog Source-of-Truth Review is now later/backlog after MCR-1056; the
+active next step is MCR-1058 Local Fake MVP Root Command Acceptance/Runbook
+Closeout. This remains read-only/planning-only; no current doc authorizes source
+removal, real GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a
+network-capable client, or external process runner execution.
 
 Validation commands for the docs closeout and decision task:
 
