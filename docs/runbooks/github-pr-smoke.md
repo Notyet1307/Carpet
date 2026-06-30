@@ -38,6 +38,9 @@ after verified proof and matching `create_pr` approval.
 MCR-940 adds the hardening plan in
 `docs/analysis/github-adapter-hardening-plan.md`. That plan is the gate before
 any future code task broadens the adapter beyond the existing disabled scaffold.
+MCR-950 adds the refusal contract matrix in
+`docs/analysis/github-adapter-refusal-contract-matrix.md`; future runs and
+adapter tests should use it for pre-execution refusal categories.
 
 ## Required Target
 

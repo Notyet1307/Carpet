@@ -13,10 +13,10 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-950 GitHub Adapter Refusal Contract Matrix**. MCR-901 is
+Start with **MCR-960 GitHub Adapter Refusal Contract Test Plan**. MCR-901 is
 complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a policy
-artifact for evidence retention and cleanup, and MCR-940 now has a hardening
-plan artifact.
+artifact for evidence retention and cleanup, MCR-940 has a hardening plan
+artifact, and MCR-950 now has a refusal matrix artifact.
 
 ## Cards
 
@@ -141,7 +141,11 @@ branch deletion, broad-token path, or live memory path is authorized.
 
 ### MCR-950: GitHub Adapter Refusal Contract Matrix
 
-Status: not started.
+Status: matrix artifact added in
+`docs/analysis/github-adapter-refusal-contract-matrix.md`; adapter
+implementation, schemas, fixtures, tests, packages, real GitHub writes, merge,
+deploy, production main writes, remote ref deletion, token/env dump, and live
+memory remain unauthorized.
 
 - Problem solved: MCR-940 defines refusal cases in prose; a future worker still
   needs a named contract matrix before any adapter code hardening starts.
@@ -162,6 +166,32 @@ Status: not started.
   `git diff --check`.
 - Fake/scaffold/real boundary: docs/planning only; no adapter code and no real
   GitHub write.
+
+### MCR-960: GitHub Adapter Refusal Contract Test Plan
+
+Status: not started.
+
+- Problem solved: MCR-950 names refusal cases, but the repo still needs a
+  smallest docs/contract-test plan that maps each matrix row to future test
+  coverage before any `packages/github-adapter/**` implementation task starts.
+- Why now: a test plan can define fixture shape, precedence, and expected
+  refusal categories without authorizing adapter code or real GitHub writes.
+- Allowed files: `docs/analysis/github-adapter-refusal-contract-matrix.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`,
+  `docs/runbooks/github-pr-smoke.md`, `docs/roadmaps/post-mvp-roadmap.md`, and a
+  future dedicated analysis doc if explicitly approved.
+- Forbidden files/actions: `packages/github-adapter/**`, runtime/app/code/test,
+  schema, fixture, package files, Octokit, `gh pr create`, `gh api` writes,
+  push, merge, deploy, production main write, remote branch deletion, token/env
+  dump, live memory.
+- Acceptance criteria: a docs-only plan maps each MCR-950 matrix row to one
+  future contract-test scenario, expected refusal category, minimal fixture
+  fields, and any precedence rules; it does not add tests or fixtures.
+- Validation/proof: docs diff, `rg` for production GitHub authorization drift
+  and token/env dump language, `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`.
+- Fake/scaffold/real boundary: docs/contract-test planning only; no adapter
+  code, no fixtures, no test files, and no real GitHub write.
 
 ## Global Deny List
 

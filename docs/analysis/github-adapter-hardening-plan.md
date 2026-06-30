@@ -72,6 +72,10 @@ show the same target, credential, approval, cleanup, and redaction properties.
 
 ## Refusal Cases
 
+MCR-950 turns these prose cases into the named contract matrix at
+`docs/analysis/github-adapter-refusal-contract-matrix.md`. Future adapter code
+or tests should cite that matrix instead of reinterpreting this section.
+
 The future adapter must refuse before external execution when any of these is
 true:
 
@@ -116,6 +120,6 @@ memory path is allowed.
 
 ## Next Planning Step
 
-The smallest next incomplete task is a docs-only refusal contract matrix that
-turns the refusal cases above into named cases and expected outcomes before any
-new adapter code is authorized.
+MCR-950 added the docs-only refusal contract matrix. The smallest next task is
+to plan docs/contract-test coverage from that matrix without touching adapter
+implementation code.
