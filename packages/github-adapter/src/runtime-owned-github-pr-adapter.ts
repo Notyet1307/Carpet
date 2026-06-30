@@ -301,7 +301,9 @@ export function createRuntimeOwnedGitHubPrAdapter(
 
       const apiSummary =
         redactedApiSummary(result.api_summary, input) ??
-        legacyLocalRunnerApiSummary(legacyLocalRunnerStdout(result), input);
+        (hasApiSummary(result)
+          ? null
+          : legacyLocalRunnerApiSummary(legacyLocalRunnerStdout(result), input));
 
       if (!apiSummary) {
         return {
@@ -589,6 +591,10 @@ function legacyLocalRunnerStdout(result: RuntimeOwnedGitHubPrRunnerResult) {
   }
 
   return typeof result.stdout === "string" ? result.stdout : undefined;
+}
+
+function hasApiSummary(result: RuntimeOwnedGitHubPrRunnerResult) {
+  return isRecord(result) && Object.hasOwn(result, "api_summary");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

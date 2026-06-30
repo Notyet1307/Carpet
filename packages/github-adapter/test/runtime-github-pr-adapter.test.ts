@@ -204,6 +204,55 @@ test("runtime-owned adapter rejects mismatched API summaries without retaining r
   }
 });
 
+test("runtime-owned adapter does not recover mismatched API summary from legacy stdout", async () => {
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => ({
+      exit_code: 0,
+      api_summary: { ...prApiSummary(), repository: "Notyet1307/other-repo" },
+      stdout: legacyPrUrlStdout(),
+      stderr: rawRunnerOutput().stderr,
+    }),
+  });
+
+  const result = await adapter.createPullRequest(createRequest());
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "pr_url_missing");
+    assertContainsNoRawRunnerMaterial(result);
+  }
+});
+
+test("runtime-owned adapter does not recover invalid API summary from legacy stdout", async () => {
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => ({
+      exit_code: 0,
+      api_summary: {
+        operation: "github.issue.create",
+        repository: "Notyet1307/github-pr-smoke-sandbox",
+        base_ref: "mcr/MCR-840/base-run_mcr_840",
+        head_ref: "mcr/MCR-840/run_mcr_840-runtime-owned-github-pr-adapter",
+        pull_request_url:
+          "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2",
+      },
+      stdout: legacyPrUrlStdout(),
+      stderr: rawRunnerOutput().stderr,
+    }),
+  });
+
+  const result = await adapter.createPullRequest(createRequest());
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "pr_url_missing");
+    assertContainsNoRawRunnerMaterial(result);
+  }
+});
+
 test("runtime-owned adapter rejects legacy stdout URL for another repository without retaining raw output", async () => {
   const adapter = createRuntimeOwnedGitHubPrAdapter({
     enabled: true,
@@ -585,6 +634,13 @@ function rawRunnerOutput() {
     stdout: `raw stdout token ${token} raw diff raw PR body raw approval payload`,
     stderr: `raw stderr token ${token} raw API payload raw patch`,
   };
+}
+
+function legacyPrUrlStdout() {
+  return [
+    "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2",
+    rawRunnerOutput().stdout,
+  ].join("\n");
 }
 
 function exportedTypeBlock(source: string, typeName: string) {
