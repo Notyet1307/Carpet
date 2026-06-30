@@ -131,10 +131,14 @@ exited 0, both ignored local fake artifacts existed, `summary.json` reported
 `approval_status=consumed`, `pr_count=1`, `memory_status=proposed`, and
 `fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
 contract/schema validation remained 84/84 with `git diff --check` passing.
-The next bounded work should be MCR-1066, a docs/read-only operator handoff and
-artifact retention/cleanup policy pass for the single-command local fake MVP,
-not GitHub adapter expansion. This does not authorize real services,
-DB/Postgres, live memory, or GitHub adapter expansion.
+MCR-1066 completed the docs-only operator handoff and artifact
+retention/cleanup policy pass for the single-command local fake MVP. The runbook
+now names the required `summary.json` handoff fields, Runtime-owned snapshot
+proof fields, decisive GO/NO-GO checks, and ignored artifact retention/cleanup
+rules. The next bounded work is MCR-1067, a read-only operator-friendliness audit
+for the root command alias, runbook, handoff fields, ignored artifact behavior,
+and cleanup wording. This does not authorize real services, DB/Postgres, live
+memory, GitHub adapter expansion, or package/runtime/test/schema/fixture changes.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec

@@ -1,6 +1,7 @@
 # Local Fake MVP Root Command Runbook
 
 Task: MCR-1058 Local Fake MVP Root Command Acceptance/Runbook Closeout
+Operator handoff supplement: MCR-1066
 
 ## Command
 
@@ -49,6 +50,61 @@ The snapshot is the Runtime Store proof artifact. `summary.json` is the stable
 handoff summary for the local fake run; the snapshot keeps Runtime task/proof/
 approval/artifact refs and does not persist a live memory write.
 
+## Operator Handoff Checklist
+
+Run the single command from the repository root:
+
+```bash
+pnpm mvp:local
+```
+
+Confirm both ignored generated artifacts exist:
+
+- `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`
+- `.mcr/runs/local-fake-mvp/summary.json`
+
+Copy/report these `summary.json` fields in handoff:
+
+- `command`
+- `snapshot_path`
+- `task_id`
+- `task_state`
+- `transition_count`
+- `proof_status`
+- `approval_status`
+- `pr_count`
+- `memory_status`
+- `fake_only`
+- `validation_notes`
+
+Copy/report this snapshot proof:
+
+- `source_of_truth=runtime`
+- task count and task state
+- transition count
+- proof ref status
+- approval ref status and action
+- artifact ref count and kinds
+- PR artifact count
+
+Decisive GO requires all of these:
+
+- `command=pnpm mvp:local`
+- `snapshot_path=.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`
+- `task_id` is present and matches the snapshot task.
+- `task_state=completed`
+- `transition_count=14` and matches the snapshot transition count.
+- `proof_status=verified`
+- `approval_status=consumed`
+- `pr_count=1`
+- `memory_status=proposed`
+- `fake_only=true`
+- snapshot `source_of_truth=runtime`
+- snapshot has 1 completed task.
+- snapshot proof ref has `status=verified`.
+- snapshot approval ref has `status=consumed` and `action=create_pr`.
+- snapshot artifact refs include exactly one `kind=pr` artifact.
+
 ## Evidence Artifact Design Status
 
 MCR-1061 decided that `pnpm mvp:local` should write an ignored generated JSON
@@ -78,14 +134,25 @@ Treat the run as NO-GO if any of these happens:
 - The snapshot cannot be parsed as JSON.
 - The summary cannot be parsed as JSON.
 - The summary is not `task_state=completed`, `proof_status=verified`,
-  `approval_status=consumed`, `pr_count=1`, `memory_status=proposed`, and
-  `fake_only=true` in `summary.json`.
+  `approval_status=consumed`, `transition_count=14`, `pr_count=1`,
+  `memory_status=proposed`, and `fake_only=true` in `summary.json`.
+- `summary.snapshot_path` does not point to
+  `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`.
+- `summary.task_id` is missing or does not match the snapshot task.
+- The snapshot is not `source_of_truth=runtime`.
+- The snapshot task count/state, transition count, proof ref status, approval ref
+  status/action, artifact ref count/kinds, or PR artifact count does not match
+  the decisive GO fields above.
 - `pnpm test:contracts`, `pnpm schemas:validate`, or `git diff --check` fails.
 
-## Cleanup
+## Artifact Retention / Cleanup Policy
 
-`.mcr/runs/local-fake-mvp/` is ignored generated output. It may be deleted after
-review:
+`.mcr/runs/local-fake-mvp/*` is ignored generated evidence. Do not commit
+`runtime-store.snapshot.json`, `summary.json`, or any other generated file from
+that directory.
+
+Keep `.mcr/runs/local-fake-mvp/` until commander review if the reviewer needs to
+inspect the generated JSON artifacts. After review/closeout, it may be deleted:
 
 ```bash
 rm -rf .mcr/runs/local-fake-mvp/
@@ -93,6 +160,11 @@ rm -rf .mcr/runs/local-fake-mvp/
 
 Do not clean source files, docs, schemas, fixtures, package files, or runtime
 code as part of this generated-output cleanup.
+
+Do not copy raw logs, raw diff, token/env material, secret values, or live memory
+body content into handoff. If long-term retention is needed, keep only a short
+summary in docs or handoff; do not preserve generated `.mcr/runs/local-fake-mvp/`
+artifacts in git.
 
 ## Boundary
 
@@ -128,8 +200,15 @@ local fake state with `transition_count=14`, `pr_count=1`, `memory_status=propos
 and `fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
 contract/schema validation stayed 84/84 with `git diff --check` passing.
 
-The next recommended task is MCR-1066, a docs/read-only operator handoff and
-artifact retention/cleanup policy pass for the single-command local fake MVP.
-Do not use this runbook or the MCR-1064 GO audit as authorization for real
-Matrix, Codex, GitHub, DB/Postgres, live memory, real-service smoke, production
-readiness, or GitHub adapter expansion.
+MCR-1066 completed the docs-only operator handoff and artifact retention/cleanup
+policy pass for the single-command local fake MVP. This runbook now names the
+exact handoff fields, snapshot proof fields, decisive GO/NO-GO checks, and
+ignored artifact retention/cleanup rules for `.mcr/runs/local-fake-mvp/`.
+
+The next recommended task is MCR-1067, a read-only single-command
+operator-friendliness audit: verify the root script alias, runbook command,
+handoff fields, ignored artifact behavior, and cleanup wording still agree
+without changing runtime/code/tests/schema/fixtures/package files.
+Do not use this runbook, the MCR-1064 GO audit, or MCR-1066 as authorization for
+real Matrix, Codex, GitHub, DB/Postgres, live memory, real-service smoke,
+production readiness, or GitHub adapter expansion.

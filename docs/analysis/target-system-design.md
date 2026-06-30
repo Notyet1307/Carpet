@@ -484,9 +484,13 @@ read-only GO audit on base commit `1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`:
 `summary.json` reported completed/verified/consumed local fake state with
 `transition_count=14`, `pr_count=1`, `memory_status=proposed`, and
 `fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
-contract/schema validation remained 84/84 with `git diff --check` passing. The
-next recommended task is MCR-1066, a docs/read-only operator handoff and
-artifact retention/cleanup policy pass for the single-command local fake MVP.
+contract/schema validation remained 84/84 with `git diff --check` passing.
+MCR-1066 completed the docs-only operator handoff and artifact
+retention/cleanup policy pass for the single-command local fake MVP. The runbook
+now names the required `summary.json` handoff fields, Runtime-owned snapshot
+proof fields, decisive GO/NO-GO checks, and ignored artifact retention/cleanup
+rules. The next recommended task is MCR-1067, a read-only single-command
+operator-friendliness audit.
 This boundary still does not authorize real GitHub calls, Octokit, `fetch`,
 `gh api`, `gh pr create`, PR creation, source removal, branch deletion, merge,
 deploy, production `main` writes, token reads, secret reads, env dumps, raw

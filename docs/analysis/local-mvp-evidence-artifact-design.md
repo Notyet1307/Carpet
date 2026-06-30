@@ -147,7 +147,11 @@ next-step stale refs, kept `pnpm test:contracts` and `pnpm schemas:validate` at
 84/84, passed `git diff --check`, and left no tracked changes in the audit
 worktree.
 
-The next recommended task is MCR-1066, a docs/read-only operator handoff and
-artifact retention/cleanup policy pass for `.mcr/runs/local-fake-mvp/`. It
-should not change command behavior, schemas, fixtures, tests, package files,
-runtime code, real-service integrations, or GitHub adapter scope.
+MCR-1066 completed the docs-only operator handoff and artifact retention/cleanup
+policy pass for `.mcr/runs/local-fake-mvp/`. `docs/runbooks/local-fake-mvp.md`
+now names the required `summary.json` handoff fields, Runtime-owned snapshot
+proof fields, decisive GO/NO-GO checks, and ignored generated artifact
+retention/cleanup rules. The next recommended task is MCR-1067, a read-only
+operator-friendliness audit for the single-command local fake path. It should
+not change command behavior, schemas, fixtures, tests, package files, runtime
+code, real-service integrations, or GitHub adapter scope.

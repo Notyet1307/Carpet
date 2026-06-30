@@ -105,9 +105,13 @@ exited 0, both ignored local fake artifacts existed, `summary.json` reported
 `task_state=completed`, `transition_count=14`, `proof_status=verified`,
 `approval_status=consumed`, `pr_count=1`, `memory_status=proposed`, and
 `fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
-contract/schema validation remained 84/84 with `git diff --check` passing. The
-next bounded step should be MCR-1066, a docs/read-only operator handoff and
-artifact retention/cleanup policy pass for the single-command local fake MVP.
+contract/schema validation remained 84/84 with `git diff --check` passing.
+MCR-1066 completed the docs-only operator handoff and artifact
+retention/cleanup policy pass for the single-command local fake MVP. The runbook
+now names the required `summary.json` handoff fields, Runtime-owned snapshot
+proof fields, decisive GO/NO-GO checks, and ignored artifact retention/cleanup
+rules. The next bounded step is MCR-1067, a read-only operator-friendliness
+audit for the same single-command path.
 
 ## Target System Design Alignment
 
