@@ -106,8 +106,10 @@ MCR-1056 completed and merged in commit
 root command only: it does not call real Matrix, Codex, GitHub, DB, or live
 memory. It is not production MVP, not a real-service smoke, not database
 persistence, and not authorization to continue GitHub adapter expansion. The
-next bounded work should document and accept the one-command local experience
-before returning to GitHub adapter backlog refinement.
+one-command local experience is documented and accepted in
+`docs/runbooks/local-fake-mvp.md` by MCR-1058. The next bounded work is MCR-1059,
+a read-only readiness audit of the runbook and command before returning to any
+backlog refinement.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec

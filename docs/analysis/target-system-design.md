@@ -463,12 +463,13 @@ in commit `4406e79a6a324b492de845f1c0a071f3eadfc809`, adding the root command
 Matrix, Codex, GitHub, DB, or live memory. It is not production MVP, not a
 real-service smoke, not database persistence, and not authorization to continue
 GitHub adapter expansion. MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth
-Review is later/backlog; the next recommended task is MCR-1058 Local Fake MVP
-Root Command Acceptance/Runbook Closeout. This boundary still does not authorize
-real GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR creation,
-source removal, branch deletion, merge, deploy, production `main` writes, token
-reads, secret reads, env dumps, raw payload logging, a network-capable client,
-or live memory writes.
+Review is later/backlog. MCR-1058 closed the docs/runbook acceptance in
+`docs/runbooks/local-fake-mvp.md`; the next recommended task is MCR-1059 Local
+Fake MVP Root Command Readiness Audit, read-only. This boundary still does not
+authorize real GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR
+creation, source removal, branch deletion, merge, deploy, production `main`
+writes, token reads, secret reads, env dumps, raw payload logging, a
+network-capable client, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

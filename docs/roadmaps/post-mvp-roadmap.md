@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1056, the First Recommended Task is MCR-1058 Local Fake MVP Root
-Command Acceptance/Runbook Closeout.
+After MCR-1058, the First Recommended Task is MCR-1059 Local Fake MVP Root
+Command Readiness Audit.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -75,7 +75,9 @@ later/backlog, not the active next step. MCR-1056 completed and merged in commit
 runtime-orchestrator flow and does not call real Matrix, Codex, GitHub, DB, or
 live memory. It is not production MVP, not a real-service smoke, not database
 persistence, and not authorization to continue GitHub adapter expansion.
-Production GitHub implementation remains unauthorized.
+MCR-1058 added `docs/runbooks/local-fake-mvp.md` as the docs-only acceptance
+and runbook closeout for that command. Production GitHub implementation remains
+unauthorized.
 
 ## Cards
 
@@ -1047,8 +1049,8 @@ implementation.
 
 ### MCR-1058: Local Fake MVP Root Command Acceptance/Runbook Closeout
 
-Status: First Recommended Task after MCR-1057. Docs/runbook/UX acceptance only;
-no implementation is authorized by this card.
+Status: completed as docs/runbook closeout in `docs/runbooks/local-fake-mvp.md`.
+No implementation was authorized by this card.
 
 - Problem solved: `pnpm mvp:local` exists, but the user-facing single-command
   experience still needs a small acceptance/runbook pass so future sessions know
@@ -1069,6 +1071,30 @@ no implementation is authorized by this card.
 - Fake/scaffold/real boundary: documentation/acceptance only; `pnpm mvp:local`
   remains a local fake MVP root command, not production MVP, not a real-service
   smoke, not DB persistence, and not GitHub adapter authorization.
+
+### MCR-1059: Local Fake MVP Root Command Readiness Audit
+
+Status: First Recommended Task after MCR-1058. Read-only audit only; no
+implementation is authorized by this card.
+
+- Problem solved: after the runbook closeout, an independent worker should
+  verify the command, generated snapshot, and roadmap state without changing
+  code.
+- Why now: this is the smallest check before any later backlog refinement.
+- Allowed files/actions: read-only inspection of docs, command output, snapshot
+  output, git status, and validation results.
+- Forbidden files/actions: source edits, package files, runtime, apps, packages,
+  workers, schemas, fixtures, tests, `.env`, real Matrix, real Codex, real
+  GitHub, DB/Postgres, live memory, commit, push, merge, PR.
+- Acceptance criteria: confirm `docs/runbooks/local-fake-mvp.md` matches
+  `pnpm mvp:local`, confirm `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`
+  is generated and ignored, confirm status summary remains completed/verified/
+  consumed/proposed, and confirm docs no longer present MCR-1058 as active.
+- Validation/proof: `pnpm mvp:local`, snapshot existence check, snapshot summary
+  read, `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and
+  `git status --short --untracked-files=all`.
+- Fake/scaffold/real boundary: read-only readiness audit; no new runtime code,
+  no real-service smoke, and no GitHub adapter expansion.
 
 ## Global Deny List
 

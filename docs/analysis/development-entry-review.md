@@ -81,7 +81,9 @@ adds the root command `pnpm mvp:local`, which writes
 `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` through the local fake MVP
 path. This does not add production MVP readiness, real-service smoke coverage,
 DB persistence, real Matrix/Codex/GitHub calls, live memory writes, or
-authorization to continue GitHub adapter expansion.
+authorization to continue GitHub adapter expansion. MCR-1058 closed the
+docs/runbook acceptance in `docs/runbooks/local-fake-mvp.md`; the next bounded
+step is MCR-1059 read-only readiness audit.
 
 ## Target System Design Alignment
 

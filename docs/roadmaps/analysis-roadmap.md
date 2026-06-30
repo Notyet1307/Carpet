@@ -469,12 +469,13 @@ MCR-1056 completed and merged in commit
 Matrix, Codex, GitHub, DB, or live memory. It is not production MVP, not a
 real-service smoke, not database persistence, and not authorization to continue
 GitHub adapter expansion. MCR-1055 GitHub adapter backlog review is later/backlog
-for now. The First Recommended Task after MCR-1057 is MCR-1058 Local Fake MVP
-Root Command Acceptance/Runbook Closeout. Do not treat this as authorization for
-real GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
-removal, merge, deploy, production `main` writes, branch deletion, token/env
-dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
-writes.
+for now. MCR-1058 completed as the docs/runbook closeout in
+`docs/runbooks/local-fake-mvp.md`. The First Recommended Task after MCR-1058 is
+MCR-1059 Local Fake MVP Root Command Readiness Audit, a read-only review of the
+runbook and command. Do not treat this as authorization for real GitHub
+implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source removal,
+merge, deploy, production `main` writes, branch deletion, token/env dumps, raw
+payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory writes.
 
 ---
 
