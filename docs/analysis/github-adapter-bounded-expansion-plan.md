@@ -196,27 +196,32 @@ explain why it is denial context.
 ## Handoff Prompt Seed
 
 This was the recommended roadmap task after MCR-1040. MCR-1041 has now chosen
-redaction-first sequencing. The next smallest task is MCR-1042: a local-only
-redacted command/API contract slice.
+redaction-first sequencing. MCR-1042 completed that first local-only redacted
+command/API contract slice in commit
+`fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`. The next smallest task is now
+MCR-1044: a local-only injected runner/client interface tightening slice that
+consumes the redacted contract instead of standardizing raw command output.
 
 ```text
-You are a Carpet worker for MCR-1042: GitHub Adapter Redacted Command Contract
-Local Slice. Use a dedicated worktree. Do not commit, push, merge, PR, or call
+You are a Carpet worker for MCR-1044: GitHub Adapter Injected Runner Interface
+Tightening. Use a dedicated worktree. Do not commit, push, merge, PR, or call
 any external service.
 
 Goal:
-Implement the first local-only redacted command/API summary contract slice that
-follows the MCR-1041 design decision. This slice may only harden local command
-summary/redaction behavior. It must not add real GitHub writes, a
-network-capable client, Octokit, fetch, gh api, gh pr create execution, Runtime
-orchestration, smoke runners, GitHub workflows, Matrix/Codex real smokes,
-merge, deploy, branch deletion, production main writes, token/env dumps, secret
-reads, raw payload logging, or live memory writes.
+Implement the second local-only MCR-1041 sequencing step after the MCR-1042
+redaction contract: tighten the injected runner/client interface so it consumes
+or returns only the redacted command/API summary contract and evidence refs.
+This slice may only harden local runner boundary shape. It must not add real
+GitHub writes, a network-capable client, Octokit, fetch, gh api,
+gh pr create execution, Runtime orchestration, smoke runners, GitHub workflows,
+Matrix/Codex real smokes, merge, deploy, branch deletion, production main
+writes, token/env dumps, secret reads, raw payload logging, or live memory
+writes.
 
 Allowed files:
 - packages/github-adapter/src/runtime-owned-github-pr-adapter.ts
 - packages/github-adapter/test/runtime-github-pr-adapter.test.ts
-- packages/github-adapter/src/index.ts only if exported redaction types need
+- packages/github-adapter/src/index.ts only if exported local interface types need
   the same narrowed boundary
 
 Forbidden:
@@ -227,7 +232,8 @@ client, merge, deploy, branch deletion, production main write, token/env dump,
 secret read, raw payload logging, live memory write, commit, push, PR.
 
 Acceptance:
-- Define or extract a local redacted command/API summary contract.
+- The local injected runner/client surface consumes or returns only redacted
+  command/API summaries and evidence refs.
 - Preserve verified proof, action-scoped approval, run_id, target repository,
   base/head refs, explicit scoped/disposable credential input, no ambient auth,
   no runner/client call on refusals, and redacted evidence refs.

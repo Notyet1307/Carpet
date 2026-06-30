@@ -13,7 +13,7 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-MCR-1042 GitHub Adapter Redacted Command Contract Local Slice is the first
+MCR-1044 GitHub Adapter Injected Runner Interface Tightening is the first
 recommended task.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
@@ -33,9 +33,13 @@ calls. MCR-1040 turned the generic "later planning" instruction into a concrete
 planning-only card for bounded adapter expansion. MCR-1041 is now the design
 artifact for local interface/redaction ordering: both are required, but
 command/API redaction comes first and injected runner/client interface tightening
-comes second. MCR-1042 may implement only that first local redaction contract
-slice if explicitly approved. It must not add real GitHub, production
-automation, merge, deploy, live memory work, or a network-capable client.
+comes second. MCR-1042 completed and was accepted as the local-only redacted
+command/API summary contract slice in commit
+`fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`. MCR-1043 is this docs-only
+closeout so future workers do not repeat MCR-1042. MCR-1044 should implement
+only the second local-only interface-tightening step if explicitly approved. It
+must not add real GitHub, production automation, merge, deploy, live memory
+work, or a network-capable client.
 
 ## Cards
 
@@ -492,12 +496,26 @@ outside MCR-1041.
 
 ### MCR-1042: GitHub Adapter Redacted Command Contract Local Slice
 
-Status: recommended next local-only code slice; not yet started.
+Status: completed and accepted as a local-only code slice in
+`fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`.
 
 - Problem solved: MCR-1041 chose redaction-first sequencing, but the current
   adapter still keeps command building, redaction, runner execution, and proof
   retention in one source file. The next slice should make the redacted
   command/API contract explicit before any runner/client interface expansion.
+- Completed result: the Runtime-owned GitHub PR adapter now supports structured
+  `api_summary` on success, preserves the legacy local stdout URL extraction
+  path only for repo-scoped PR URLs, rebuilds the retained API summary from
+  redacted fields, and keeps raw stdout, stderr, token/env material, raw API
+  payload, raw patch/diff, raw PR body, and raw approval payload material out of
+  returned results and retained proof.
+- Accepted files changed: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
+  `packages/github-adapter/src/index.ts`.
+- Accepted proof: `pnpm --filter github-adapter test` 43/43,
+  `pnpm --filter runtime-orchestrator test` 13/13, `pnpm test:contracts` 84/84,
+  `pnpm schemas:validate` 84/84, `pnpm test` 230/230, and
+  `git diff --check`.
 - Why now: a small local redaction contract is the narrowest way to reduce leak
   risk without adding real GitHub, network authority, Runtime orchestration, or
   broader adapter behavior.
@@ -523,6 +541,75 @@ Status: recommended next local-only code slice; not yet started.
   `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and `rg`
   evidence for GitHub authorization drift and raw token/env/payload retention.
 - Fake/scaffold/real boundary: local redaction-contract hardening only; no real
+  GitHub write, no network-capable client, no Octokit, no `fetch`, no `gh api`,
+  no `gh pr create`, no merge, no deploy, no branch deletion, no production
+  `main` write, no secret read, and no live memory write.
+
+### MCR-1043: GitHub Adapter Redacted Command Contract Closeout Docs
+
+Status: docs-only closeout card added by MCR-1043; no code, schema, fixture,
+test, package, runtime, Matrix, GitHub, Codex, memory, or external action is
+authorized by this card.
+
+- Problem solved: MCR-1042 merged into `main`, but this roadmap still pointed
+  the first recommended task at MCR-1042 and described it as pending.
+- Why now: stale closeout text can cause commander sessions to dispatch a
+  completed redaction-contract code slice again instead of moving to the second
+  MCR-1041 sequencing step.
+- Allowed files: `docs/roadmaps/post-mvp-roadmap.md`,
+  `docs/analysis/github-adapter-bounded-expansion-plan.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`,
+  `docs/analysis/github-adapter-refusal-test-plan.md`, and
+  `docs/analysis/target-system-design.md`.
+- Forbidden files/actions: `packages/**`, `apps/**`, `workers/**`,
+  `runtime/**`, `schemas/**`, `fixtures/**`, `tests/**`, package files,
+  lockfiles, `.codex.local.env`, real GitHub writes, Octokit, `fetch`,
+  `gh api`, `gh pr create`, a network-capable client, merge, deploy, branch
+  deletion, production `main` write, token/env dump, secret read, raw payload
+  logging, live memory write, commit, push, PR, or live memory update.
+- Acceptance criteria: MCR-1042 is recorded as completed and accepted; First
+  Recommended Task no longer points to MCR-1042; the next step follows
+  MCR-1041 sequencing and points to injected runner/client interface tightening;
+  all text keeps the GitHub adapter boundary local-only.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and stale-text `rg` evidence.
+- Fake/scaffold/real boundary: docs-only status synchronization; no runtime,
+  adapter, external service, or live memory behavior changes.
+
+### MCR-1044: GitHub Adapter Injected Runner Interface Tightening
+
+Status: recommended next local-only code slice; not started here.
+
+- Problem solved: MCR-1041 requires both redaction and interface tightening.
+  MCR-1042 completed the redacted command/API summary contract, so the next
+  narrow step is to tighten the local injected runner/client interface around
+  that redacted contract.
+- Why now: once redacted result shape is stable, the runner boundary can reject
+  or avoid raw token/env, raw stdout/stderr, raw API payload, raw patch/diff,
+  raw PR body, and raw approval payload material before a future real adapter
+  path is designed.
+- Allowed files: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
+  `packages/github-adapter/src/index.ts` only if exported local interface types
+  need the same narrowed boundary.
+- Forbidden files/actions: `apps/**`, `workers/**`, `runtime/**`, `schemas/**`,
+  `fixtures/**`, package files, lockfiles, `.codex.local.env`, GitHub workflows,
+  smoke runners, Matrix/Codex real smokes, real GitHub writes, Octokit, `fetch`,
+  `gh api`, `gh pr create`, a network-capable client, merge, deploy, branch
+  deletion, production `main` write, token/env dump, secret read, raw payload
+  logging, raw stdout/stderr retention, raw patch/diff retention, raw PR body
+  retention, raw approval payload retention, live memory write, commit, push,
+  PR, or live memory update.
+- Acceptance criteria: the local injected runner/client surface consumes or
+  returns only the redacted command/API summary contract and evidence refs;
+  refusal paths still return before runner/client calls; success paths keep
+  action-scoped approval, run_id, target repo, base/head refs, explicit
+  scoped/disposable credential input, and no ambient auth; no real GitHub or
+  network-capable implementation is added.
+- Validation/proof: `pnpm --filter github-adapter test`,
+  `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and `rg`
+  evidence for GitHub authorization drift and raw token/env/payload retention.
+- Fake/scaffold/real boundary: local runner-interface tightening only; no real
   GitHub write, no network-capable client, no Octokit, no `fetch`, no `gh api`,
   no `gh pr create`, no merge, no deploy, no branch deletion, no production
   `main` write, no secret read, and no live memory write.

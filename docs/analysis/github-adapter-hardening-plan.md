@@ -139,13 +139,20 @@ runner/client interface tightening. That order keeps raw token/env, raw
 stdout/stderr, raw API payload, raw patch, raw diff, and raw PR body material
 out of the interface before a runner/client shape is frozen.
 
-The next smallest task is MCR-1042, if explicitly approved: a local-only
-redacted command/API contract slice. It may touch only
+MCR-1042 completed and was accepted as that first local-only redacted
+command/API contract slice in commit
+`fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`. It touched only
 `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
 `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
 `packages/github-adapter/src/index.ts` only if exported redaction types need the
-same narrowed boundary. It must not add Runtime GitHub writes, Octokit,
+same narrowed boundary. It did not add Runtime GitHub writes, Octokit,
 `gh pr create`, `gh api`, fetch calls, a network-capable client, package
 changes, schemas, fixtures, smoke runners, merge, deploy, production `main`
 writes, token/env dumps, secret reads, raw payload logging, or live memory
 writes.
+
+The next smallest task is MCR-1044, if explicitly approved: a local-only
+injected runner/client interface tightening slice. It should keep the same code
+allowlist, consume the MCR-1042 redacted command/API summary contract, and avoid
+standardizing raw runner output, raw API payloads, token/env material, raw PR
+body material, or raw approval payloads as acceptable interface data.

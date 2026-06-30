@@ -401,6 +401,27 @@ Octokit, `fetch`, `gh api`, `gh pr create`, PR creation, branch deletion, merge,
 deploy, production `main` writes, token reads, secret reads, env dumps, raw
 payload logging, or live memory writes.
 
+## MCR-1041 Through MCR-1044 GitHub Adapter Local Expansion Boundary
+
+MCR-1041 chose the local expansion order after MCR-1040: redacted command/API
+contract first, injected runner/client interface tightening second. MCR-1042
+completed and was accepted as the first local-only redacted command/API summary
+contract slice in commit `fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`.
+
+The accepted MCR-1042 boundary keeps the compatibility path local: structured
+`api_summary` is accepted on success, legacy local stdout URL extraction is
+limited to repo-scoped PR URLs for runtime-orchestrator compatibility, and
+retained proof is rebuilt from redacted fields instead of raw stdout, stderr,
+token/env material, raw API payload, raw patch/diff, raw PR body, or raw
+approval payload material.
+
+MCR-1043 is a docs-only closeout. The next local-only code slice is MCR-1044:
+injected runner/client interface tightening around the MCR-1042 redacted
+contract. MCR-1044 must not add real GitHub calls, Octokit, `fetch`, `gh api`,
+`gh pr create`, PR creation, branch deletion, merge, deploy, production `main`
+writes, token reads, secret reads, env dumps, raw payload logging, a
+network-capable client, or live memory writes.
+
 ## MCR-850 Real Vertical Smoke Boundary
 
 MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id

@@ -205,12 +205,20 @@ records the docs-only readiness result as GO. MCR-1040 added the bounded
 expansion planning card. MCR-1041 then chose both boundaries but sequenced them:
 redacted command/API contract first, injected runner/client interface second.
 
-MCR-1042 is the next smallest local-only code slice if explicitly approved. Its
-tests should keep every existing refusal fixture at `no_runner_calls=true`,
-prove command/API summaries are redacted before retention, and prove raw
-token/env, raw stdout/stderr, raw API payload, raw patch, raw diff, raw PR body,
-raw approval payload, and live memory material are not retained. MCR-1042 still
-does not permit real GitHub writes, Octokit, `gh pr create`, `gh api` writes,
-fetch calls, a network-capable client, merge, deploy, production `main` writes,
-broad credential use, secret reads, token value logging, env dumps, raw approval
-payload logging, or live memory writes.
+MCR-1042 completed and was accepted as the first local-only code slice in commit
+`fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`. Its tests keep existing refusal
+fixtures at `no_runner_calls=true`, prove command/API summaries are redacted
+before retention, and prove raw token/env, raw stdout/stderr, raw API payload,
+raw patch, raw diff, raw PR body, raw approval payload, and live memory material
+are not retained. MCR-1042 still does not permit real GitHub writes, Octokit,
+`gh pr create`, `gh api` writes, fetch calls, a network-capable client, merge,
+deploy, production `main` writes, broad credential use, secret reads, token
+value logging, env dumps, raw approval payload logging, or live memory writes.
+
+MCR-1044 is the next smallest local-only code slice if explicitly approved. It
+should tighten the injected runner/client interface around the MCR-1042
+redacted command/API summary contract while preserving the same refusal-first
+behavior and the same prohibition on real GitHub, network-capable clients,
+Octokit, `gh pr create`, `gh api`, fetch calls, merge, deploy, production
+`main` writes, broad credential use, secret reads, token/env dumps, raw payload
+logging, and live memory writes.
