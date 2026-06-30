@@ -407,7 +407,15 @@ test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after p
     ref: `refs/heads/mcr/MCR-800/runtime-orchestrator-cli/${runId}/head`,
     base_ref: `refs/heads/mcr/MCR-800/runtime-orchestrator-cli/${runId}/base`,
   };
+  const expectedApiSummary = {
+    operation: "github.pull_request.create",
+    repository: "Notyet1307/github-pr-smoke-sandbox",
+    base_ref: `mcr/MCR-800/runtime-orchestrator-cli/${runId}/base`,
+    head_ref: `mcr/MCR-800/runtime-orchestrator-cli/${runId}/head`,
+    pull_request_url: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3",
+  };
   const calls: unknown[] = [];
+  const runnerResults: unknown[] = [];
   const result = await runRuntimeOrchestrator({
     repoRoot: root,
     snapshotPath,
@@ -432,11 +440,12 @@ test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after p
       cleanup_status: "not_started",
       runner: async (command: unknown) => {
         calls.push(command);
-        return {
+        const runnerResult = {
           exit_code: 0,
-          stdout: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3\n",
-          stderr: "",
+          api_summary: expectedApiSummary,
         };
+        runnerResults.push(runnerResult);
+        return runnerResult;
       },
     },
   } as Parameters<typeof runRuntimeOrchestrator>[0]);
@@ -455,10 +464,12 @@ test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after p
   assert.equal(result.prs.length, 1);
   assert.deepEqual(result.prs[0]?.target, runtimeOwnedTarget);
   assert.equal(result.prs[0]?.url, "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3");
+  assert.deepEqual(result.prs[0]?.api_summary, expectedApiSummary);
   assert.equal(result.prs[0]?.approval_id, "approval_mcr_800_runtime_orchestrator_cli");
   assert.equal(result.prs[0]?.base_sha, "b".repeat(40));
   assert.equal(result.prs[0]?.head_sha, "c".repeat(40));
   assert.equal(result.prs[0]?.cleanup_status, "not_started");
+  assert.deepEqual(runnerResults, [{ exit_code: 0, api_summary: expectedApiSummary }]);
   assert.deepEqual((calls[0] as { args: string[] }).args, [
     "pr",
     "create",
