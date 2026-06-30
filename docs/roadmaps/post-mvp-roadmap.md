@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1060, the First Recommended Task is MCR-1061 Local Fake MVP Root
-Command Evidence Artifact Design.
+After MCR-1061, the First Recommended Task is MCR-1062 Local Fake MVP Root
+Command Evidence Artifact Minimal Implementation.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -83,8 +83,11 @@ mvp:local` matched the runbook Minimum Acceptance, generated the ignored
 `task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
 `pr_count=1`, and `memory_status=proposed`. `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
-docs-only closeout for that audit result. Production GitHub implementation
-remains unauthorized.
+docs-only closeout for that audit result. MCR-1061 completes the docs/design
+decision: future implementation should write ignored generated
+`.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot, not
+`summary.log` or a separate handoff evidence record. Production GitHub
+implementation remains unauthorized.
 
 ## Cards
 
@@ -1127,8 +1130,8 @@ result in roadmap/source-of-truth docs only.
 
 ### MCR-1061: Local Fake MVP Root Command Evidence Artifact Design
 
-Status: First Recommended Task after MCR-1060. Docs-only/read-only or
-design-only; no implementation is authorized by this card.
+Status: completed as docs/design. GO for a later minimal `summary.json`
+implementation; no implementation was authorized or performed by this card.
 
 - Problem solved: MCR-1059 showed that `pnpm mvp:local` can be verified by
   stdout plus the ignored snapshot, but the repo has not decided whether the
@@ -1151,6 +1154,41 @@ design-only; no implementation is authorized by this card.
 - Fake/scaffold/real boundary: design only; this does not authorize command
   implementation, production MVP, real Matrix/Codex/GitHub, DB/Postgres, live
   memory, or GitHub adapter expansion.
+
+Decision summary: the future artifact should be ignored generated
+`.mcr/runs/local-fake-mvp/summary.json`, colocated with
+`runtime-store.snapshot.json`. It should include command, generated time,
+snapshot path, task id/state, transition count, proof status, approval status,
+PR count, memory status, `fake_only=true`, and short validation notes. It must
+not store raw Matrix event bodies, worker stdout/stderr, raw diffs/logs,
+token/env material, secrets, live memory bodies, or GitHub API response bodies.
+
+### MCR-1062: Local Fake MVP Root Command Evidence Artifact Minimal Implementation
+
+Status: First Recommended Task after MCR-1061. Implementation is not authorized
+until explicitly assigned.
+
+- Problem solved: MCR-1061 decided the stable evidence artifact shape, but
+  `pnpm mvp:local` still does not write `summary.json`.
+- Why now: replacing `tee summary.log` with generated structured evidence makes
+  the local fake MVP root command easier to hand off without changing fake/real
+  boundaries.
+- Allowed files/actions: the smallest source/test/runbook changes needed to
+  write and validate ignored `.mcr/runs/local-fake-mvp/summary.json`.
+- Forbidden files/actions: real Matrix, real Codex, real GitHub, DB/Postgres,
+  live memory, GitHub adapter expansion, PR creation, merge, deploy, production
+  `main` writes, token/env dumps, secret reads, raw payload logging, and
+  checking generated `.mcr` evidence into git.
+- Acceptance criteria: `pnpm mvp:local` writes both
+  `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+  `.mcr/runs/local-fake-mvp/summary.json`; the summary matches the MCR-1061
+  minimum shape; runbook validation reads summary and snapshot with `node -e`
+  and no longer depends on `tee`.
+- Validation/proof: `pnpm mvp:local`, summary/snapshot `node -e` check,
+  `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and stale
+  text `rg`.
+- Fake/scaffold/real boundary: local fake root-command artifact only; no real
+  services, DB, adapter expansion, live memory, or production readiness.
 
 ## Global Deny List
 

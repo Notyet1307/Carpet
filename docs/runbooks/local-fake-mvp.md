@@ -45,6 +45,25 @@ parsed from the `pnpm mvp:local` summary stdout captured in
 `.mcr/runs/local-fake-mvp/summary.log`; the snapshot keeps Runtime task/proof/
 approval/artifact refs and does not persist a live memory write.
 
+## Evidence Artifact Design Status
+
+MCR-1061 recommends that a future implementation make `pnpm mvp:local` write an
+ignored generated JSON summary at:
+
+```text
+.mcr/runs/local-fake-mvp/summary.json
+```
+
+That future artifact should sit beside
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and contain only stable
+summary fields: command, generated time, snapshot path, task id/state,
+transition count, proof status, approval status, PR count, memory status,
+`fake_only=true`, and short validation notes.
+
+This runbook's current Minimum Acceptance remains unchanged until that behavior
+is implemented. After MCR-1062, the runbook should validate `summary.json` and
+the snapshot with `node -e`, without relying on `tee` and `summary.log`.
+
 ## No-Go Conditions
 
 Treat the run as NO-GO if any of these happens:
@@ -92,7 +111,8 @@ It does not prove or authorize:
 ## Next Step
 
 MCR-1059 completed as a read-only GO audit of this runbook and the existing
-command. The next recommended task is MCR-1061 Local Fake MVP Root Command
-Evidence Artifact Design: a docs-only/read-only or design-only decision on
-whether `pnpm mvp:local` should directly write `summary.log`, `summary.json`, or
-a handoff evidence artifact. It should not implement new code.
+command. MCR-1061 completed the docs/design decision: a future implementation
+should make `pnpm mvp:local` write ignored generated
+`.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot. The next
+recommended task is MCR-1062, a minimal implementation only if explicitly
+assigned.

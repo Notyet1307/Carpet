@@ -47,8 +47,9 @@ is the docs-only closeout for that audit. MCR-1054 completed the
 read-only/design-only legacy stdout fallback removal decision by keeping bounded
 internal compatibility. MCR-1055 is now later/backlog after MCR-1056. MCR-1058
 completed the local fake MVP docs/runbook closeout. MCR-1059 completed as a
-read-only GO audit; the active next step is MCR-1061 Local Fake MVP Root Command
-Evidence Artifact Design, docs-only/read-only or design-only.
+read-only GO audit, and MCR-1061 completed the local fake evidence artifact
+design; the active next step is MCR-1062 minimal `summary.json` implementation
+only if explicitly assigned.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -255,12 +256,12 @@ deliberately cover that compatibility path, and runtime-orchestrator uses public
 `api_summary`. Any future removal must be a separate human-approved source/test
 task with new local evidence and an explicit allowlist. MCR-1055 Post-GitHub
 Adapter Backlog Source-of-Truth Review is now later/backlog after MCR-1056.
-MCR-1058 completed the local fake MVP docs/runbook closeout, and MCR-1059
-completed as a read-only GO audit. The active next step is MCR-1061 Local Fake
-MVP Root Command Evidence Artifact Design, docs-only/read-only or design-only.
-This remains read-only/planning-only; no current doc authorizes source removal, real
-GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable
-client, or external process runner execution.
+MCR-1058 completed the local fake MVP docs/runbook closeout, MCR-1059 completed
+as a read-only GO audit, and MCR-1061 completed the local fake evidence artifact
+design. The active next step is MCR-1062 minimal `summary.json` implementation
+only if explicitly assigned. This remains read-only/planning-only; no current
+doc authorizes source removal, real GitHub writes, Octokit, `fetch`, `gh api`,
+`gh pr create`, a network-capable client, or external process runner execution.
 
 Validation commands for the docs closeout and decision task:
 

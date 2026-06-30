@@ -115,11 +115,13 @@ runbook Minimum Acceptance, generated the ignored
 `task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
 `pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 records
-that audit result in source-of-truth docs only. The next bounded work is
-MCR-1061 Local Fake MVP Root Command Evidence Artifact Design, docs-only or
-read-only or design-only, to decide whether the root command should directly write
-`summary.log`, `summary.json`, or a handoff evidence artifact. MCR-1060 does not
-authorize implementing that artifact.
+that audit result in source-of-truth docs only. MCR-1061 completed the design
+decision: future implementation should write ignored generated
+`.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot, not
+`summary.log` or a separate handoff evidence record. The next bounded work is
+MCR-1062 Local Fake MVP Root Command Evidence Artifact Minimal Implementation,
+if explicitly assigned. MCR-1061 does not authorize real services, DB/Postgres,
+live memory, or GitHub adapter expansion.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec

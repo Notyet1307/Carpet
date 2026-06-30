@@ -256,10 +256,10 @@ bounded internal fallback, do not propose a later removal slice now, and require
 new local evidence plus an explicit source/test allowlist before any future
 removal attempt. MCR-1055 Post-GitHub Adapter Backlog Source-of-Truth Review is
 now later/backlog after MCR-1056. MCR-1058 completed the local fake MVP
-docs/runbook closeout, and MCR-1059 completed as a read-only GO audit. The
-active next step is MCR-1061 Local Fake MVP Root Command Evidence Artifact
-Design, docs-only/read-only or design-only. This plan still does not permit real
-GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
-external process runner execution, source removal, merge, deploy, production
-`main` writes, broad credential use, secret reads, token/env dumps, raw payload
-logging, or live memory writes.
+docs/runbook closeout, MCR-1059 completed as a read-only GO audit, and MCR-1061
+completed the local fake evidence artifact design. The active next step is
+MCR-1062 minimal `summary.json` implementation only if explicitly assigned.
+This plan still does not permit real GitHub, network-capable clients, Octokit,
+`gh pr create`, `gh api`, fetch calls, external process runner execution,
+source removal, merge, deploy, production `main` writes, broad credential use,
+secret reads, token/env dumps, raw payload logging, or live memory writes.
