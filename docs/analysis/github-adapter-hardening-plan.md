@@ -151,8 +151,19 @@ changes, schemas, fixtures, smoke runners, merge, deploy, production `main`
 writes, token/env dumps, secret reads, raw payload logging, or live memory
 writes.
 
-The next smallest task is MCR-1044, if explicitly approved: a local-only
-injected runner/client interface tightening slice. It should keep the same code
-allowlist, consume the MCR-1042 redacted command/API summary contract, and avoid
-standardizing raw runner output, raw API payloads, token/env material, raw PR
-body material, or raw approval payloads as acceptable interface data.
+MCR-1044 completed and was accepted as the second local-only runner interface
+tightening slice in commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167`.
+Exported `RuntimeOwnedGitHubPrRunnerResult` now retains only `exit_code` plus
+`api_summary`; exported `RuntimeOwnedGitHubPrRunner` no longer standardizes
+stdout/stderr as public contract fields; legacy stdout PR URL compatibility is
+internal local compatibility only. Retained proof/evidence remains redacted
+`api_summary` fields and evidence refs, not raw runner output, raw API payloads,
+token/env material, raw PR body material, or raw approval payloads.
+
+MCR-1045 is the docs-only closeout for that merged status. The next recommended
+task after MCR-1045 is MCR-1046 GitHub Adapter Expansion Readiness Audit, a
+docs-only/read-only audit before any further GitHub expansion. This plan still
+does not authorize real GitHub writes, Octokit, `fetch`, `gh api`,
+`gh pr create`, a network-capable client, merge, deploy, branch deletion,
+production `main` writes, token/env dumps, secret reads, raw payload logging,
+or live memory writes.

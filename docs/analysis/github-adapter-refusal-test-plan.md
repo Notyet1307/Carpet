@@ -215,10 +215,19 @@ are not retained. MCR-1042 still does not permit real GitHub writes, Octokit,
 deploy, production `main` writes, broad credential use, secret reads, token
 value logging, env dumps, raw approval payload logging, or live memory writes.
 
-MCR-1044 is the next smallest local-only code slice if explicitly approved. It
-should tighten the injected runner/client interface around the MCR-1042
-redacted command/API summary contract while preserving the same refusal-first
-behavior and the same prohibition on real GitHub, network-capable clients,
-Octokit, `gh pr create`, `gh api`, fetch calls, merge, deploy, production
-`main` writes, broad credential use, secret reads, token/env dumps, raw payload
-logging, and live memory writes.
+MCR-1044 completed and was accepted as the second local-only runner interface
+tightening slice in commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167`. The
+exported runner result contract now keeps only `exit_code` plus `api_summary`;
+the exported runner contract no longer standardizes stdout/stderr; legacy
+stdout PR URL compatibility is internal local compatibility only. The refusal
+matrix remains refusal-first, and retained proof/evidence remains redacted
+`api_summary` fields plus evidence refs instead of raw stdout/stderr, raw API
+payload, token/env material, raw PR body, raw approval payload, or live memory
+material.
+
+MCR-1045 is the docs-only closeout for that merged status. The next recommended
+task after MCR-1045 is MCR-1046 GitHub Adapter Expansion Readiness Audit, a
+docs-only/read-only audit before any further GitHub expansion. This plan still
+does not permit real GitHub, network-capable clients, Octokit, `gh pr create`,
+`gh api`, fetch calls, merge, deploy, production `main` writes, broad credential
+use, secret reads, token/env dumps, raw payload logging, or live memory writes.

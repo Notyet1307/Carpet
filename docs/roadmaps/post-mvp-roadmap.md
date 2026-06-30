@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-MCR-1044 GitHub Adapter Injected Runner Interface Tightening is the first
-recommended task.
+After MCR-1045 GitHub Adapter Runner Interface Closeout Docs, the first
+recommended task is MCR-1046 GitHub Adapter Expansion Readiness Audit.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -36,10 +36,13 @@ command/API redaction comes first and injected runner/client interface tightenin
 comes second. MCR-1042 completed and was accepted as the local-only redacted
 command/API summary contract slice in commit
 `fcdd4caff37ecbca64b34635e209afb5fa4b9fd7`. MCR-1043 is this docs-only
-closeout so future workers do not repeat MCR-1042. MCR-1044 should implement
-only the second local-only interface-tightening step if explicitly approved. It
-must not add real GitHub, production automation, merge, deploy, live memory
-work, or a network-capable client.
+closeout so future workers do not repeat MCR-1042. MCR-1044 completed and was
+merged in commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167` as the
+local-only injected runner interface tightening slice. MCR-1045 is the
+docs-only closeout that records that status and keeps the next step bounded.
+After MCR-1045, the next recommended task is MCR-1046, a docs-only/read-only
+readiness audit before any further GitHub expansion; no real GitHub
+implementation is authorized.
 
 ## Cards
 
@@ -578,41 +581,140 @@ authorized by this card.
 
 ### MCR-1044: GitHub Adapter Injected Runner Interface Tightening
 
-Status: recommended next local-only code slice; not started here.
+Status: completed, accepted, and merged in commit
+`367c625fe05e76e865ed2dab45f0f4d19ceb0167`.
 
-- Problem solved: MCR-1041 requires both redaction and interface tightening.
-  MCR-1042 completed the redacted command/API summary contract, so the next
-  narrow step is to tighten the local injected runner/client interface around
-  that redacted contract.
-- Why now: once redacted result shape is stable, the runner boundary can reject
-  or avoid raw token/env, raw stdout/stderr, raw API payload, raw patch/diff,
-  raw PR body, and raw approval payload material before a future real adapter
-  path is designed.
-- Allowed files: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+- Problem solved: MCR-1041 required both redaction and interface tightening.
+  MCR-1042 completed the redacted command/API summary contract; MCR-1044 then
+  tightened the local injected runner boundary around that redacted contract.
+- Completed result: exported `RuntimeOwnedGitHubPrRunnerResult` now retains only
+  `exit_code` plus `api_summary`; exported `RuntimeOwnedGitHubPrRunner` no
+  longer standardizes runner stdout/stderr as public contract fields. Legacy
+  stdout PR URL compatibility remains only as an internal local helper.
+- Retained proof boundary: proof/evidence still comes from redacted
+  `api_summary` fields and evidence refs, not raw stdout, stderr, token/env
+  material, raw API payload, raw patch/diff, raw PR body, or raw approval
+  payload material.
+- Accepted files changed: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
   `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
-  `packages/github-adapter/src/index.ts` only if exported local interface types
-  need the same narrowed boundary.
-- Forbidden files/actions: `apps/**`, `workers/**`, `runtime/**`, `schemas/**`,
-  `fixtures/**`, package files, lockfiles, `.codex.local.env`, GitHub workflows,
-  smoke runners, Matrix/Codex real smokes, real GitHub writes, Octokit, `fetch`,
+  `packages/github-adapter/src/index.ts`.
+- Fake/scaffold/real boundary: completed local runner-interface tightening only;
+  no real GitHub write, no network-capable client, no Octokit, no `fetch`, no
+  `gh api`, no `gh pr create`, no merge, no deploy, no branch deletion, no
+  production `main` write, no secret read, and no live memory write.
+
+### MCR-1045: GitHub Adapter Runner Interface Closeout Docs
+
+Status: docs-only closeout card; no code, schema, fixture, test, package,
+runtime, Matrix, GitHub, Codex, DB, memory, or external action is authorized by
+this card.
+
+- Problem solved: MCR-1044 merged into `main`, but post-MVP roadmap and related
+  GitHub adapter analysis docs previously described it as first recommended,
+  next, or not started.
+- Why now: stale closeout text can cause commander sessions to repeat a
+  completed local runner-interface code slice or infer that GitHub adapter work
+  is ready to become a real service.
+- Allowed files: `docs/roadmaps/post-mvp-roadmap.md`,
+  `docs/roadmaps/analysis-roadmap.md`,
+  `docs/analysis/target-system-design.md`,
+  `docs/analysis/github-adapter-bounded-expansion-plan.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`, and
+  `docs/analysis/github-adapter-refusal-test-plan.md`.
+- Forbidden files/actions: `packages/**`, `apps/**`, `workers/**`,
+  `runtime/**`, `schemas/**`, `fixtures/**`, `tests/**`, package files,
+  lockfiles, `.codex.local.env`, real GitHub writes, Octokit, `fetch`,
   `gh api`, `gh pr create`, a network-capable client, merge, deploy, branch
   deletion, production `main` write, token/env dump, secret read, raw payload
-  logging, raw stdout/stderr retention, raw patch/diff retention, raw PR body
-  retention, raw approval payload retention, live memory write, commit, push,
-  PR, or live memory update.
-- Acceptance criteria: the local injected runner/client surface consumes or
-  returns only the redacted command/API summary contract and evidence refs;
-  refusal paths still return before runner/client calls; success paths keep
-  action-scoped approval, run_id, target repo, base/head refs, explicit
-  scoped/disposable credential input, and no ambient auth; no real GitHub or
-  network-capable implementation is added.
+  logging, live memory write, commit, push, PR, DB/Postgres, or Matrix/Codex
+  real smoke.
+- Acceptance criteria: MCR-1044 is recorded as completed and merged at
+  `367c625fe05e76e865ed2dab45f0f4d19ceb0167`; no allowed doc routes workers to
+  MCR-1044 as an active next task; exported runner facts and retained proof
+  boundaries are stated; the next recommendation remains bounded/local/design
+  first.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and stale-text `rg` evidence.
+- Next recommended task after MCR-1045: MCR-1046 GitHub Adapter Expansion
+  Readiness Audit. Do not start real GitHub, Octokit, `fetch`,
+  `gh api`, `gh pr create`, network-capable client, merge, deploy, production
+  `main` write, branch deletion, token/env dump, raw payload logging, DB,
+  Matrix/Codex real smoke, or live memory work from this closeout.
+
+### MCR-1046: GitHub Adapter Expansion Readiness Audit
+
+Status: recommended next docs-only/read-only audit before any further GitHub
+adapter expansion. It is not an implementation task.
+
+- Problem solved: after MCR-1042 redacted command/API summary hardening and
+  MCR-1044 runner interface tightening, the repo needs one explicit readiness
+  audit to verify docs, tests, adapter boundaries, refusal fixtures, and
+  runtime-orchestrator integration agree before selecting any new GitHub adapter
+  expansion.
+- Why now: without an explicit audit card, commander sessions must invent the
+  next task, which can drift into implementation or real-service authorization.
+- Allowed files/actions: read-only inspection of the current repository,
+  especially these docs, `packages/github-adapter/**`,
+  `packages/runtime-orchestrator/**`, `fixtures/github-adapter/refusals/**`,
+  related contract tests, and package manifests. The audit output should be the
+  worker handoff; do not edit files unless a later task explicitly changes this
+  card.
+- Forbidden files/actions: edits to `packages/**`, `apps/**`, `workers/**`,
+  `runtime/**`, `schemas/**`, `fixtures/**`, `tests/**`, package files,
+  lockfiles, `.codex.local.env`; real GitHub, Octokit, `fetch`, `gh api`,
+  `gh pr create`, network-capable client, merge, deploy, branch deletion,
+  production `main` write, token/env dump, secret read, raw payload logging,
+  DB/Postgres, Matrix/Codex real smoke, live memory, commit, push, PR.
+- Acceptance criteria: audit reports GO/NO-GO; no stale MCR-1044-as-next text
+  remains; no docs imply real GitHub authorization; local tests remain green;
+  `rg` confirms no new real GitHub, network, or process execution path is
+  introduced; if GO, the audit recommends the next smallest bounded task.
 - Validation/proof: `pnpm --filter github-adapter test`,
-  `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and `rg`
-  evidence for GitHub authorization drift and raw token/env/payload retention.
-- Fake/scaffold/real boundary: local runner-interface tightening only; no real
-  GitHub write, no network-capable client, no Octokit, no `fetch`, no `gh api`,
-  no `gh pr create`, no merge, no deploy, no branch deletion, no production
-  `main` write, no secret read, and no live memory write.
+  `pnpm --filter runtime-orchestrator test`, `pnpm test:contracts`,
+  `pnpm schemas:validate`, `pnpm test`, `git diff --check`, stale-text `rg`,
+  and `rg` for real GitHub/network/process-path drift.
+- Fake/scaffold/real boundary: read-only audit only; no code, fixture, test,
+  schema, runtime, package, smoke, external service, or live memory behavior
+  changes.
+- Handoff prompt seed:
+
+```text
+You are a Carpet worker for MCR-1046: GitHub Adapter Expansion Readiness Audit.
+Use the existing worktree or a dedicated read-only audit worktree. Do not commit,
+push, merge, PR, or call any external service.
+
+Goal:
+Read-only audit after MCR-1042 and MCR-1044. Verify docs, tests, GitHub adapter
+boundaries, refusal fixtures, and runtime-orchestrator integration are aligned
+before any further GitHub adapter expansion is chosen.
+
+Do not edit:
+packages, apps, workers, runtime, schemas, fixtures, tests, package files,
+lockfiles, .codex.local.env, or docs unless the task explicitly broadens scope.
+
+Forbidden:
+real GitHub, Octokit, fetch, gh api, gh pr create, network-capable client,
+merge, deploy, branch deletion, production main write, token/env dump, secret
+read, raw payload logging, DB/Postgres, Matrix/Codex real smoke, live memory,
+commit, push, PR.
+
+Acceptance:
+- Report GO/NO-GO.
+- Confirm no stale MCR-1044-as-next text.
+- Confirm docs do not authorize real GitHub.
+- Confirm local tests are green.
+- Confirm rg finds no new real GitHub, network, or process execution path.
+- If GO, recommend the next smallest bounded task.
+
+Validation:
+- pnpm --filter github-adapter test
+- pnpm --filter runtime-orchestrator test
+- pnpm test:contracts
+- pnpm schemas:validate
+- pnpm test
+- git diff --check
+- rg stale-text and authorization-drift checks
+```
 
 ## Global Deny List
 

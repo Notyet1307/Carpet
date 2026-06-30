@@ -428,6 +428,20 @@ opt-in、action-scoped approval 路径执行，且 production Matrix integration
 persistent Runtime service、real room/user lifecycle automation、production
 GitHub PR/API、deploy 和 live memory write 仍未完成。
 
+Post-MVP GitHub adapter local expansion through MCR-1044 is also complete:
+MCR-1044 merged at commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167` as a
+local-only runner interface tightening slice. Exported
+`RuntimeOwnedGitHubPrRunnerResult` retains only `exit_code` plus `api_summary`;
+exported `RuntimeOwnedGitHubPrRunner` no longer standardizes stdout/stderr; the
+legacy stdout PR URL compatibility path is internal only. MCR-1045 is the
+docs-only closeout that syncs this roadmap and the GitHub adapter analysis docs.
+After MCR-1045, the next recommended task is MCR-1046 GitHub Adapter Expansion
+Readiness Audit: a docs-only/read-only audit before any further GitHub
+expansion. Do not treat this as authorization for real GitHub implementation,
+Octokit, `fetch`, `gh api`, `gh pr create`, merge, deploy, production `main`
+writes, branch deletion, token/env dumps, raw payload logging, DB/Postgres,
+Matrix/Codex real smoke, or live memory writes.
+
 ---
 
 ## 6. Phase Roadmap
