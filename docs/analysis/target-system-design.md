@@ -179,6 +179,25 @@ excluded.
 This is not DB implementation, migration authorization, production Runtime
 readiness, or a persistent service.
 
+## MCR-920 Matrix Room/User Lifecycle Design Boundary
+
+MCR-920 adds `docs/analysis/matrix-room-user-lifecycle-design.md` as a
+design-only gate before real Matrix room or user lifecycle work.
+
+The design keeps Matrix as collaboration, approval, and projection surface, not
+Runtime source of truth. Runtime owns room bindings, user and approval identity
+bindings, deny-by-default permission decisions, projection idempotency, cleanup
+refs, and revocation refs.
+
+Future Matrix implementation must start with room/user binding contracts and
+fixtures before any room creation, invite automation, membership automation,
+production AppService deployment, real Matrix send path, or production
+homeserver setup.
+
+This is not production Matrix integration, room/user automation authorization,
+real Matrix send authorization, production Runtime readiness, or a persistent
+service.
+
 ## MCR-310 Closeout Boundary
 
 MCR-310 has produced one manual real Codex exec smoke proof on 2026-06-29:

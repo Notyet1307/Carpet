@@ -13,13 +13,16 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-901 Post-MVP Source-of-Truth Audit**. It is read-only/docs-first
-and should reconcile the closed MCR-800..MCR-850 wave before any production
-adapter or DB design work starts.
+Start with **MCR-930 Evidence Retention And Cleanup Policy**. MCR-901 is
+complete, MCR-910 and MCR-920 have design artifacts, and the next incomplete
+gap is evidence retention before more real-service proof expands.
 
 ## Cards
 
 ### MCR-901: Post-MVP Source-of-Truth Audit
+
+Status: completed; audit result GO. Historical card retained for source-of-truth
+traceability.
 
 - Problem solved: closed smoke work is spread across roadmap, runbooks, and
   analysis docs, which can cause workers to follow stale "next" directions.
@@ -61,6 +64,10 @@ implementation remains unauthorized.
   only implemented persistence path.
 
 ### MCR-920: Matrix Room/User Lifecycle Design Before Integration
+
+Status: design artifact added in
+`docs/analysis/matrix-room-user-lifecycle-design.md`; implementation remains
+unauthorized.
 
 - Problem solved: MCR-720 proved one disposable transaction, but room mapping,
   user identity, invitations, permissions, and cleanup are not designed for real
