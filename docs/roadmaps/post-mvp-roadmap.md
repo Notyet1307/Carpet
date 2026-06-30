@@ -13,8 +13,11 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1061, the First Recommended Task is MCR-1062 Local Fake MVP Root
-Command Evidence Artifact Minimal Implementation.
+After MCR-1063, the First Recommended Task is MCR-1064 Local Fake MVP
+Single-Command Readiness Audit. MCR-1064 should be read-only: rerun
+`pnpm mvp:local`, confirm the two ignored local fake MVP artifacts and stable
+summary handoff shape, scan for stale docs, and report GO/NO-GO without
+implementing runtime, adapter, schema, fixture, or service changes.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -83,11 +86,17 @@ mvp:local` matched the runbook Minimum Acceptance, generated the ignored
 `task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
 `pr_count=1`, and `memory_status=proposed`. `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
-docs-only closeout for that audit result. MCR-1061 completes the docs/design
-decision: future implementation should write ignored generated
+docs-only closeout for that audit result. MCR-1061 completed the docs/design
+decision: the root command should write ignored generated
 `.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot, not
-`summary.log` or a separate handoff evidence record. Production GitHub
-implementation remains unauthorized.
+`summary.log` or a separate handoff evidence record. MCR-1062 completed and
+merged in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local`
+now writes both ignored artifacts,
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+`.mcr/runs/local-fake-mvp/summary.json`, and prints the same structured summary
+to stdout. `summary.json` is the stable handoff summary, so acceptance no
+longer requires `tee` or `summary.log`. MCR-1063 is this docs-only closeout.
+Production GitHub implementation remains unauthorized.
 
 ## Cards
 
@@ -1130,8 +1139,10 @@ result in roadmap/source-of-truth docs only.
 
 ### MCR-1061: Local Fake MVP Root Command Evidence Artifact Design
 
-Status: completed as docs/design. GO for a later minimal `summary.json`
-implementation; no implementation was authorized or performed by this card.
+Status: completed as docs/design. MCR-1062 later implemented the minimal
+`summary.json` artifact in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`; no implementation was authorized or
+performed by MCR-1061 itself.
 
 - Problem solved: MCR-1059 showed that `pnpm mvp:local` can be verified by
   stdout plus the ignored snapshot, but the repo has not decided whether the
@@ -1155,7 +1166,7 @@ implementation; no implementation was authorized or performed by this card.
   implementation, production MVP, real Matrix/Codex/GitHub, DB/Postgres, live
   memory, or GitHub adapter expansion.
 
-Decision summary: the future artifact should be ignored generated
+Decision summary: the artifact should be ignored generated
 `.mcr/runs/local-fake-mvp/summary.json`, colocated with
 `runtime-store.snapshot.json`. It should include command, generated time,
 snapshot path, task id/state, transition count, proof status, approval status,
@@ -1165,11 +1176,11 @@ token/env material, secrets, live memory bodies, or GitHub API response bodies.
 
 ### MCR-1062: Local Fake MVP Root Command Evidence Artifact Minimal Implementation
 
-Status: First Recommended Task after MCR-1061. Implementation is not authorized
-until explicitly assigned.
+Status: completed and merged in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`.
 
-- Problem solved: MCR-1061 decided the stable evidence artifact shape, but
-  `pnpm mvp:local` still does not write `summary.json`.
+- Problem solved: MCR-1061 decided the stable evidence artifact shape, and
+  MCR-1062 made `pnpm mvp:local` write `summary.json`.
 - Why now: replacing `tee summary.log` with generated structured evidence makes
   the local fake MVP root command easier to hand off without changing fake/real
   boundaries.
@@ -1189,6 +1200,67 @@ until explicitly assigned.
   text `rg`.
 - Fake/scaffold/real boundary: local fake root-command artifact only; no real
   services, DB, adapter expansion, live memory, or production readiness.
+
+Completed outcome: `pnpm mvp:local` now writes two ignored generated artifacts:
+
+```text
+.mcr/runs/local-fake-mvp/runtime-store.snapshot.json
+.mcr/runs/local-fake-mvp/summary.json
+```
+
+`summary.json` is the stable handoff summary and matches the one-line JSON
+summary printed to stdout. It is not `summary.log`, and acceptance does not
+require `tee`.
+
+### MCR-1063: Local Fake MVP Summary Artifact Closeout Docs Sync
+
+Status: docs-only closeout for MCR-1062. No runtime, code, test, schema,
+fixture, service, adapter, DB, real Matrix, real Codex, real GitHub, or live
+memory changes are authorized by this card.
+
+- Problem solved: source-of-truth docs still described MCR-1062 as unimplemented
+  or next work after it merged on `main`.
+- Why now: stale roadmap text can send workers back to an already completed
+  implementation instead of auditing the one-command local fake MVP output.
+- Allowed files/actions: roadmap, analysis, and runbook docs explicitly scoped
+  by the task brief.
+- Forbidden files/actions: runtime, package files, apps, workers, schemas,
+  fixtures, tests, `.mcr`, `.env`, real Matrix, real Codex, real GitHub,
+  DB/Postgres, live memory, commit, push, merge, PR.
+- Acceptance criteria: record MCR-1062 commit
+  `1d6225595191db3a59ffa05546c6aad59a2e7b7c`; state that `pnpm mvp:local`
+  writes both ignored artifacts; state that `summary.json` is the stable
+  handoff summary and no `tee summary.log` is required; keep fake-only
+  boundaries explicit; recommend a read-only readiness audit next.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and stale-text `rg`.
+- Fake/scaffold/real boundary: docs-only source-of-truth sync; local fake MVP
+  only.
+
+### MCR-1064: Local Fake MVP Single-Command Readiness Audit
+
+Status: First Recommended Task after MCR-1063. Read-only audit only.
+
+- Problem solved: after MCR-1062 and MCR-1063, the source of truth should be
+  verified from the real command and generated artifacts before scheduling
+  another implementation thread.
+- Why now: this is the smallest useful next step and avoids drifting back into
+  GitHub adapter expansion without a fresh readiness signal.
+- Allowed files/actions: read-only inspection of docs, git status, command
+  output, ignored `.mcr/runs/local-fake-mvp/` artifacts, and validation output.
+- Forbidden files/actions: source edits, package changes, runtime, apps,
+  workers, schemas, fixtures, tests, real Matrix, real Codex, real GitHub,
+  DB/Postgres, live memory, commit, push, merge, PR.
+- Acceptance criteria: `pnpm mvp:local` writes
+  `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+  `.mcr/runs/local-fake-mvp/summary.json`; `summary.json` parses as the stable
+  handoff summary and matches stdout structure; no `summary.log` or `tee` path
+  is needed; docs do not overclaim real-service readiness.
+- Validation/proof: `pnpm mvp:local`, summary/snapshot `node -e` check,
+  `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, stale
+  docs scan, and generated-output cleanup note.
+- Fake/scaffold/real boundary: read-only local fake MVP audit; no real
+  Matrix/Codex/GitHub/DB/live memory automation.
 
 ## Global Deny List
 

@@ -4,8 +4,7 @@ Task: MCR-1061 Local Fake MVP Root Command Evidence Artifact Design
 
 ## Decision
 
-GO: a future implementation should make `pnpm mvp:local` write one stable
-generated JSON evidence artifact:
+GO: `pnpm mvp:local` should write one stable generated JSON evidence artifact:
 
 ```text
 .mcr/runs/local-fake-mvp/summary.json
@@ -21,15 +20,30 @@ Do not introduce a separate handoff evidence record for the local fake root
 command now. `summary.json` plus the existing Runtime Store snapshot is the
 smallest useful handoff surface.
 
+## Implementation Status
+
+MCR-1062 completed this design and merged in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`. `pnpm mvp:local` now writes both
+ignored generated artifacts:
+
+```text
+.mcr/runs/local-fake-mvp/runtime-store.snapshot.json
+.mcr/runs/local-fake-mvp/summary.json
+```
+
+`summary.json` is the stable handoff summary and matches the structured JSON
+summary printed to stdout. It is not `summary.log`, and validation no longer
+requires `tee`.
+
 ## Artifact Path
 
-The future root command should write:
+The root command writes:
 
 ```text
 .mcr/runs/local-fake-mvp/summary.json
 ```
 
-It should continue writing the existing snapshot beside it:
+It also writes the existing snapshot beside it:
 
 ```text
 .mcr/runs/local-fake-mvp/runtime-store.snapshot.json
@@ -73,9 +87,9 @@ Field rules:
 - `fake_only` must be `true` for this command.
 - `validation_notes` should be short, bounded strings for reviewer context.
 
-If the future implementation needs a schema, that is a separate contract task.
-MCR-1061 does not add schemas, fixtures, tests, package changes, or command
-behavior.
+If this artifact later needs a schema, that is a separate contract task.
+MCR-1061 did not add schemas, fixtures, tests, package changes, or command
+behavior; MCR-1062 implemented only the narrow generated artifact behavior.
 
 ## Redaction Boundary
 
@@ -93,12 +107,12 @@ The artifact may store counts, statuses, ids, and repo-relative artifact refs.
 It should be derived from Runtime-owned state and the local fake command result,
 not from Matrix, GitHub, live memory, or raw worker output as a source of truth.
 
-## Future Runbook Validation
+## Runbook Validation
 
-After MCR-1062 implements the artifact, the runbook should stop requiring
+After MCR-1062, the runbook no longer requires
 `tee .mcr/runs/local-fake-mvp/summary.log` for acceptance.
 
-The future validation should read both generated JSON files:
+Validation should read both generated JSON files:
 
 ```bash
 pnpm mvp:local
@@ -112,10 +126,12 @@ git diff --check
 
 ## Non-Authorization
 
-This design does not authorize:
+This design did not itself authorize implementation, and MCR-1062 did not
+authorize anything beyond the local fake generated artifact. It still does not
+authorize:
 
-- implementing `summary.json`
-- changing `pnpm mvp:local`
+- additional `summary.json` behavior beyond the MCR-1062 local fake artifact
+- changing `pnpm mvp:local` beyond the completed local fake summary output
 - changing package files, runtime, apps, workers, schemas, fixtures, or tests
 - real Matrix, real Codex, real GitHub, DB/Postgres, or live memory
 - GitHub adapter expansion, PR creation, merge, deploy, production `main`
@@ -123,9 +139,7 @@ This design does not authorize:
 
 ## Next Step
 
-MCR-1062 may be a minimal implementation task for the root command evidence
-artifact if the owner accepts this GO decision.
-
-MCR-1062 should be narrow: write ignored `summary.json`, keep the existing
-snapshot path, update the runbook acceptance command, and add the smallest local
-check needed for the new JSON shape. It must not change fake/real boundaries.
+MCR-1064 should be a read-only single-command readiness audit. It should rerun
+`pnpm mvp:local`, inspect the snapshot and `summary.json`, verify stale docs are
+gone, and report GO/NO-GO without changing runtime, schemas, fixtures, tests, or
+real-service integrations.

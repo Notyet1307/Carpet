@@ -473,13 +473,18 @@ matched the runbook Minimum Acceptance, generated the ignored
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 records
 that result in source-of-truth docs. MCR-1061 completed the local fake MVP
 evidence artifact design decision: use ignored generated
-`.mcr/runs/local-fake-mvp/summary.json` beside the snapshot as the future stable
-artifact. The next recommended task is MCR-1062, a minimal implementation only
-if explicitly assigned. This boundary still does not authorize real GitHub
-calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR creation, source removal,
-branch deletion, merge, deploy, production `main` writes, token reads, secret
-reads, env dumps, raw payload logging, a network-capable client, DB/Postgres,
-production Matrix, real Codex execution, or live memory writes.
+`.mcr/runs/local-fake-mvp/summary.json` beside the snapshot as the stable
+handoff summary, not `summary.log`. MCR-1062 completed and merged in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local` now writes
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+`.mcr/runs/local-fake-mvp/summary.json`, and stdout uses the same structured
+summary shape. Acceptance no longer requires `tee`. The next recommended task
+is MCR-1064, a read-only single-command readiness audit. This boundary still
+does not authorize real GitHub calls, Octokit, `fetch`, `gh api`,
+`gh pr create`, PR creation, source removal, branch deletion, merge, deploy,
+production `main` writes, token reads, secret reads, env dumps, raw payload
+logging, a network-capable client, DB/Postgres, production Matrix, real Codex
+execution, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

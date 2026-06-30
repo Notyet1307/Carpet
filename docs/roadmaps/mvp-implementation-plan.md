@@ -116,12 +116,18 @@ runbook Minimum Acceptance, generated the ignored
 `pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 records
 that audit result in source-of-truth docs only. MCR-1061 completed the design
-decision: future implementation should write ignored generated
+decision: the root command should write ignored generated
 `.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot, not
-`summary.log` or a separate handoff evidence record. The next bounded work is
-MCR-1062 Local Fake MVP Root Command Evidence Artifact Minimal Implementation,
-if explicitly assigned. MCR-1061 does not authorize real services, DB/Postgres,
-live memory, or GitHub adapter expansion.
+`summary.log` or a separate handoff evidence record. MCR-1062 completed and
+merged in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local`
+now writes two ignored generated artifacts,
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+`.mcr/runs/local-fake-mvp/summary.json`, and stdout uses the same structured
+summary shape. `summary.json` is the stable handoff summary; acceptance does not
+require `tee` or `summary.log`. The next bounded work should be MCR-1064, a
+read-only single-command readiness audit, not GitHub adapter expansion. This
+does not authorize real services, DB/Postgres, live memory, or GitHub adapter
+expansion.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec

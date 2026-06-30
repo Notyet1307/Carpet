@@ -91,10 +91,16 @@ runbook Minimum Acceptance, generated the ignored
 `pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
 docs-only source-of-truth closeout for that audit. MCR-1061 completed the
-docs/design decision: a later implementation should make `pnpm mvp:local` write
-ignored generated `.mcr/runs/local-fake-mvp/summary.json` beside the snapshot,
-not `summary.log` or a separate handoff evidence record. The next bounded step
-is MCR-1062, a minimal implementation only if explicitly assigned.
+docs/design decision: `pnpm mvp:local` should write ignored generated
+`.mcr/runs/local-fake-mvp/summary.json` beside the snapshot, not `summary.log`
+or a separate handoff evidence record. MCR-1062 completed and merged in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local` now writes both
+ignored artifacts,
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+`.mcr/runs/local-fake-mvp/summary.json`, and prints the same structured summary
+to stdout. `summary.json` is the stable handoff summary, so acceptance does not
+require `tee` or `summary.log`. The next bounded step should be MCR-1064, a
+read-only single-command readiness audit.
 
 ## Target System Design Alignment
 

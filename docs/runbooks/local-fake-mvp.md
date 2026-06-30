@@ -51,22 +51,22 @@ approval/artifact refs and does not persist a live memory write.
 
 ## Evidence Artifact Design Status
 
-MCR-1061 recommends that a future implementation make `pnpm mvp:local` write an
-ignored generated JSON summary at:
+MCR-1061 decided that `pnpm mvp:local` should write an ignored generated JSON
+summary at:
 
 ```text
 .mcr/runs/local-fake-mvp/summary.json
 ```
 
-That future artifact should sit beside
-`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and contain only stable
+MCR-1062 implemented this artifact in commit
+`1d6225595191db3a59ffa05546c6aad59a2e7b7c`. It sits beside
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and contains only stable
 summary fields: command, generated time, snapshot path, task id/state,
 transition count, proof status, approval status, PR count, memory status,
 `fake_only=true`, and short validation notes.
 
-MCR-1062 implements this artifact. Minimum Acceptance now validates
-`summary.json` and the snapshot with `node -e`, without relying on `tee` or
-`summary.log`.
+Minimum Acceptance validates `summary.json` and the snapshot with `node -e`,
+without relying on `tee` or `summary.log`.
 
 ## No-Go Conditions
 
@@ -118,6 +118,9 @@ It does not prove or authorize:
 ## Next Step
 
 MCR-1059 completed as a read-only GO audit of this runbook and the existing
-command. MCR-1061 completed the docs/design decision, and MCR-1062 implements
+command. MCR-1061 completed the docs/design decision, and MCR-1062 implemented
 the ignored generated `.mcr/runs/local-fake-mvp/summary.json` artifact beside
-the existing snapshot.
+the existing snapshot in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`.
+The next recommended task is MCR-1064, a read-only single-command readiness
+audit of the command, snapshot, summary, stale docs, and generated-output
+cleanup status.

@@ -478,11 +478,15 @@ matched the runbook Minimum Acceptance, generated the ignored
 `pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
 schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
 docs-only closeout for that audit result. MCR-1061 completed the local fake MVP
-evidence artifact design decision: future implementation should write an ignored
+evidence artifact design decision: the root command should write an ignored
 generated `.mcr/runs/local-fake-mvp/summary.json` beside the existing snapshot,
-not `summary.log` or a separate handoff evidence record. The First Recommended
-Task after MCR-1061 is MCR-1062, a minimal implementation of that root-command
-evidence artifact if explicitly assigned. Do not treat this as authorization for
+not `summary.log` or a separate handoff evidence record. MCR-1062 completed and
+merged in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local`
+now writes `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+`.mcr/runs/local-fake-mvp/summary.json`, and stdout uses the same structured
+summary shape. `summary.json` is the stable handoff summary, so acceptance does
+not require `tee` or `summary.log`. The next recommended task is MCR-1064, a
+read-only single-command readiness audit. Do not treat this as authorization for
 real GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
 removal, merge, deploy, production `main` writes, branch deletion, token/env
 dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
