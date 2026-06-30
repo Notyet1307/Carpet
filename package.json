@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test",
     "test:contracts": "node --test tests/contracts/*.test.mjs",
-    "schemas:validate": "node --test tests/contracts/*.test.mjs"
+    "schemas:validate": "node --test tests/contracts/*.test.mjs",
+    "mvp:local": "mkdir -p .mcr/runs/local-fake-mvp && node --disable-warning=ExperimentalWarning apps/runtime-orchestrator/src/cli.ts --snapshot .mcr/runs/local-fake-mvp/runtime-store.snapshot.json"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
