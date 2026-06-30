@@ -2,75 +2,64 @@
 
 Version: 2026-06-30
 
-Task ID: MCR-1000
+Task ID: MCR-1000 / MCR-1010
 
-Status: completed docs/source-gap plan; pending review.
+Status: MCR-1010 source/harness hardening completed; pending review.
 
 ## Purpose
 
-GH-REF-004 through GH-REF-009 require `approval_mismatch` refusals, but the
-current local adapter source and fixture harness cannot honestly produce that
-category. This note locks the boundary so a later worker does not make those
-rows pass by remapping `approval_required` in test-only code.
+GH-REF-004 through GH-REF-009 require `approval_mismatch` refusals. MCR-1010
+closed the earlier source/harness gap by making the approval gate emit
+`approval_mismatch` for a selected but mismatched approval and by adding local
+fixture execution for each row.
 
-This is a docs-only source-gap plan. It does not add executable fixtures, tests,
-adapter source, approval-gate source, schemas, real GitHub calls, Octokit usage,
-`gh pr create`, `gh api` writes, fetch calls, token reads, env dumps, live memory
-writes, or worker-side commit, push, merge, or PR actions.
+This remains local source, schema, fixture, and test hardening only. It does not
+add real GitHub calls, Octokit usage, `gh pr create`, `gh api` writes, fetch
+calls, token reads, env dumps, live memory writes, or worker-side commit, push,
+merge, or PR actions.
 
 ## Current Harness Answer
 
-No. The current local harness cannot honestly represent GH-REF-004 through
-GH-REF-009 as `approval_mismatch` without source and harness changes.
+Yes after MCR-1010. The local harness now represents GH-REF-004 through
+GH-REF-009 as `approval_mismatch` without remapping `approval_required`.
 
 Current evidence:
 
-- `packages/approval-gate/src/approval-gate.ts` has no `approval_mismatch`
-  error code in `ApprovalGateErrorCode`.
-- Approval authorization finds an exact `task_id`, `proof_id`, `action`, and
-  `target` match. When no exact match exists, it returns `approval_required`
-  with reason `no matching approval`.
-- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` passes only
-  `task_id`, `proof_id`, `action=create_pr`, `target`, and `requested_at` into
-  `approvalGate.authorize`, then returns the gate code unchanged.
+- `packages/approval-gate/src/approval-gate.ts` includes `approval_mismatch`
+  in `ApprovalGateErrorCode`.
+- Approval authorization preserves `approval_required` when no selected
+  approval exists, and returns `approval_mismatch` when `approval_id` selects an
+  approval whose task, proof, action, target, or run scope differs.
+- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` passes
+  `approval_id`, proof `run_id`, and an internal target including `repository`
+  into `approvalGate.authorize`, then returns the gate code unchanged.
 - `packages/github-adapter/test/runtime-github-pr-adapter.test.ts` fixture
-  harness supports only `adapter.approval=granted|missing|replayed`; it cannot
-  build a per-fixture mismatched approval record.
-- The same test harness maps `approval_required` to `missing_approval`, which is
-  already the GH-REF-003 category.
+  harness supports `adapter.approval=mismatched` and builds one selected
+  mismatched approval record per fixture.
+- GH-REF-004 through GH-REF-009 fixture files are supported local refusal cases
+  with `expected.adapter_code=approval_mismatch` and zero runner calls.
 
 ## Precise Gap
 
-The current approval gate collapses "no approval exists" and "an approval exists
-but does not match this request" into the same observable adapter result:
-`approval_required`.
+The former gap was that the approval gate collapsed "no approval exists" and "a
+selected approval exists but does not match this request" into
+`approval_required`. MCR-1010 splits those cases:
 
-Mapping `approval_required` to `approval_mismatch` only for GH-REF-004 through
-GH-REF-009 would be misleading because it would make fixture metadata, not
-adapter or approval-gate behavior, decide the category. It would also conflict
-with GH-REF-003, where the same adapter code correctly means
-`missing_approval`.
+- Missing `approval_id` or unknown selected `approval_id` remains
+  `approval_required`.
+- Known selected approval with mismatched task, proof, action, target, or run
+  scope returns `approval_mismatch`.
 
-Some approval mismatch rows are not representable with current source shape:
+GH-REF-004 action mismatch uses a schema-valid `push_branch` approval record to
+prove action scoping. `authorize()` still refuses non-`create_pr` requests as
+`forbidden_action`.
 
-- GH-REF-004 action mismatch cannot be stored as a mismatched approval through
-  the current gate because non-`create_pr` approvals are rejected before storage.
-- GH-REF-005 proof mismatch can be rejected as `unverified_proof` during grant
-  unless the harness can register both proof ids and then request a different
-  proof id.
-- GH-REF-007 target repository mismatch is not in the authorization request; the
-  runtime-owned adapter keeps `repository` outside the approval target.
-- GH-REF-009 run mismatch is not in the approval record, approval schema, or
-  authorization request.
-
-## MCR-1010 Future Card
-
-Suggested next task:
+## MCR-1010 Card
 
 `MCR-1010 GitHub Adapter Approval Mismatch Source/Harness Hardening`
 
 Problem solved: make GH-REF-004 through GH-REF-009 executable local refusals
-only after the approval-gate source, adapter authorization envelope, and fixture
+after the approval-gate source, adapter authorization envelope, and fixture
 harness can distinguish `approval_mismatch` from `missing_approval`.
 
 Allowed files:
@@ -131,6 +120,5 @@ listed mismatch.
 | GH-REF-008 | Approval base ref or head ref differs from request refs. | `approval_mismatch` | `approval_ref`, `request_ref_summary_ref` |
 | GH-REF-009 | Approval `run_id` differs from request or proof `run_id`. | `approval_mismatch` | `approval_ref`, `proof_ref`, `request_envelope_ref` |
 
-Do not add these as executable fixtures until MCR-1010 source and harness
-changes make the adapter produce `approval_mismatch` without test-only category
-rewrites.
+These are executable local fixtures after MCR-1010. Keep them one-denial-cause
+cases and do not reintroduce test-only category rewrites.

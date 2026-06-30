@@ -113,6 +113,37 @@ test("requires task id, proof id, action, and target to match", () => {
   equal(approvalGate.authorize(createPrRequest()).ok, true);
 });
 
+test("selected mismatched approval is distinct from missing approval", () => {
+  const approvalGate = gate();
+
+  equal(approvalGate.grant(approval()).ok, true);
+
+  const missing = approvalGate.authorize(
+    createPrRequest({ approval_id: "approval_missing" }),
+  );
+
+  equal(missing.ok, false);
+  if (!missing.ok) {
+    equal(missing.code, "approval_required");
+  }
+
+  const mismatch = approvalGate.authorize(
+    createPrRequest({
+      approval_id: "approval_mcr_500",
+      target: {
+        type: "pull_request",
+        ref: "refs/heads/mcr/MCR-500/other",
+        base_ref: "refs/heads/main",
+      },
+    }),
+  );
+
+  equal(mismatch.ok, false);
+  if (!mismatch.ok) {
+    equal(mismatch.code, "approval_mismatch");
+  }
+});
+
 test("rejects proofless, vague, wrong-actor, and expired approvals", () => {
   const approvalGate = gate();
   const proofless = approval();
@@ -201,12 +232,51 @@ test("treats denial and timeout as terminal outcomes for that action", () => {
 test("never allows merge, deploy, secret access, or memory write", () => {
   const approvalGate = gate();
 
-  for (const action of ["merge", "deploy", "secret_access", "memory_write"]) {
+  for (const action of [
+    "push_branch",
+    "external_write",
+    "merge",
+    "deploy",
+    "secret_access",
+    "memory_write",
+  ]) {
     const result = approvalGate.authorize(createPrRequest({ action }));
 
     equal(result.ok, false);
     if (!result.ok) {
       equal(result.code, "forbidden_action");
     }
+  }
+});
+
+test("can store non-create approvals without authorizing those actions", () => {
+  const approvalGate = gate();
+
+  const grant = approvalGate.grant(
+    approval({
+      action: "push_branch",
+      target: {
+        type: "git_branch",
+        ref: "refs/heads/mcr/MCR-500/approval-gate",
+      },
+    }),
+  );
+
+  equal(grant.ok, true);
+
+  const authorize = approvalGate.authorize(
+    createPrRequest({
+      approval_id: "approval_mcr_500",
+      action: "push_branch",
+      target: {
+        type: "git_branch",
+        ref: "refs/heads/mcr/MCR-500/approval-gate",
+      },
+    }),
+  );
+
+  equal(authorize.ok, false);
+  if (!authorize.ok) {
+    equal(authorize.code, "forbidden_action");
   }
 });

@@ -289,7 +289,8 @@ type RefusalFixture = {
   support: "supported" | "deferred";
   adapter: {
     enabled: boolean;
-    approval: "granted" | "missing" | "replayed";
+    approval: "granted" | "missing" | "mismatched" | "replayed";
+    approval_overrides?: Record<string, unknown>;
     runner: "injected" | "missing";
     now: string;
   };
@@ -318,6 +319,7 @@ function loadRefusalFixtures(): RefusalFixture[] {
 
 function requestForFixture(fixture: RefusalFixture): RuntimeOwnedGitHubPrInput {
   return createRequest({
+    ...(fixture.adapter.approval === "mismatched" ? { approval_id: approvalId } : {}),
     ...(fixture.request?.proof_overrides
       ? { proof: proof(fixture.request.proof_overrides) }
       : {}),
@@ -335,10 +337,16 @@ function gateForFixture(
 
   const gate = createInMemoryApprovalGate({
     now: () => new Date(currentTime.value),
-    verified_proof_ids: new Set([proofId]),
+    verified_proof_ids: new Set(
+      [
+        proofId,
+        stringValue(fixture.adapter.approval_overrides?.proof_id),
+        stringValue(fixture.request?.proof_overrides?.proof_id),
+      ].filter((value): value is string => Boolean(value)),
+    ),
   });
   currentTime.value = "2026-06-29T10:00:00.000Z";
-  assert.equal(gate.grant(approval()).ok, true);
+  assert.equal(gate.grant(approval(fixture.adapter.approval_overrides)).ok, true);
   currentTime.value = fixture.adapter.now;
 
   if (fixture.adapter.approval === "replayed") {
@@ -346,8 +354,9 @@ function gateForFixture(
       gate.authorize({
         task_id: taskId,
         proof_id: proofId,
+        run_id: runId,
         action: "create_pr",
-        target,
+        target: authorizationTarget(),
         requested_at: fixture.adapter.now,
       }).ok,
       true,
@@ -377,6 +386,10 @@ function refusalCategoryFor(code: string): string {
   return code;
 }
 
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
 function approvedGate() {
   const approvalGate = createInMemoryApprovalGate({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
@@ -400,12 +413,21 @@ function approval(overrides: Record<string, unknown> = {}) {
     approval_id: approvalId,
     task_id: taskId,
     proof_id: proofId,
+    run_id: runId,
     action: "create_pr",
     actor: { type: "human", id: "@lead:matrix.local" },
-    target,
+    target: authorizationTarget(),
     conditions: ["Create only the disposable PR."],
     created_at: now,
     expires_at: "2026-06-29T11:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function authorizationTarget(overrides: Record<string, unknown> = {}) {
+  return {
+    ...target,
+    repository: "Notyet1307/github-pr-smoke-sandbox",
     ...overrides,
   };
 }

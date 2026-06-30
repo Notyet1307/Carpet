@@ -8,6 +8,7 @@ export type ApprovalRecord = {
   approval_id: string;
   task_id: string;
   proof_id: string;
+  run_id?: string;
   action: string;
   actor: {
     type: "human";
@@ -22,6 +23,8 @@ export type ApprovalRecord = {
 export type ApprovalRequest = {
   task_id: string;
   proof_id: string;
+  approval_id?: string;
+  run_id?: string;
   action: string;
   target: Record<string, unknown>;
   requested_at?: string;
@@ -52,6 +55,7 @@ export type ApprovalGateErrorCode =
   | "invalid_request"
   | "forbidden_action"
   | "approval_required"
+  | "approval_mismatch"
   | "approval_denied"
   | "approval_expired"
   | "approval_replayed"
@@ -60,6 +64,14 @@ export type ApprovalGateErrorCode =
 export type ApprovalGateOptions = {
   now?: () => Date;
   verified_proof_ids?: ReadonlySet<string>;
+};
+
+type ApprovalScope = {
+  task_id: string;
+  proof_id: string;
+  run_id?: string;
+  action: string;
+  target: Record<string, unknown>;
 };
 
 const root = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
@@ -85,9 +97,6 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
 
       const record = approval as ApprovalRecord;
 
-      if (!canExecute(record.action)) {
-        return fail("forbidden_action", `action is not executable: ${record.action}`);
-      }
       if (!verifiedProofIds.has(record.proof_id)) {
         return fail("unverified_proof", "proof has not been verified");
       }
@@ -132,10 +141,11 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
         return fail("approval_denied", "approval was denied for this action");
       }
 
-      const match = [...approvals.values()].find((approval) =>
-        matchesApprovalScope(approval, parsed.request),
-      );
-
+      const match = parsed.request.approval_id
+        ? approvals.get(parsed.request.approval_id)
+        : [...approvals.values()].find((approval) =>
+            matchesApprovalScope(approval, parsed.request),
+          );
       if (!match) {
         return fail("approval_required", "no matching approval");
       }
@@ -144,6 +154,9 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
       }
       if (isExpired(match.expires_at, now())) {
         return fail("approval_expired", "approval expired");
+      }
+      if (!matchesApprovalScope(match, parsed.request)) {
+        return fail("approval_mismatch", "selected approval does not match request");
       }
 
       usedApprovalIds.add(match.approval_id);
@@ -168,6 +181,8 @@ function parseRequest(value: unknown):
   const request = {
     task_id: stringValue(value.task_id),
     proof_id: stringValue(value.proof_id),
+    approval_id: optionalStringValue(value.approval_id),
+    run_id: optionalStringValue(value.run_id),
     action: stringValue(value.action),
     target: isRecord(value.target) ? value.target : null,
     requested_at: optionalStringValue(value.requested_at),
@@ -182,6 +197,8 @@ function parseRequest(value: unknown):
     request: {
       task_id: request.task_id,
       proof_id: request.proof_id,
+      ...(request.approval_id ? { approval_id: request.approval_id } : {}),
+      ...(request.run_id ? { run_id: request.run_id } : {}),
       action: request.action,
       target: request.target,
       ...(request.requested_at ? { requested_at: request.requested_at } : {}),
@@ -229,12 +246,13 @@ function parseDenial(value: unknown):
 }
 
 function matchesApprovalScope(
-  approval: Pick<ApprovalRecord, "task_id" | "proof_id" | "action" | "target">,
+  approval: ApprovalScope,
   request: ApprovalRequest,
 ): boolean {
   return (
     approval.task_id === request.task_id &&
     approval.proof_id === request.proof_id &&
+    approval.run_id === request.run_id &&
     approval.action === request.action &&
     isDeepStrictEqual(approval.target, request.target)
   );

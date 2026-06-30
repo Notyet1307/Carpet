@@ -1,0 +1,27 @@
+{
+  "case_id": "GH-REF-004",
+  "scenario_id": "GH-REF-TC-004",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "mismatched",
+    "approval_overrides": {
+      "action": "push_branch",
+      "target": {
+        "type": "git_branch",
+        "ref": "refs/heads/mcr/MCR-840/runtime-owned-github-pr-adapter"
+      }
+    },
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "expected": {
+    "refusal_category": "approval_mismatch",
+    "adapter_code": "approval_mismatch",
+    "evidence_refs": [
+      "approval_ref",
+      "request_envelope_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

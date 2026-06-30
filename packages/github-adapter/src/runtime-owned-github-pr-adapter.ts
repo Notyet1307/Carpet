@@ -76,6 +76,7 @@ export type RuntimeOwnedGitHubPullRequest = {
 
 export type RuntimeOwnedGitHubPrInput = {
   action?: string;
+  approval_id?: string;
   task_id: string;
   proof?: ProofLedgerEntry | null;
   target: PullRequestTarget;
@@ -209,8 +210,10 @@ export function createRuntimeOwnedGitHubPrAdapter(
       const authorization = options.approvalGate.authorize({
         task_id: input.task_id,
         proof_id: input.proof.proof_id,
+        ...(input.approval_id ? { approval_id: input.approval_id } : {}),
+        run_id: input.proof.run_id,
         action: "create_pr",
-        target: input.target,
+        target: { ...input.target, repository: input.repository },
         requested_at: input.requested_at ?? now().toISOString(),
       });
 

@@ -1,0 +1,23 @@
+{
+  "case_id": "GH-REF-005",
+  "scenario_id": "GH-REF-TC-005",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "mismatched",
+    "approval_overrides": {
+      "proof_id": "proof_mcr_840_sibling"
+    },
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "expected": {
+    "refusal_category": "approval_mismatch",
+    "adapter_code": "approval_mismatch",
+    "evidence_refs": [
+      "approval_ref",
+      "proof_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

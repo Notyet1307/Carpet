@@ -27,6 +27,10 @@
       "type": "string",
       "pattern": "^proof_[A-Za-z0-9_-]+$"
     },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run_[A-Za-z0-9_-]+$"
+    },
     "action": {
       "type": "string",
       "enum": [
@@ -69,6 +73,10 @@
           "minLength": 1
         },
         "base_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
           "type": "string",
           "minLength": 1
         },
@@ -166,6 +174,9 @@
                 "type": "string"
               },
               "base_ref": {
+                "type": "string"
+              },
+              "repository": {
                 "type": "string"
               }
             }

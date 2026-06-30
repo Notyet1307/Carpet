@@ -13,16 +13,17 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After accepting MCR-1000, start with **MCR-1010 GitHub Adapter Approval
-Mismatch Source/Harness Hardening**. MCR-901 is complete, MCR-910 and MCR-920
-have design artifacts, MCR-930 has a policy artifact for evidence retention and
-cleanup, MCR-940 has a hardening plan artifact, MCR-950 has a refusal matrix
-artifact, MCR-960 has a docs-only test-plan artifact, MCR-970 adds the first
-local refusal fixtures and tests, MCR-980 hardens the deferred local refusal
-source boundary, MCR-990 adds the local forbidden-action fixture slice for
-GH-REF-021 through GH-REF-026, and MCR-1000 documents the approval mismatch
-source/harness gap for GH-REF-004 through GH-REF-009. The remaining uncovered
-MCR-950 rows are GH-REF-004 through GH-REF-009, GH-REF-013, GH-REF-015,
+After MCR-1010 review, start with **MCR-1020 remaining GitHub adapter local
+refusal hardening** for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
+MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
+policy artifact for evidence retention and cleanup, MCR-940 has a hardening
+plan artifact, MCR-950 has a refusal matrix artifact, MCR-960 has a docs-only
+test-plan artifact, MCR-970 adds the first local refusal fixtures and tests,
+MCR-980 hardens the deferred local refusal source boundary, MCR-990 adds the
+local forbidden-action fixture slice for GH-REF-021 through GH-REF-026,
+MCR-1000 documents the approval mismatch source/harness gap, and MCR-1010
+closes GH-REF-004 through GH-REF-009 as executable local `approval_mismatch`
+fixtures. The remaining uncovered MCR-950 rows are GH-REF-013, GH-REF-015,
 GH-REF-016, and GH-REF-017.
 
 ## Cards
@@ -318,7 +319,7 @@ Status: completed docs/source-gap plan; pending review.
 
 ### MCR-1010: GitHub Adapter Approval Mismatch Source/Harness Hardening
 
-Status: proposed next after MCR-1000 acceptance.
+Status: completed; pending review.
 
 - Problem solved: GH-REF-004 through GH-REF-009 need executable local refusals,
   but current approval-gate source and the runtime-owned GitHub adapter fixture
@@ -361,6 +362,17 @@ Status: proposed next after MCR-1000 acceptance.
   token/env dump language.
 - Fake/scaffold/real boundary: local source/harness and fixture hardening only;
   no adapter real-write behavior and no real GitHub write path.
+
+### MCR-1020: Remaining GitHub Adapter Local Refusal Hardening
+
+Status: proposed next after MCR-1010 review.
+
+- Problem solved: remaining uncovered MCR-950 rows GH-REF-013, GH-REF-015,
+  GH-REF-016, and GH-REF-017 need local target/ref/protection/dirty-worktree
+  refusals before any broader GitHub adapter work.
+- Fake/scaffold/real boundary: local source/harness and fixture hardening only;
+  no real GitHub, no Octokit, no `gh pr create`, no `gh api`, no push, no merge,
+  no deploy, no secret reads, and no live memory writes.
 
 ## Global Deny List
 

@@ -1,0 +1,28 @@
+{
+  "case_id": "GH-REF-007",
+  "scenario_id": "GH-REF-TC-007",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "mismatched",
+    "approval_overrides": {
+      "target": {
+        "type": "pull_request",
+        "ref": "refs/heads/mcr/MCR-840/runtime-owned-github-pr-adapter",
+        "base_ref": "refs/heads/mcr-840-base-run-mcr-840",
+        "repository": "Notyet1307/other-disposable-sandbox"
+      }
+    },
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "expected": {
+    "refusal_category": "approval_mismatch",
+    "adapter_code": "approval_mismatch",
+    "evidence_refs": [
+      "approval_ref",
+      "target_summary_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

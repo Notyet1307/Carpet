@@ -2,6 +2,7 @@
   "approval_id": "approval_20260627_create_pr",
   "task_id": "task_20260627_001",
   "proof_id": "proof_20260627_001",
+  "run_id": "run_20260627_001",
   "action": "create_pr",
   "actor": {
     "type": "human",
@@ -10,7 +11,8 @@
   "target": {
     "type": "pull_request",
     "ref": "refs/heads/analysis/p8-approval-gate-contract",
-    "base_ref": "refs/heads/main"
+    "base_ref": "refs/heads/main",
+    "repository": "Notyet1307/github-pr-smoke-sandbox"
   },
   "conditions": [
     "PR body must include task_id, proof_id, validation, risk, and rollback notes."
