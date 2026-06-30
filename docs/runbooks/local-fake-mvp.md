@@ -121,6 +121,15 @@ MCR-1059 completed as a read-only GO audit of this runbook and the existing
 command. MCR-1061 completed the docs/design decision, and MCR-1062 implemented
 the ignored generated `.mcr/runs/local-fake-mvp/summary.json` artifact beside
 the existing snapshot in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`.
-The next recommended task is MCR-1064, a read-only single-command readiness
-audit of the command, snapshot, summary, stale docs, and generated-output
-cleanup status.
+MCR-1064 then completed as a read-only GO audit on base commit
+`1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`: `pnpm mvp:local` exited 0, both
+ignored artifacts existed, `summary.json` reported completed/verified/consumed
+local fake state with `transition_count=14`, `pr_count=1`, `memory_status=proposed`,
+and `fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
+contract/schema validation stayed 84/84 with `git diff --check` passing.
+
+The next recommended task is MCR-1066, a docs/read-only operator handoff and
+artifact retention/cleanup policy pass for the single-command local fake MVP.
+Do not use this runbook or the MCR-1064 GO audit as authorization for real
+Matrix, Codex, GitHub, DB/Postgres, live memory, real-service smoke, production
+readiness, or GitHub adapter expansion.

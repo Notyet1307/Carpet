@@ -99,8 +99,15 @@ ignored artifacts,
 `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
 `.mcr/runs/local-fake-mvp/summary.json`, and prints the same structured summary
 to stdout. `summary.json` is the stable handoff summary, so acceptance does not
-require `tee` or `summary.log`. The next bounded step should be MCR-1064, a
-read-only single-command readiness audit.
+require `tee` or `summary.log`. MCR-1064 completed as a read-only GO audit on
+base commit `1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`: `pnpm mvp:local`
+exited 0, both ignored local fake artifacts existed, `summary.json` reported
+`task_state=completed`, `transition_count=14`, `proof_status=verified`,
+`approval_status=consumed`, `pr_count=1`, `memory_status=proposed`, and
+`fake_only=true`, the snapshot reported `source_of_truth=runtime`, and
+contract/schema validation remained 84/84 with `git diff --check` passing. The
+next bounded step should be MCR-1066, a docs/read-only operator handoff and
+artifact retention/cleanup policy pass for the single-command local fake MVP.
 
 ## Target System Design Alignment
 

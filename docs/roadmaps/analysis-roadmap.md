@@ -485,9 +485,16 @@ merged in commit `1d6225595191db3a59ffa05546c6aad59a2e7b7c`: `pnpm mvp:local`
 now writes `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
 `.mcr/runs/local-fake-mvp/summary.json`, and stdout uses the same structured
 summary shape. `summary.json` is the stable handoff summary, so acceptance does
-not require `tee` or `summary.log`. The next recommended task is MCR-1064, a
-read-only single-command readiness audit. Do not treat this as authorization for
-real GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
+not require `tee` or `summary.log`. MCR-1064 completed as a read-only GO audit
+on base commit `1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`: `pnpm mvp:local`
+exited 0, both ignored local fake artifacts existed, `summary.json` reported
+completed/verified/consumed local fake state with `transition_count=14`,
+`pr_count=1`, `memory_status=proposed`, and `fake_only=true`, the snapshot
+reported `source_of_truth=runtime`, and contract/schema validation remained
+84/84 with `git diff --check` passing. The next recommended task is MCR-1066, a
+docs/read-only operator handoff and artifact retention/cleanup policy pass for
+the single-command local fake MVP. Do not treat this as authorization for real
+GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
 removal, merge, deploy, production `main` writes, branch deletion, token/env
 dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
 writes.

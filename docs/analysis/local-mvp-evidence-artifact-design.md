@@ -139,7 +139,15 @@ authorize:
 
 ## Next Step
 
-MCR-1064 should be a read-only single-command readiness audit. It should rerun
-`pnpm mvp:local`, inspect the snapshot and `summary.json`, verify stale docs are
-gone, and report GO/NO-GO without changing runtime, schemas, fixtures, tests, or
-real-service integrations.
+MCR-1064 completed as a read-only GO audit on base commit
+`1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`. It reran `pnpm mvp:local`,
+confirmed the ignored snapshot and `summary.json`, verified the local fake
+summary fields and Runtime-owned snapshot counts, found zero active MCR-1062
+next-step stale refs, kept `pnpm test:contracts` and `pnpm schemas:validate` at
+84/84, passed `git diff --check`, and left no tracked changes in the audit
+worktree.
+
+The next recommended task is MCR-1066, a docs/read-only operator handoff and
+artifact retention/cleanup policy pass for `.mcr/runs/local-fake-mvp/`. It
+should not change command behavior, schemas, fixtures, tests, package files,
+runtime code, real-service integrations, or GitHub adapter scope.
