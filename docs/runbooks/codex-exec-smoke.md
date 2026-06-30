@@ -62,6 +62,11 @@ For `evidence_dir=.mcr/runs/<run_id>`, record these refs before execution:
 - `.mcr/runs/<run_id>/diff.patch`
 - `.mcr/runs/<run_id>/proof.json`
 
+Retention, redaction, checked-in proof, and cleanup rules are defined in
+`docs/runbooks/evidence-retention-and-cleanup.md`. These raw refs stay local by
+default; tracked docs may cite paths, SHAs, exit codes, command shapes, and
+redacted summaries only.
+
 ## Manual Smoke Steps
 
 1. Confirm the task is disposable and low risk.

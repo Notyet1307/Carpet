@@ -13,9 +13,9 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-930 Evidence Retention And Cleanup Policy**. MCR-901 is
-complete, MCR-910 and MCR-920 have design artifacts, and the next incomplete
-gap is evidence retention before more real-service proof expands.
+Start with **MCR-940 Disposable GitHub Adapter Hardening Plan**. MCR-901 is
+complete, MCR-910 and MCR-920 have design artifacts, and MCR-930 now has a
+policy artifact for evidence retention and cleanup.
 
 ## Cards
 
@@ -89,6 +89,10 @@ unauthorized.
   compatibility proof.
 
 ### MCR-930: Evidence Retention And Cleanup Policy
+
+Status: policy artifact added in
+`docs/runbooks/evidence-retention-and-cleanup.md`; no evidence migration,
+service run, cleanup automation, or raw evidence check-in is authorized.
 
 - Problem solved: `.mcr` run evidence exists locally, but retention, redaction,
   cleanup, and checked-in proof rules are not a single policy.

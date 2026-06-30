@@ -136,6 +136,13 @@ Capture these fields for any future approved run:
 The proof must be enough for a reviewer to confirm the PR was created only in
 the disposable target, only after approval, and with no secret exposure.
 
+Retention, redaction, checked-in proof, and cleanup rules are defined in
+`docs/runbooks/evidence-retention-and-cleanup.md`. Raw patches, raw diffs,
+GitHub patch/diff payloads, raw GitHub API payloads, token-bearing output, and
+temporary credential files stay out of tracked git. A checked-in PR body artifact
+must be reviewed, redacted, and small, and must contain no raw patch, raw API
+payload, secret, or large log.
+
 ## Forbidden Actions
 
 - merge PR

@@ -24,6 +24,9 @@ MCR-720 exists to preflight whether the local Matrix contracts can later be
 compared against a disposable Matrix-only real-service surface after explicit
 human approval.
 
+Evidence retention and cleanup for all real-service smoke work must follow
+`docs/runbooks/evidence-retention-and-cleanup.md`.
+
 Smoke evidence is compatibility proof. It is not a correctness source.
 Correctness still comes from contract tests, schemas, fake E2E tests, proof
 verification, and human review.
@@ -318,6 +321,9 @@ For each approved manual run, capture:
 Evidence capture should prove what was observed without storing raw secrets,
 large logs, raw Matrix events, raw Matrix event bodies, Matrix access tokens,
 raw Codex output, GitHub API payloads, database dumps, or live memory writes.
+Keep raw review material local under `.mcr/runs/<run_id>/`; tracked closeout docs
+may record only refs, paths, SHAs, exit codes, command shapes, redacted
+summaries, and cleanup status.
 
 ## Cleanup
 
@@ -331,8 +337,10 @@ After the run:
   `MCR_MATRIX_RUN_DIR/appservice-registration.yaml`,
   `MCR_MATRIX_RUN_DIR/log.config`, and `MCR_MATRIX_RUN_DIR/listener.env`
 - stop any local processes created for the run
-- remove temporary evidence working files after review, keeping only approved
-  proof refs
+- keep decisive evidence under `.mcr/runs/<run_id>/` until human review and
+  cleanup review are complete
+- remove only disposable resources, generated credentials, generated
+  registrations, token-bearing files, and non-decisive temporary files
 - record cleanup status in the handoff
 
 ## Rollback
