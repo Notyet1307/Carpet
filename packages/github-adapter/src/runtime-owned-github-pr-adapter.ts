@@ -39,8 +39,6 @@ export type RuntimeOwnedGitHubPrApiSummary = {
 export type RuntimeOwnedGitHubPrRunnerResult = {
   exit_code: number;
   api_summary?: RuntimeOwnedGitHubPrApiSummary;
-  stdout?: string;
-  stderr?: string;
 };
 
 export type RuntimeOwnedGitHubPrRunner = (
@@ -303,7 +301,7 @@ export function createRuntimeOwnedGitHubPrAdapter(
 
       const apiSummary =
         redactedApiSummary(result.api_summary, input) ??
-        legacyLocalRunnerApiSummary(result.stdout, input);
+        legacyLocalRunnerApiSummary(legacyLocalRunnerStdout(result), input);
 
       if (!apiSummary) {
         return {
@@ -583,6 +581,18 @@ function legacyLocalRunnerApiSummary(
     head_ref: branchName(input.target.ref),
     pull_request_url: pullRequestUrl,
   };
+}
+
+function legacyLocalRunnerStdout(result: RuntimeOwnedGitHubPrRunnerResult) {
+  if (!isRecord(result)) {
+    return undefined;
+  }
+
+  return typeof result.stdout === "string" ? result.stdout : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 function isPullRequestUrlForRepository(url: string, repository: string) {

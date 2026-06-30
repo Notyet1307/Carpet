@@ -118,7 +118,22 @@ test("runtime-owned adapter exposes only redacted command and API summary on suc
   }
 });
 
-test("runtime-owned adapter accepts legacy local runner stdout URL without retaining raw output", async () => {
+test("runtime-owned exported runner contract does not standardize raw stdout or stderr", () => {
+  const source = readFileSync(
+    fileURLToPath(new URL("../src/runtime-owned-github-pr-adapter.ts", import.meta.url)),
+    "utf8",
+  );
+  const resultContract = exportedTypeBlock(source, "RuntimeOwnedGitHubPrRunnerResult");
+  const runnerContract = exportedTypeBlock(source, "RuntimeOwnedGitHubPrRunner");
+
+  assert.equal(resultContract.includes("stdout"), false);
+  assert.equal(resultContract.includes("stderr"), false);
+  assert.equal(runnerContract.includes("LegacyLocalRuntimeOwnedGitHubPrRunnerResult"), false);
+  assert.equal(runnerContract.includes("stdout"), false);
+  assert.equal(runnerContract.includes("stderr"), false);
+});
+
+test("runtime-owned adapter preserves localized legacy stdout URL compatibility without retaining raw output", async () => {
   const adapter = createRuntimeOwnedGitHubPrAdapter({
     enabled: true,
     approvalGate: approvedGate(),
@@ -570,6 +585,18 @@ function rawRunnerOutput() {
     stdout: `raw stdout token ${token} raw diff raw PR body raw approval payload`,
     stderr: `raw stderr token ${token} raw API payload raw patch`,
   };
+}
+
+function exportedTypeBlock(source: string, typeName: string) {
+  const start = source.indexOf(`export type ${typeName} =`);
+
+  assert.notEqual(start, -1);
+
+  const nextExport = source.indexOf("\nexport type ", start + 1);
+
+  assert.notEqual(nextExport, -1);
+
+  return source.slice(start, nextExport);
 }
 
 function assertContainsNoRawRunnerMaterial(value: unknown) {
