@@ -33,8 +33,7 @@ test("runtime-owned adapter builds redacted gh pr create command and records PR 
       calls.push(command);
       return {
         exit_code: 0,
-        stdout: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2\n",
-        stderr: "",
+        api_summary: prApiSummary(),
       };
     },
     now: () => new Date("2026-06-29T10:05:00.000Z"),
@@ -80,6 +79,139 @@ test("runtime-owned adapter builds redacted gh pr create command and records PR 
     });
     assert.equal(result.pr.command.env.GH_TOKEN, "[REDACTED]");
     assert.equal(JSON.stringify(result.pr).includes(token), false);
+  }
+});
+
+test("runtime-owned adapter exposes only redacted command and API summary on success", async () => {
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => ({
+      exit_code: 0,
+      api_summary: prApiSummary(),
+      ...rawRunnerOutput(),
+    }),
+  });
+
+  const result = await adapter.createPullRequest(createRequest());
+
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.deepEqual(result.pr.api_summary, {
+      operation: "github.pull_request.create",
+      repository: "Notyet1307/github-pr-smoke-sandbox",
+      base_ref: "mcr/MCR-840/base-run_mcr_840",
+      head_ref: "mcr/MCR-840/run_mcr_840-runtime-owned-github-pr-adapter",
+      pull_request_url:
+        "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2",
+    });
+    assert.equal(result.pr.command.env.GH_TOKEN, "[REDACTED]");
+    const serialized = JSON.stringify(result.pr);
+    assert.equal(serialized.includes(token), false);
+    assert.equal(serialized.includes("raw stdout"), false);
+    assert.equal(serialized.includes("raw stderr"), false);
+    assert.equal(serialized.includes("raw API payload"), false);
+    assert.equal(serialized.includes("raw patch"), false);
+    assert.equal(serialized.includes("raw diff"), false);
+    assert.equal(serialized.includes("raw PR body"), false);
+    assert.equal(serialized.includes("raw approval payload"), false);
+  }
+});
+
+test("runtime-owned adapter accepts legacy local runner stdout URL without retaining raw output", async () => {
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => ({
+      exit_code: 0,
+      stdout: [
+        "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2",
+        `raw stdout token ${token}`,
+        "raw diff",
+        "raw PR body",
+        "raw approval payload",
+      ].join("\n"),
+      stderr: `raw stderr token ${token} raw API payload raw patch`,
+    }),
+  });
+
+  const result = await adapter.createPullRequest(createRequest());
+
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.deepEqual(result.pr.api_summary, prApiSummary());
+    assert.equal(result.pr.url, prApiSummary().pull_request_url);
+    const serialized = JSON.stringify(result.pr);
+    assert.equal(serialized.includes(token), false);
+    assert.equal(serialized.includes("raw stdout"), false);
+    assert.equal(serialized.includes("raw stderr"), false);
+    assert.equal(serialized.includes("raw API payload"), false);
+    assert.equal(serialized.includes("raw patch"), false);
+    assert.equal(serialized.includes("raw diff"), false);
+    assert.equal(serialized.includes("raw PR body"), false);
+    assert.equal(serialized.includes("raw approval payload"), false);
+  }
+});
+
+test("runtime-owned adapter rejects mismatched API summaries without retaining raw output", async () => {
+  for (const [name, apiSummary] of [
+    [
+      "repository",
+      { ...prApiSummary(), repository: "Notyet1307/other-repo" },
+    ],
+    ["base_ref", { ...prApiSummary(), base_ref: "mcr/MCR-840/wrong-base" }],
+    ["head_ref", { ...prApiSummary(), head_ref: "mcr/MCR-840/wrong-head" }],
+    [
+      "pull_request_url",
+      {
+        ...prApiSummary(),
+        pull_request_url: "https://github.com/Notyet1307/other-repo/pull/2",
+      },
+    ],
+  ] as const) {
+    const adapter = createRuntimeOwnedGitHubPrAdapter({
+      enabled: true,
+      approvalGate: approvedGate(),
+      runner: async () => ({
+        exit_code: 0,
+        api_summary: apiSummary,
+        ...rawRunnerOutput(),
+      }),
+    });
+
+    const result = await adapter.createPullRequest(createRequest());
+
+    assert.equal(result.ok, false, name);
+    if (!result.ok) {
+      assert.equal(result.code, "pr_url_missing", name);
+      assertContainsNoRawRunnerMaterial(result);
+    }
+  }
+});
+
+test("runtime-owned adapter rejects legacy stdout URL for another repository without retaining raw output", async () => {
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => ({
+      exit_code: 0,
+      stdout: [
+        "https://github.com/Notyet1307/other-repo/pull/2",
+        `raw stdout token ${token}`,
+        "raw diff",
+        "raw PR body",
+        "raw approval payload",
+      ].join("\n"),
+      stderr: `raw stderr token ${token} raw API payload raw patch`,
+    }),
+  });
+
+  const result = await adapter.createPullRequest(createRequest());
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "pr_url_missing");
+    assertContainsNoRawRunnerMaterial(result);
   }
 });
 
@@ -175,7 +307,7 @@ test("runtime-owned adapter blocks unsafe inputs before runner execution", async
       approvalGate: approvedGate(),
       runner: async () => {
         calls += 1;
-        return { exit_code: 0, stdout: "", stderr: "" };
+        return { exit_code: 0 };
       },
       ...(options ?? {}),
     });
@@ -197,7 +329,7 @@ test("runtime-owned adapter checks explicit env before missing approval", async 
     approvalGate: unapprovedGate(),
     runner: async () => {
       calls += 1;
-      return { exit_code: 0, stdout: "", stderr: "" };
+      return { exit_code: 0 };
     },
   });
 
@@ -217,7 +349,7 @@ test("runtime-owned adapter checks explicit env before missing proof", async () 
     approvalGate: unapprovedGate(),
     runner: async () => {
       calls += 1;
-      return { exit_code: 0, stdout: "", stderr: "" };
+      return { exit_code: 0 };
     },
   });
 
@@ -239,7 +371,7 @@ test("runtime-owned adapter checks missing approval before unsafe target", async
     approvalGate: unapprovedGate(),
     runner: async () => {
       calls += 1;
-      return { exit_code: 0, stdout: "", stderr: "" };
+      return { exit_code: 0 };
     },
   });
 
@@ -261,7 +393,7 @@ test("runtime-owned adapter checks selected approval mismatch before unsafe ref"
     approvalGate: approvedGate(),
     runner: async () => {
       calls += 1;
-      return { exit_code: 0, stdout: "", stderr: "" };
+      return { exit_code: 0 };
     },
   });
 
@@ -292,8 +424,7 @@ test("runtime-owned adapter does not consume approval on unsafe target refusal",
       calls.push(command);
       return {
         exit_code: 0,
-        stdout: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2\n",
-        stderr: "",
+        api_summary: prApiSummary(),
       };
     },
   });
@@ -323,7 +454,7 @@ test("runtime-owned adapter ignores ambient gh auth and process env", async () =
     approvalGate: approvedGate(),
     runner: async () => {
       calls += 1;
-      return { exit_code: 0, stdout: "", stderr: "" };
+      return { exit_code: 0 };
     },
   });
 
@@ -350,8 +481,7 @@ test("runtime-owned adapter records failed runner exit without raw stderr or tok
     approvalGate: approvedGate(),
     runner: async () => ({
       exit_code: 1,
-      stdout: "",
-      stderr: `bad credentials ${token}`,
+      ...rawRunnerOutput(),
     }),
   });
 
@@ -378,7 +508,7 @@ for (const fixture of loadRefusalFixtures().filter((fixture) => fixture.support 
         fixture.adapter.runner === "injected"
           ? async (command) => {
               calls.push(command);
-              return { exit_code: 0, stdout: "", stderr: "" };
+              return { exit_code: 0 };
             }
           : undefined,
       now: () => new Date(currentTime.value),
@@ -423,6 +553,35 @@ function createRequest(overrides: Record<string, unknown> = {}) {
     requested_at: "2026-06-29T10:05:00.000Z",
     ...overrides,
   };
+}
+
+function prApiSummary() {
+  return {
+    operation: "github.pull_request.create" as const,
+    repository: "Notyet1307/github-pr-smoke-sandbox",
+    base_ref: "mcr/MCR-840/base-run_mcr_840",
+    head_ref: "mcr/MCR-840/run_mcr_840-runtime-owned-github-pr-adapter",
+    pull_request_url: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2",
+  };
+}
+
+function rawRunnerOutput() {
+  return {
+    stdout: `raw stdout token ${token} raw diff raw PR body raw approval payload`,
+    stderr: `raw stderr token ${token} raw API payload raw patch`,
+  };
+}
+
+function assertContainsNoRawRunnerMaterial(value: unknown) {
+  const serialized = JSON.stringify(value);
+  assert.equal(serialized.includes(token), false);
+  assert.equal(serialized.includes("raw stdout"), false);
+  assert.equal(serialized.includes("raw stderr"), false);
+  assert.equal(serialized.includes("raw API payload"), false);
+  assert.equal(serialized.includes("raw patch"), false);
+  assert.equal(serialized.includes("raw diff"), false);
+  assert.equal(serialized.includes("raw PR body"), false);
+  assert.equal(serialized.includes("raw approval payload"), false);
 }
 
 type RefusalFixture = {

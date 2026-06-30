@@ -28,10 +28,19 @@ export type RedactedRuntimeOwnedGitHubPrCommand = Omit<
   env: { GH_TOKEN: "[REDACTED]" };
 };
 
+export type RuntimeOwnedGitHubPrApiSummary = {
+  operation: "github.pull_request.create";
+  repository: string;
+  base_ref: string;
+  head_ref: string;
+  pull_request_url: string;
+};
+
 export type RuntimeOwnedGitHubPrRunnerResult = {
   exit_code: number;
-  stdout: string;
-  stderr: string;
+  api_summary?: RuntimeOwnedGitHubPrApiSummary;
+  stdout?: string;
+  stderr?: string;
 };
 
 export type RuntimeOwnedGitHubPrRunner = (
@@ -80,6 +89,7 @@ export type RuntimeOwnedGitHubPullRequest = {
   head_sha: string;
   title: string;
   command: RedactedRuntimeOwnedGitHubPrCommand;
+  api_summary: RuntimeOwnedGitHubPrApiSummary;
   validation_summary: Array<Pick<ProofValidation, "command" | "status" | "exit_code">>;
   cleanup_status: "not_started" | "kept_for_review";
   evidence_refs: RuntimeOwnedGitHubPrEvidenceRefs;
@@ -291,13 +301,15 @@ export function createRuntimeOwnedGitHubPrAdapter(
         };
       }
 
-      const url = firstGitHubPullRequestUrl(result.stdout);
+      const apiSummary =
+        redactedApiSummary(result.api_summary, input) ??
+        legacyLocalRunnerApiSummary(result.stdout, input);
 
-      if (!url) {
+      if (!apiSummary) {
         return {
           ok: false,
           code: "pr_url_missing",
-          reason: "gh pr create did not return a pull request URL",
+          reason: "gh pr create did not return a valid redacted API summary",
           exit_code: result.exit_code,
           stderr_log_ref: evidenceRefs.stderr,
           command: redactedCommand,
@@ -305,7 +317,7 @@ export function createRuntimeOwnedGitHubPrAdapter(
       }
 
       const pr: RuntimeOwnedGitHubPullRequest = {
-        url,
+        url: apiSummary.pull_request_url,
         task_id: input.task_id,
         proof_id: input.proof.proof_id,
         approval_id: approvalId(authorization),
@@ -315,6 +327,7 @@ export function createRuntimeOwnedGitHubPrAdapter(
         head_sha: input.head_sha,
         title: input.title,
         command: redactedCommand,
+        api_summary: apiSummary,
         validation_summary: input.proof.validation.map((validation) => ({
           command: validation.command,
           status: validation.status,
@@ -522,8 +535,74 @@ function refIncludesRunId(ref: string, runId: string | undefined) {
   return typeof runId === "string" && runId.length > 0 && ref.includes(runId);
 }
 
-function firstGitHubPullRequestUrl(stdout: string) {
-  return stdout.match(/https:\/\/github\.com\/[^\s]+\/pull\/\d+/)?.[0] ?? null;
+function redactedApiSummary(
+  summary: RuntimeOwnedGitHubPrApiSummary | undefined,
+  input: Pick<RuntimeOwnedGitHubPrInput, "repository" | "target">,
+): RuntimeOwnedGitHubPrApiSummary | null {
+  const expectedBase = branchName(input.target.base_ref);
+  const expectedHead = branchName(input.target.ref);
+
+  if (
+    !summary ||
+    summary.operation !== "github.pull_request.create" ||
+    summary.repository !== input.repository ||
+    summary.base_ref !== expectedBase ||
+    summary.head_ref !== expectedHead ||
+    !isPullRequestUrlForRepository(summary.pull_request_url, input.repository)
+  ) {
+    return null;
+  }
+
+  return {
+    operation: "github.pull_request.create",
+    repository: input.repository,
+    base_ref: expectedBase,
+    head_ref: expectedHead,
+    pull_request_url: summary.pull_request_url,
+  };
+}
+
+function legacyLocalRunnerApiSummary(
+  stdout: string | undefined,
+  input: Pick<RuntimeOwnedGitHubPrInput, "repository" | "target">,
+): RuntimeOwnedGitHubPrApiSummary | null {
+  if (!stdout) {
+    return null;
+  }
+
+  const pullRequestUrl = firstPullRequestUrlForRepository(stdout, input.repository);
+
+  if (!pullRequestUrl) {
+    return null;
+  }
+
+  return {
+    operation: "github.pull_request.create",
+    repository: input.repository,
+    base_ref: branchName(input.target.base_ref),
+    head_ref: branchName(input.target.ref),
+    pull_request_url: pullRequestUrl,
+  };
+}
+
+function isPullRequestUrlForRepository(url: string, repository: string) {
+  return new RegExp(
+    `^https://github\\.com/${escapeRegExp(repository)}/pull/\\d+$`,
+  ).test(url);
+}
+
+function firstPullRequestUrlForRepository(stdout: string, repository: string) {
+  return (
+    stdout.match(
+      new RegExp(
+        `https://github\\.com/${escapeRegExp(repository)}/pull/\\d+(?=\\s|$)`,
+      ),
+    )?.[0] ?? null
+  );
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function approvalId(result: Extract<ApprovalGateResult, { ok: true }>) {

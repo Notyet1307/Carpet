@@ -12,6 +12,7 @@ export {
   type DisposableGitHubPrTarget,
   type RedactedRuntimeOwnedGitHubPrCommand,
   type RuntimeOwnedGitHubPrAdapterOptions,
+  type RuntimeOwnedGitHubPrApiSummary,
   type RuntimeOwnedGitHubPrCommand,
   type RuntimeOwnedGitHubPrEvidenceRefs,
   type RuntimeOwnedGitHubPrInput,
