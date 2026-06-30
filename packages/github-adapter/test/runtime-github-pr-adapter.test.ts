@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { createInMemoryApprovalGate } from "approval-gate";
 import {
   createRuntimeOwnedGitHubPrAdapter,
   type PullRequestTarget,
   type RuntimeOwnedGitHubPrCommand,
+  type RuntimeOwnedGitHubPrInput,
 } from "github-adapter";
 import type { ProofLedgerEntry } from "proof-ledger";
 
@@ -231,6 +234,35 @@ test("runtime-owned adapter records failed runner exit without raw stderr or tok
   }
 });
 
+for (const fixture of loadRefusalFixtures().filter((fixture) => fixture.support === "supported")) {
+  test(`runtime-owned adapter refuses ${fixture.case_id} as ${fixture.expected.refusal_category}`, async () => {
+    const calls: RuntimeOwnedGitHubPrCommand[] = [];
+    const currentTime = { value: fixture.adapter.now };
+    const approvalGate = gateForFixture(fixture, currentTime);
+    const adapter = createRuntimeOwnedGitHubPrAdapter({
+      enabled: fixture.adapter.enabled,
+      approvalGate,
+      runner:
+        fixture.adapter.runner === "injected"
+          ? async (command) => {
+              calls.push(command);
+              return { exit_code: 0, stdout: "", stderr: "" };
+            }
+          : undefined,
+      now: () => new Date(currentTime.value),
+    });
+
+    const result = await adapter.createPullRequest(requestForFixture(fixture));
+
+    assert.equal(result.ok, false);
+    if (!result.ok) {
+      assert.equal(refusalCategoryFor(result.code), fixture.expected.refusal_category);
+      assert.equal(result.code, fixture.expected.adapter_code);
+    }
+    assert.equal(calls.length, 0);
+  });
+}
+
 function createRequest(overrides: Record<string, unknown> = {}) {
   return {
     action: "create_pr",
@@ -252,6 +284,99 @@ function createRequest(overrides: Record<string, unknown> = {}) {
   };
 }
 
+type RefusalFixture = {
+  case_id: string;
+  support: "supported" | "deferred";
+  adapter: {
+    enabled: boolean;
+    approval: "granted" | "missing" | "replayed";
+    runner: "injected" | "missing";
+    now: string;
+  };
+  request?: {
+    overrides?: Record<string, unknown>;
+    proof_overrides?: Partial<ProofLedgerEntry>;
+  };
+  expected: {
+    refusal_category: string;
+    adapter_code: string;
+  };
+};
+
+function loadRefusalFixtures(): RefusalFixture[] {
+  const fixtureDir = fileURLToPath(
+    new URL("../../../fixtures/github-adapter/refusals/", import.meta.url),
+  );
+
+  return readdirSync(fixtureDir)
+    .filter((filename) => filename.endsWith(".json"))
+    .sort()
+    .map((filename) =>
+      JSON.parse(readFileSync(`${fixtureDir}/${filename}`, "utf8")),
+    ) as RefusalFixture[];
+}
+
+function requestForFixture(fixture: RefusalFixture): RuntimeOwnedGitHubPrInput {
+  return createRequest({
+    ...(fixture.request?.proof_overrides
+      ? { proof: proof(fixture.request.proof_overrides) }
+      : {}),
+    ...(fixture.request?.overrides ?? {}),
+  }) as RuntimeOwnedGitHubPrInput;
+}
+
+function gateForFixture(
+  fixture: RefusalFixture,
+  currentTime: { value: string },
+): ReturnType<typeof createInMemoryApprovalGate> {
+  if (fixture.adapter.approval === "missing") {
+    return unapprovedGate();
+  }
+
+  const gate = createInMemoryApprovalGate({
+    now: () => new Date(currentTime.value),
+    verified_proof_ids: new Set([proofId]),
+  });
+  currentTime.value = "2026-06-29T10:00:00.000Z";
+  assert.equal(gate.grant(approval()).ok, true);
+  currentTime.value = fixture.adapter.now;
+
+  if (fixture.adapter.approval === "replayed") {
+    assert.equal(
+      gate.authorize({
+        task_id: taskId,
+        proof_id: proofId,
+        action: "create_pr",
+        target,
+        requested_at: fixture.adapter.now,
+      }).ok,
+      true,
+    );
+  }
+
+  return gate;
+}
+
+function refusalCategoryFor(code: string): string {
+  if (code === "proof_verification_failed") {
+    return "unverified_proof";
+  }
+  if (code === "approval_required") {
+    return "missing_approval";
+  }
+  if (code === "approval_expired" || code === "approval_replayed") {
+    return "expired_or_replayed_approval";
+  }
+  if (code === "credential_scope_required" || code === "scoped_env_required") {
+    return "unsafe_credential";
+  }
+  if (code === "production_main_rejected") {
+    return "unsafe_ref";
+  }
+
+  return code;
+}
+
 function approvedGate() {
   const approvalGate = createInMemoryApprovalGate({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
@@ -270,7 +395,7 @@ function unapprovedGate() {
   });
 }
 
-function approval() {
+function approval(overrides: Record<string, unknown> = {}) {
   return {
     approval_id: approvalId,
     task_id: taskId,
@@ -281,6 +406,7 @@ function approval() {
     conditions: ["Create only the disposable PR."],
     created_at: now,
     expires_at: "2026-06-29T11:00:00.000Z",
+    ...overrides,
   };
 }
 

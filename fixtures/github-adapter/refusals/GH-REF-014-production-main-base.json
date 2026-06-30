@@ -1,0 +1,31 @@
+{
+  "case_id": "GH-REF-014",
+  "scenario_id": "GH-REF-TC-014",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "target": {
+        "type": "pull_request",
+        "ref": "refs/heads/mcr/MCR-970/run-mcr-970-head",
+        "base_ref": "refs/heads/main"
+      },
+      "disposable_target": {
+        "kind": "branch_policy"
+      }
+    }
+  },
+  "expected": {
+    "refusal_category": "unsafe_ref",
+    "adapter_code": "production_main_rejected",
+    "evidence_refs": [
+      "ref_classification_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

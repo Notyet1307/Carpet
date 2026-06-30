@@ -1,0 +1,14 @@
+{
+  "case_id": "GH-REF-019",
+  "scenario_id": "GH-REF-TC-019",
+  "support": "deferred",
+  "expected": {
+    "refusal_category": "unsafe_evidence"
+  },
+  "deferred": {
+    "reason": "RuntimeOwnedGitHubPrInput accepts evidence_dir as an artifact-ref prefix but does not accept an evidence redaction scanner result or raw-material exclusion summary.",
+    "future_source_allowlist": [
+      "packages/github-adapter/src/runtime-owned-github-pr-adapter.ts"
+    ]
+  }
+}

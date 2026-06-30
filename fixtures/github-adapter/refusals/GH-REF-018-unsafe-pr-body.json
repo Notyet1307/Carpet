@@ -1,0 +1,14 @@
+{
+  "case_id": "GH-REF-018",
+  "scenario_id": "GH-REF-TC-018",
+  "support": "deferred",
+  "expected": {
+    "refusal_category": "unsafe_body"
+  },
+  "deferred": {
+    "reason": "RuntimeOwnedGitHubPrInput accepts body_file as a path string and does not accept a PR body redaction scanner result or body artifact safety summary.",
+    "future_source_allowlist": [
+      "packages/github-adapter/src/runtime-owned-github-pr-adapter.ts"
+    ]
+  }
+}

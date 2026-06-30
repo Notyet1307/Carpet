@@ -13,11 +13,12 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-970 GitHub Adapter Refusal Contract Tests/Fixtures Plan**.
-MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
-policy artifact for evidence retention and cleanup, MCR-940 has a hardening plan
-artifact, MCR-950 has a refusal matrix artifact, and MCR-960 has a docs-only
-test-plan artifact.
+After accepting MCR-970, start with **MCR-980 GitHub Adapter Deferred Refusal
+Source Hardening**. MCR-901 is complete, MCR-910 and MCR-920 have design
+artifacts, MCR-930 has a policy artifact for evidence retention and cleanup,
+MCR-940 has a hardening plan artifact, MCR-950 has a refusal matrix artifact,
+MCR-960 has a docs-only test-plan artifact, and MCR-970 adds the first local
+refusal fixtures and tests.
 
 ## Cards
 
@@ -200,7 +201,10 @@ authorized.
 
 ### MCR-970: GitHub Adapter Refusal Contract Tests/Fixtures Plan
 
-Status: recommended next.
+Status: partial local tests/fixtures added. Current adapter API covers
+GH-REF-002, GH-REF-003, GH-REF-010, GH-REF-011, GH-REF-012, GH-REF-014, and
+GH-REF-020. GH-REF-001, GH-REF-018, and GH-REF-019 are fixture-documented as
+deferred pending source hardening.
 
 - Problem solved: MCR-960 defines scenario coverage, but the repo still needs a
   smallest path-authorized implementation plan before any future worker creates
@@ -224,6 +228,32 @@ Status: recommended next.
   `git diff --check`.
 - Fake/scaffold/real boundary: contract-test/fixture planning or explicitly
   bounded local tests only; no real GitHub write path.
+
+### MCR-980: GitHub Adapter Deferred Refusal Source Hardening
+
+Status: proposed next after MCR-970 is reviewed.
+
+- Problem solved: MCR-970 documents three high-value refusal cases that the
+  current adapter input cannot represent without source changes.
+- Why now: GH-REF-001, GH-REF-018, and GH-REF-019 are high-risk proof/content
+  boundaries. They should be source-hardened before broadening GitHub adapter
+  behavior or adding any real-write path.
+- Allowed files: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`,
+  `fixtures/github-adapter/refusals/**`,
+  `docs/analysis/github-adapter-refusal-test-plan.md`, and
+  `docs/roadmaps/post-mvp-roadmap.md`.
+- Forbidden files/actions: Runtime/app/package/schema files, Octokit,
+  `gh pr create`, `gh api` writes, push, merge, deploy, production main write,
+  remote branch deletion, token/env dump, live memory, and real GitHub smoke.
+- Acceptance criteria: adapter returns machine-readable refusal categories for
+  missing proof, unsafe PR body, and unsafe evidence before runner execution;
+  fixture tests cover those cases without checked-in sensitive material.
+- Validation/proof: `pnpm --filter github-adapter test`, `pnpm test:contracts`,
+  `pnpm schemas:validate`, `git diff --check`, and `rg` evidence for GitHub
+  authorization drift and token/env dump language.
+- Fake/scaffold/real boundary: local source hardening only; no real GitHub write
+  path.
 
 ## Global Deny List
 

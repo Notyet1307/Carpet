@@ -71,6 +71,44 @@ This task does not authorize creating those files. A later task must explicitly
 allow `packages/github-adapter/**` and `fixtures/github-adapter/**` before any
 test or fixture file is added.
 
+## MCR-970 Local Fixture Execution Status
+
+MCR-970 added local JSON fixtures under `fixtures/github-adapter/refusals/` and
+fixture-driven assertions in
+`packages/github-adapter/test/runtime-github-pr-adapter.test.ts`. These tests do
+not call an external runner for refusal cases; the injected runner only records
+whether execution would have been reached.
+
+Supported by the current adapter API:
+
+- `GH-REF-002` maps current `proof_verification_failed` to `unverified_proof`.
+- `GH-REF-003` maps current `approval_required` to `missing_approval`.
+- `GH-REF-010` maps current `approval_replayed` to
+  `expired_or_replayed_approval`.
+- `GH-REF-011` maps current `credential_scope_required` to
+  `unsafe_credential`.
+- `GH-REF-012` maps current `scoped_env_required` to `unsafe_credential`.
+- `GH-REF-014` maps current `production_main_rejected` to `unsafe_ref`.
+- `GH-REF-020` uses current `forbidden_action` directly.
+
+Deferred because the current adapter input cannot represent the planned
+scenario without source changes:
+
+- `GH-REF-001` needs a request envelope shape that can omit proof before calling
+  proof verification.
+- `GH-REF-018` needs a PR-body safety summary or scanner result in the adapter
+  input.
+- `GH-REF-019` needs an evidence safety summary or scanner result in the adapter
+  input.
+
+Smallest future source allowlist for those deferred cases:
+
+- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`
+- `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
+- `fixtures/github-adapter/refusals/**`
+- `docs/analysis/github-adapter-refusal-test-plan.md`
+- `docs/roadmaps/post-mvp-roadmap.md`
+
 ## Scenario Map
 
 | Scenario id | Source case | Minimal fixture/input fields | Expected refusal category | Expected evidence refs | Precedence/isolation note | Why this test exists |
