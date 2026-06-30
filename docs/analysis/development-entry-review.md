@@ -110,8 +110,16 @@ MCR-1066 completed the docs-only operator handoff and artifact
 retention/cleanup policy pass for the single-command local fake MVP. The runbook
 now names the required `summary.json` handoff fields, Runtime-owned snapshot
 proof fields, decisive GO/NO-GO checks, and ignored artifact retention/cleanup
-rules. The next bounded step is MCR-1067, a read-only operator-friendliness
-audit for the same single-command path.
+rules. MCR-1067 completed as a read-only GO operator-friendliness audit on base
+commit `f3d8c39e6fd158305c9d2b0ee945d19057df05f1`: the root alias matched the
+runbook, `pnpm mvp:local` exited 0, the ignored snapshot and `summary.json`
+existed, summary/snapshot fields matched the decisive local fake handoff checks,
+cleanup wording stayed bounded to `.mcr/runs/local-fake-mvp/`, boundary scan
+stayed local fake only, `pnpm test:contracts` and `pnpm schemas:validate` were
+84/84, `git diff --check` exited 0, and the audit worktree had no tracked diff.
+MCR-1068 is the docs-only closeout for that result. The next bounded step is
+MCR-1069, a read-only/docs-only stop-condition and next-phase review for the
+same single-command local fake path.
 
 ## Target System Design Alignment
 

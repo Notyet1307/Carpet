@@ -13,26 +13,33 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1066, the First Recommended Task is MCR-1067 Local Fake MVP
-Single-Command Operator-Friendliness Audit. MCR-1066 completed the docs-only
-operator handoff checklist and artifact retention/cleanup policy in
-`docs/runbooks/local-fake-mvp.md`: operators now have the required
-`summary.json` fields, Runtime-owned snapshot proof fields, decisive GO/NO-GO
-checks, and ignored `.mcr/runs/local-fake-mvp/` retention/cleanup rules. MCR-1064
-completed as a read-only GO audit on base commit
-`1eb7d748ef72a9b29c16953ff7310fd00c9ad5e2`: `pnpm mvp:local` exited 0, the
-two generated artifacts existed under ignored `.mcr/`, `summary.json` reported
-`task_state=completed`, `transition_count=14`, `proof_status=verified`,
-`approval_status=consumed`, `pr_count=1`, `memory_status=proposed`, and
-`fake_only=true`, the snapshot reported Runtime as source of truth with 1 task
-and 14 transitions, contract/schema validation was 84/84, `git diff --check`
-exited 0, and the audit worktree had no tracked changes. This proves the local
-fake root command/operator handoff is ready as a single-command local fake path
-only; it does not prove or authorize real Matrix, Codex, GitHub, DB/Postgres,
-live memory, real services, or GitHub adapter expansion. MCR-1067 should check
-the root script alias, runbook command, handoff fields, ignored artifact behavior,
-and cleanup wording still agree without changing runtime/code/tests/schema/
-fixtures/package files.
+After MCR-1068, the First Recommended Task is MCR-1069 Local Fake MVP Operator
+Handoff Stop-Condition And Next-Phase Review. MCR-1067 completed as a read-only
+GO audit on base commit `f3d8c39e6fd158305c9d2b0ee945d19057df05f1`: the
+`package.json` root alias matched `docs/runbooks/local-fake-mvp.md`,
+`pnpm mvp:local` exited 0, `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`
+and `.mcr/runs/local-fake-mvp/summary.json` existed and were ignored by
+`.gitignore:4:.mcr/`, `summary.json` reported `command=pnpm mvp:local`,
+`snapshot_path=.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`,
+`task_id=task_mcr_800_runtime_orchestrator_cli`, `task_state=completed`,
+`transition_count=14`, `proof_status=verified`, `approval_status=consumed`,
+`pr_count=1`, `memory_status=proposed`, `fake_only=true`, and validation notes
+for `runtime snapshot written` plus `local fake adapters only`. The snapshot
+reported `source_of_truth=runtime`, 1 completed task, 14 transitions, verified
+proof, consumed `create_pr` approval, artifact kinds `log`, `log`, `report`,
+and `pr`, and one PR artifact. Cleanup wording remained bounded to
+`rm -rf .mcr/runs/local-fake-mvp/` and did not authorize cleaning source/docs/
+schemas/fixtures/package/runtime files or copying raw logs, raw diff, token/env,
+secret, or live memory body content. Boundary scan stayed local fake only;
+`pnpm test:contracts` was 84/84, `pnpm schemas:validate` was 84/84, `git diff
+--check` exited 0, and the audit worktree had no tracked diff. This means the
+single-command local fake MVP operator handoff is ready for the local fake path
+only. It does not prove or authorize real Matrix, Codex, GitHub, DB/Postgres,
+live memory, real services, production readiness, or GitHub adapter expansion.
+MCR-1069 should be read-only/docs-only: confirm the local fake operator path has
+a stop condition, remove any remaining active local fake closeout loop, and
+choose the next phase from current roadmap facts instead of returning to GitHub
+adapter expansion by default.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -117,7 +124,10 @@ MCR-1064 completed as a read-only GO audit on base commit
 The audit confirmed `pnpm mvp:local` exits 0, writes the ignored snapshot and
 `summary.json`, preserves Runtime as source of truth, keeps memory
 proposal-only, and leaves no tracked changes in the audit worktree. MCR-1065 is
-this docs-only closeout. Production GitHub implementation remains unauthorized.
+this docs-only closeout. MCR-1067 later completed as a read-only GO
+operator-friendliness audit on base commit
+`f3d8c39e6fd158305c9d2b0ee945d19057df05f1`; MCR-1068 is the docs-only closeout
+for that result. Production GitHub implementation remains unauthorized.
 
 ## Cards
 
@@ -1360,7 +1370,8 @@ summary is needed.
 
 ### MCR-1067: Local Fake MVP Single-Command Operator-Friendliness Audit
 
-Status: next recommended task after MCR-1066. Read-only only.
+Status: completed; read-only audit result GO on base commit
+`f3d8c39e6fd158305c9d2b0ee945d19057df05f1`.
 
 - Problem solved: after the handoff and retention docs land, the single-command
   path needs one final operator-readiness check across the root script alias,
@@ -1375,10 +1386,80 @@ Status: next recommended task after MCR-1066. Read-only only.
 - Acceptance criteria: report GO/NO-GO on whether the root alias, runbook,
   handoff checklist, artifact retention/cleanup policy, and local fake boundary
   agree; do not change behavior.
-- Validation/proof: read-only `rg`/git inspection plus any validation commands
-  explicitly requested by the task brief.
+- Validation/proof: `pnpm mvp:local` exited 0; `package.json` root alias matched
+  the runbook; `.mcr/runs/local-fake-mvp/runtime-store.snapshot.json` and
+  `.mcr/runs/local-fake-mvp/summary.json` existed and were ignored by
+  `.gitignore:4:.mcr/`; `summary.json` reported `command=pnpm mvp:local`,
+  `snapshot_path=.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`,
+  `task_id=task_mcr_800_runtime_orchestrator_cli`, `task_state=completed`,
+  `transition_count=14`, `proof_status=verified`, `approval_status=consumed`,
+  `pr_count=1`, `memory_status=proposed`, `fake_only=true`, and validation notes
+  `runtime snapshot written` plus `local fake adapters only`; the snapshot
+  reported `source_of_truth=runtime`, 1 completed task, 14 transitions, verified
+  proof, consumed `create_pr` approval, artifact kinds `log`, `log`, `report`,
+  and `pr`, and one PR artifact; cleanup wording was bounded to
+  `.mcr/runs/local-fake-mvp/`; boundary scan stayed local fake only;
+  `pnpm test:contracts` and `pnpm schemas:validate` were 84/84; `git diff
+  --check` exited 0; the audit worktree had no tracked diff.
 - Fake/scaffold/real boundary: read-only audit only; no implementation,
-  cleanup automation, real service, or adapter expansion.
+  cleanup automation, real service, or adapter expansion. "Operator handoff
+  ready" means local fake only, not real Matrix/Codex/GitHub/DB/live memory or
+  production readiness.
+
+### MCR-1068: Local Fake MVP Operator-Friendliness Audit Closeout Docs Sync
+
+Status: docs-only closeout for MCR-1067. No runtime, code, tests, schemas,
+fixtures, package files, services, real Matrix, real Codex, real GitHub, DB,
+live memory, commit, push, merge, or PR is authorized by this card.
+
+- Problem solved: MCR-1067 returned GO, but source-of-truth docs still pointed
+  future workers at MCR-1067 as active next work.
+- Why now: after a GO audit, the roadmap should stop sending workers back to
+  the same read-only audit and should name the stop condition for the local fake
+  operator handoff path.
+- Allowed files: roadmap, analysis, and runbook docs explicitly scoped by the
+  task brief.
+- Forbidden files/actions: runtime, code, package files, schemas, fixtures,
+  tests, generated `.mcr` evidence, real Matrix, real Codex, real GitHub, DB,
+  live memory, real services, GitHub adapter expansion, commit, push, merge,
+  PR.
+- Acceptance criteria: record MCR-1067 as completed/GO at
+  `f3d8c39e6fd158305c9d2b0ee945d19057df05f1`; preserve the local-fake-only
+  boundary; remove active MCR-1067 next-task wording; recommend one read-only/
+  docs-only next task around stop condition and next-phase selection.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and stale-text `rg`.
+- Fake/scaffold/real boundary: docs-only status synchronization; no behavior,
+  package, runtime, service, adapter, or generated-artifact change.
+
+### MCR-1069: Local Fake MVP Operator Handoff Stop-Condition And Next-Phase Review
+
+Status: next recommended task after MCR-1068. Read-only/docs-only only.
+
+- Problem solved: the local fake single-command operator path has runbook,
+  generated handoff artifact, retention/cleanup wording, and a GO
+  operator-friendliness audit. The project now needs an explicit stop condition
+  and next-phase choice so workers do not repeat closeout audits or drift back
+  to GitHub adapter expansion by default.
+- Why now: MCR-1067 proves the local fake operator handoff is ready for the
+  local fake path only; the next useful step is to decide whether to stop local
+  fake closeout work or select one bounded read-only/design next phase from the
+  current target-system gaps.
+- Allowed files/actions: read-only inspection and, if drift is found,
+  docs-only updates in roadmap, analysis, and runbook docs.
+- Forbidden files/actions: runtime, code, package files, schemas, fixtures,
+  tests, generated `.mcr` evidence, real Matrix, real Codex, real GitHub, DB,
+  live memory, real-service smoke, service startup, GitHub adapter expansion,
+  commit, push, merge, PR.
+- Acceptance criteria: confirm there is no remaining active MCR-1067/local fake
+  operator-readiness loop; state the local fake path stop condition; inventory
+  the current target-system gaps; recommend exactly one next read-only/design
+  task or explicitly recommend stopping until the owner chooses a new phase.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, stale-text `rg`, and concise roadmap-gap evidence.
+- Fake/scaffold/real boundary: read-only/docs-only review. It does not
+  authorize implementation, real-service smoke, GitHub adapter expansion,
+  production readiness, DB/Postgres, or live memory writes.
 
 ## Global Deny List
 

@@ -205,10 +205,16 @@ policy pass for the single-command local fake MVP. This runbook now names the
 exact handoff fields, snapshot proof fields, decisive GO/NO-GO checks, and
 ignored artifact retention/cleanup rules for `.mcr/runs/local-fake-mvp/`.
 
-The next recommended task is MCR-1067, a read-only single-command
-operator-friendliness audit: verify the root script alias, runbook command,
-handoff fields, ignored artifact behavior, and cleanup wording still agree
-without changing runtime/code/tests/schema/fixtures/package files.
-Do not use this runbook, the MCR-1064 GO audit, or MCR-1066 as authorization for
-real Matrix, Codex, GitHub, DB/Postgres, live memory, real-service smoke,
-production readiness, or GitHub adapter expansion.
+MCR-1067 completed as a read-only GO operator-friendliness audit on base commit
+`f3d8c39e6fd158305c9d2b0ee945d19057df05f1`: the root alias matched this runbook,
+`pnpm mvp:local` exited 0, the ignored snapshot and `summary.json` existed,
+summary/snapshot fields matched the decisive handoff checks, cleanup wording
+stayed bounded to `.mcr/runs/local-fake-mvp/`, boundary scan stayed local fake
+only, `pnpm test:contracts` and `pnpm schemas:validate` were 84/84, `git diff
+--check` exited 0, and the audit worktree had no tracked diff.
+
+The next recommended task is MCR-1069, a read-only/docs-only stop-condition and
+next-phase review for the single-command local fake operator handoff path.
+Do not use this runbook, the MCR-1064 GO audit, MCR-1066, MCR-1067, or MCR-1068
+as authorization for real Matrix, Codex, GitHub, DB/Postgres, live memory,
+real-service smoke, production readiness, or GitHub adapter expansion.
