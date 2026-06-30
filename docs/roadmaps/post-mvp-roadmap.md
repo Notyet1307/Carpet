@@ -13,9 +13,10 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-940 Disposable GitHub Adapter Hardening Plan**. MCR-901 is
-complete, MCR-910 and MCR-920 have design artifacts, and MCR-930 now has a
-policy artifact for evidence retention and cleanup.
+Start with **MCR-950 GitHub Adapter Refusal Contract Matrix**. MCR-901 is
+complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a policy
+artifact for evidence retention and cleanup, and MCR-940 now has a hardening
+plan artifact.
 
 ## Cards
 
@@ -114,6 +115,11 @@ service run, cleanup automation, or raw evidence check-in is authorized.
 
 ### MCR-940: Disposable GitHub Adapter Hardening Plan
 
+Status: plan artifact added in
+`docs/analysis/github-adapter-hardening-plan.md`; no adapter implementation,
+real smoke, PR creation, cleanup command, merge, deploy, production main write,
+branch deletion, broad-token path, or live memory path is authorized.
+
 - Problem solved: MCR-730 and MCR-850 proved sandbox PR creation, but production
   GitHub automation and merge paths remain forbidden and need a hardening plan
   before code expands.
@@ -132,6 +138,30 @@ service run, cleanup automation, or raw evidence check-in is authorized.
   `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`.
 - Fake/scaffold/real boundary: planning only; real PR creation remains manual,
   disposable, approval-scoped smoke proof only.
+
+### MCR-950: GitHub Adapter Refusal Contract Matrix
+
+Status: not started.
+
+- Problem solved: MCR-940 defines refusal cases in prose; a future worker still
+  needs a named contract matrix before any adapter code hardening starts.
+- Why now: GitHub is a high-risk external write boundary, and refusal behavior
+  should be reviewable before code tasks touch `packages/github-adapter/**`.
+- Allowed files: `docs/analysis/github-adapter-hardening-plan.md`,
+  `docs/runbooks/github-pr-smoke.md`, `docs/roadmaps/post-mvp-roadmap.md`, and a
+  future dedicated analysis doc if explicitly approved.
+- Forbidden files/actions: `packages/github-adapter/**`, runtime/app/code/test,
+  schema, fixture, package files, Octokit, `gh pr create`, `gh api` writes,
+  push, merge, deploy, production main write, remote branch deletion, token/env
+  dump, live memory.
+- Acceptance criteria: matrix names each refusal case, required input proof,
+  expected refusal code or category, decisive evidence ref, and why it blocks
+  before external execution.
+- Validation/proof: docs diff, `rg` for production GitHub authorization drift
+  and token/env dump language, `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`.
+- Fake/scaffold/real boundary: docs/planning only; no adapter code and no real
+  GitHub write.
 
 ## Global Deny List
 

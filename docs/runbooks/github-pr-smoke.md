@@ -25,15 +25,19 @@ Completed smoke proof:
   temporary `GH_CONFIG_DIR`; token values and environment dumps were not
   recorded.
 
-This proves one manual sandbox create/cleanup path only. Before MCR-840, the
-Runtime PR path was fake/contract-only. `packages/github-adapter` exports
+This proves one manual sandbox create/cleanup path only. The default Runtime PR
+path remains fake/contract-only: `packages/github-adapter` exports
 `createFakeGitHubPrAdapter`, records in-memory `SimulatedPullRequest` objects,
-and has no real GitHub API, push, or merge implementation.
+and exposes no default real GitHub API, push, or merge implementation.
 
-MCR-840 adds a Runtime-owned `gh pr create` command adapter shape with an
-injected runner. It is disabled by default, does not run a real smoke by
-itself, and is only eligible for disposable targets after verified proof and
-matching `create_pr` approval.
+MCR-840 added a Runtime-owned `gh pr create` command adapter shape with an
+injected runner. It is a disabled scaffold, not a production GitHub adapter. It
+does not run a real smoke by itself and is only eligible for disposable targets
+after verified proof and matching `create_pr` approval.
+
+MCR-940 adds the hardening plan in
+`docs/analysis/github-adapter-hardening-plan.md`. That plan is the gate before
+any future code task broadens the adapter beyond the existing disabled scaffold.
 
 ## Required Target
 
@@ -174,8 +178,9 @@ smokes must repeat cleanup proof for their own `run_id`.
 The current fake adapter remains the default test path. It proves proof and
 approval contracts only.
 
-The Runtime-owned adapter is an opt-in guarded write path for disposable
-targets. It must not fall back to ambient `gh` auth or `process.env`, and it
-must not add merge, deploy, production `main`, secret access, or live memory
-write behavior. No real PR should be created unless the owner separately
-approves a manual disposable smoke for a fresh `run_id`.
+The existing Runtime-owned command-shaped adapter is a disabled scaffold for a
+future guarded write path against disposable targets. It must not fall back to
+ambient `gh` auth or `process.env`, and it must not add merge, deploy,
+production `main`, branch deletion, secret access, or live memory write
+behavior. No real PR should be created unless the owner separately approves a
+manual disposable smoke for a fresh `run_id`.

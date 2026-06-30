@@ -78,7 +78,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Codex exec smoke runner | guarded scaffold; passed once manually | `apps/worker-runner/src/codex-exec-runner.ts`; `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2` | Further runs still require explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
 | Proof ledger and verifier | implemented fake | `packages/proof-ledger/**` | No object store, durable proof ledger, or verifier worker service. |
 | Approval gate | implemented fake | `packages/approval-gate/**` | No durable approval service, Matrix identity binding, or production authorization store. |
-| GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or Runtime-owned GitHub API write path. |
+| GitHub PR adapter | fake default plus disabled scaffold | `packages/github-adapter/src/fake-github-adapter.ts`; `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` | No production GitHub adapter, Octokit path, default real GitHub write, merge, deploy, production main write, branch deletion, or broad-token path. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 and MCR-850 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; MCR-720 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`; MCR-850 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01` | Default path remains skipped; proof is disposable compatibility only, not production readiness. |
@@ -270,8 +270,10 @@ deploy, or live memory writes. It does not make MCR-720 production-ready.
 ## MCR-730 GitHub PR Smoke Boundary
 
 MCR-730 has one manual disposable GitHub PR create smoke pass on 2026-06-29. It
-does not implement Octokit, a `gh pr create` wrapper, or any Runtime-owned
-GitHub write path.
+does not implement Octokit or a production Runtime-owned GitHub write path.
+MCR-840 later added a disabled command-shaped `gh pr create` scaffold with an
+injected runner; that scaffold is not enabled by default and is not production
+GitHub integration.
 
 Current status: GO for the completed sandbox smoke only. Runtime GitHub adapter
 integration remains not implemented.
@@ -297,8 +299,9 @@ Proof:
   token values or environment dumps were recorded.
 
 The current `packages/github-adapter` path is still fake and contract-only. It
-records `SimulatedPullRequest` objects in memory and exports no real GitHub API,
-push, or merge path.
+records `SimulatedPullRequest` objects in memory by default. The disabled
+MCR-840 scaffold is explicitly not a merge, deploy, production main, branch
+deletion, broad-token, ambient-auth, or live-memory path.
 
 Required disposable target:
 
@@ -342,6 +345,21 @@ Forbidden actions:
 - deploy
 - dump secrets or token values
 - write live memory
+
+## MCR-940 GitHub Adapter Hardening Boundary
+
+MCR-940 adds `docs/analysis/github-adapter-hardening-plan.md` as a planning
+gate before any future real GitHub adapter hardening or implementation slice.
+
+The plan keeps the default Runtime path fake/in-memory, treats MCR-840 as a
+disabled scaffold only, and requires future code to keep explicit credentials,
+injected runner/client, disposable targets, run-id-bound base/head refs, verified
+proof, action-scoped approval, cleanup proof, branch deletion proof, and redacted
+evidence.
+
+This is not GitHub implementation, Octokit authorization, real smoke
+authorization, PR creation, branch deletion, merge, deploy, production main
+write, broad token use, or live memory authorization.
 
 ## MCR-850 Real Vertical Smoke Boundary
 
