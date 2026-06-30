@@ -13,10 +13,11 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-Start with **MCR-960 GitHub Adapter Refusal Contract Test Plan**. MCR-901 is
-complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a policy
-artifact for evidence retention and cleanup, MCR-940 has a hardening plan
-artifact, and MCR-950 now has a refusal matrix artifact.
+Start with **MCR-970 GitHub Adapter Refusal Contract Tests/Fixtures Plan**.
+MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
+policy artifact for evidence retention and cleanup, MCR-940 has a hardening plan
+artifact, MCR-950 has a refusal matrix artifact, and MCR-960 has a docs-only
+test-plan artifact.
 
 ## Cards
 
@@ -169,7 +170,11 @@ memory remain unauthorized.
 
 ### MCR-960: GitHub Adapter Refusal Contract Test Plan
 
-Status: not started.
+Status: test-plan artifact added in
+`docs/analysis/github-adapter-refusal-test-plan.md`; no adapter implementation,
+schemas, fixtures, tests, packages, real GitHub writes, merge, deploy,
+production main writes, remote ref deletion, token/env dump, or live memory is
+authorized.
 
 - Problem solved: MCR-950 names refusal cases, but the repo still needs a
   smallest docs/contract-test plan that maps each matrix row to future test
@@ -192,6 +197,33 @@ Status: not started.
   `git diff --check`.
 - Fake/scaffold/real boundary: docs/contract-test planning only; no adapter
   code, no fixtures, no test files, and no real GitHub write.
+
+### MCR-970: GitHub Adapter Refusal Contract Tests/Fixtures Plan
+
+Status: recommended next.
+
+- Problem solved: MCR-960 defines scenario coverage, but the repo still needs a
+  smallest path-authorized implementation plan before any future worker creates
+  test or fixture files.
+- Why now: jumping directly from docs to adapter code risks broadening the
+  GitHub write boundary; the next card should limit scope to refusal contract
+  tests and fixtures only.
+- Allowed files: `docs/analysis/github-adapter-refusal-test-plan.md`,
+  `docs/roadmaps/post-mvp-roadmap.md`, and, only if explicitly approved by the
+  task brief, `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
+  plus `fixtures/github-adapter/refusals/**`.
+- Forbidden files/actions: adapter source implementation, Runtime/app/package
+  files, schemas outside an explicit allowlist, Octokit, `gh pr create`, `gh api`
+  writes, push, merge, deploy, production main write, remote branch deletion,
+  token/env dump, live memory, and real GitHub smoke.
+- Acceptance criteria: either a plan or tightly bounded tests/fixtures implement
+  the MCR-960 one-denial-cause scenarios first, keep precedence tests explicit,
+  and assert category plus evidence refs without raw secrets or raw evidence.
+- Validation/proof: docs or test diff, `rg` for GitHub authorization drift and
+  token/env dump language, `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`.
+- Fake/scaffold/real boundary: contract-test/fixture planning or explicitly
+  bounded local tests only; no real GitHub write path.
 
 ## Global Deny List
 

@@ -40,7 +40,11 @@ MCR-940 adds the hardening plan in
 any future code task broadens the adapter beyond the existing disabled scaffold.
 MCR-950 adds the refusal contract matrix in
 `docs/analysis/github-adapter-refusal-contract-matrix.md`; future runs and
-adapter tests should use it for pre-execution refusal categories.
+adapter tests should use it for pre-execution refusal categories. MCR-960 adds
+the docs-only refusal test plan in
+`docs/analysis/github-adapter-refusal-test-plan.md`; it proposes future
+`packages/github-adapter` test and `fixtures/github-adapter` paths but does not
+create them or authorize real GitHub writes.
 
 ## Required Target
 

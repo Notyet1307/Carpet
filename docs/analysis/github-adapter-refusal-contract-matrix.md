@@ -68,6 +68,9 @@ These category strings are the stable vocabulary for future adapter contracts:
 
 ## Contract Notes For Future Tests
 
+- MCR-960 maps every matrix row to future contract-test scenarios in
+  `docs/analysis/github-adapter-refusal-test-plan.md`. Use that plan for test
+  and fixture naming before creating any test or fixture files.
 - One future contract test case should target one matrix row. Do not combine
   multiple denial causes in the same fixture unless the test explicitly asserts
   precedence.

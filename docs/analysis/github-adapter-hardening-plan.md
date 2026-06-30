@@ -120,6 +120,12 @@ memory path is allowed.
 
 ## Next Planning Step
 
-MCR-950 added the docs-only refusal contract matrix. The smallest next task is
-to plan docs/contract-test coverage from that matrix without touching adapter
-implementation code.
+MCR-950 added the docs-only refusal contract matrix. MCR-960 maps that matrix to
+future contract-test scenarios in
+`docs/analysis/github-adapter-refusal-test-plan.md`.
+
+The smallest next task is MCR-970: create the bounded contract-test and fixture
+implementation plan, or implement only those tests and fixtures if explicitly
+authorized. It must not authorize Runtime GitHub writes, Octokit, `gh pr create`,
+`gh api` writes, merge, deploy, production `main` writes, token reads, env dumps,
+or live memory writes.
