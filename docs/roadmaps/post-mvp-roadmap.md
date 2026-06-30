@@ -13,9 +13,9 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-MCR-1020 remaining GitHub adapter local refusal hardening is completed and
-pending review. It adds local executable coverage for GH-REF-013, GH-REF-015,
-GH-REF-016, and GH-REF-017.
+MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
+and accepted by the MCR-1030 docs-only readiness audit. It adds local executable
+coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
 MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
 policy artifact for evidence retention and cleanup, MCR-940 has a hardening
 plan artifact, MCR-950 has a refusal matrix artifact, MCR-960 has a docs-only
@@ -25,11 +25,11 @@ local forbidden-action fixture slice for GH-REF-021 through GH-REF-026,
 MCR-1000 documents the approval mismatch source/harness gap, MCR-1010 closes
 GH-REF-004 through GH-REF-009 as executable local `approval_mismatch` fixtures,
 and MCR-1020 closes GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017 as local
-target/ref/protection/dirty-worktree refusals. No MCR-950 local refusal rows
-remain uncovered. The next recommended step is verifier review of MCR-1020 and
-a docs-only readiness audit before any later GitHub adapter expansion; this
-does not authorize real GitHub, production automation, merge, deploy, or live
-memory work.
+target/ref/protection/dirty-worktree refusals. MCR-1030 confirms all GH-REF-001
+through GH-REF-026 local refusal fixtures are supported and assert no runner
+calls. The next recommended step is later planning for any bounded adapter
+expansion, not implementation; this does not authorize real GitHub, production
+automation, merge, deploy, or live memory work.
 
 ## Cards
 
@@ -241,7 +241,7 @@ GH-REF-011, GH-REF-012, GH-REF-014, GH-REF-018, GH-REF-019, and GH-REF-020.
 
 ### MCR-980: GitHub Adapter Deferred Refusal Source Hardening
 
-Status: completed; pending review and merge.
+Status: completed; accepted into the local refusal baseline.
 
 - Problem solved: MCR-970 documents three high-value refusal cases that the
   current adapter input cannot represent without source changes.
@@ -267,7 +267,8 @@ Status: completed; pending review and merge.
 
 ### MCR-990: GitHub Adapter Remaining Refusal Fixture Expansion Plan
 
-Status: completed forbidden-action fixture slice; pending review.
+Status: completed forbidden-action fixture slice; accepted into the local
+refusal baseline.
 
 - Problem solved: MCR-950 had forbidden-action refusal rows that were planned
   but not yet represented as executable local fixtures. GH-REF-021 through
@@ -294,7 +295,8 @@ Status: completed forbidden-action fixture slice; pending review.
 
 ### MCR-1000: GitHub Adapter Approval Mismatch Refusal Fixture Plan
 
-Status: completed docs/source-gap plan; pending review.
+Status: completed docs/source-gap plan; superseded by the accepted MCR-1010
+source/harness hardening.
 
 - Problem solved: MCR-950 approval mismatch rows GH-REF-004 through GH-REF-009
   are locked as a source/harness gap instead of being represented by fake
@@ -324,7 +326,7 @@ Status: completed docs/source-gap plan; pending review.
 
 ### MCR-1010: GitHub Adapter Approval Mismatch Source/Harness Hardening
 
-Status: completed; pending review.
+Status: completed; accepted into the local refusal baseline.
 
 - Problem solved: GH-REF-004 through GH-REF-009 need executable local refusals,
   but current approval-gate source and the runtime-owned GitHub adapter fixture
@@ -370,7 +372,8 @@ Status: completed; pending review.
 
 ### MCR-1020: Remaining GitHub Adapter Local Refusal Hardening
 
-Status: completed; pending review.
+Status: completed; accepted and closed out by the MCR-1030 docs-only readiness
+audit.
 
 - Problem solved: remaining uncovered MCR-950 rows GH-REF-013, GH-REF-015,
   GH-REF-016, and GH-REF-017 need local target/ref/protection/dirty-worktree
@@ -378,12 +381,35 @@ Status: completed; pending review.
 - Coverage added: GH-REF-013 maps to `unsafe_target`, GH-REF-015 maps to
   `unsafe_ref`, GH-REF-016 maps to `unknown_protection`, and GH-REF-017 maps to
   `dirty_worktree`; every case refuses before runner execution.
-- Next step: verifier review and, after merge, a docs-only readiness audit for
-  the GitHub adapter refusal matrix. Do not start real GitHub or production
-  automation from this completion.
+- Closeout evidence: MCR-1030 confirms GH-REF-001 through GH-REF-026 all exist
+  under `fixtures/github-adapter/refusals/`, all are `support=supported`, and
+  all expect `no_runner_calls=true`; `packages/github-adapter` tests execute
+  each local refusal before runner execution.
+- Next step: later planning for any bounded adapter expansion. Do not start real
+  GitHub or production automation from this completion.
 - Fake/scaffold/real boundary: local source/harness and fixture hardening only;
   no real GitHub, no Octokit, no `gh pr create`, no `gh api`, no push, no merge,
   no deploy, no secret reads, and no live memory writes.
+
+### MCR-1030: GitHub Adapter Refusal Matrix Readiness Audit And Closeout Docs
+
+Status: completed docs-only readiness audit; result GO.
+
+- Problem solved: post-MVP docs no longer route workers through stale MCR-1020
+  pending-review text after the local refusal matrix landed on `main`.
+- Audit result: GH-REF-001 through GH-REF-026 all exist as local refusal
+  fixtures, none are deferred, and every supported fixture expects
+  `no_runner_calls=true`.
+- Semantic closeout: local gates preserve credential precedence, non-consuming
+  approval preview, approval non-consumption on local refusal, and
+  target/repository/run-correlation checks before any injected runner can run.
+- Next step: later planning only. This closeout does not authorize real GitHub,
+  production automation, Octokit, `gh pr create`, `gh api`, fetch calls, push,
+  merge, deploy, production `main` writes, token/env dumps, secret reads, or
+  live memory writes.
+- Fake/scaffold/real boundary: docs-only readiness result; no runtime code,
+  schema, fixture, package, app, test, real GitHub, or production automation
+  change.
 
 ## Global Deny List
 

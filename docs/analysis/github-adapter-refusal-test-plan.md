@@ -92,6 +92,17 @@ MCR-1020 closes the remaining local target/ref/protection/dirty-worktree rows.
 The adapter now has pre-run gates for disposable policy proof, exact run-id ref
 correlation, target protection proof, and dirty local branch content.
 
+MCR-1030 closes the readiness audit for the current local refusal matrix. It
+confirms GH-REF-001 through GH-REF-026 all have supported local fixtures and
+`no_runner_calls=true` expectations. The current adapter checks forbidden
+actions and explicit disposable or scoped credentials before proof/approval
+state can drive execution, uses `previewAuthorize` as a non-consuming approval
+check before local target/ref/protection/dirty/body/evidence gates, and consumes
+approval only after those local gates pass and immediately before the injected
+runner. The runtime-orchestrator coverage keeps the opt-in GitHub adapter
+target, repository, and run id correlated with the approved proof/approval
+envelope.
+
 Supported by the current adapter API and local fixture runner:
 
 - `GH-REF-001` uses missing proof input and maps `missing_proof`.
@@ -189,9 +200,10 @@ ordering, not to replace the one-denial-cause-per-fixture matrix.
 
 ## Later Implementation Guardrail
 
-No MCR-950 local refusal rows remain uncovered after MCR-1020. The next
-recommended step is verifier review and a docs-only readiness audit before any
-later adapter expansion. This plan still does not authorize real GitHub writes,
-Octokit, `gh pr create`, `gh api` writes, fetch calls, merge, deploy, production
-`main` writes, broad credential use, secret reads, token value logging, env
-dumps, raw approval payload logging, or live memory writes.
+No MCR-950 local refusal rows remain uncovered after MCR-1020, and MCR-1030
+records the docs-only readiness result as GO. The next step is later planning
+for any bounded adapter expansion, not implementation. This plan still does not
+authorize real GitHub writes, Octokit, `gh pr create`, `gh api` writes, fetch
+calls, merge, deploy, production `main` writes, broad credential use, secret
+reads, token value logging, env dumps, raw approval payload logging, or live
+memory writes.

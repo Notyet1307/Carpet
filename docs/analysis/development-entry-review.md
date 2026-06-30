@@ -1,6 +1,6 @@
 # Development Entry Review
 
-Version: 2026-06-29 status sync
+Version: 2026-06-30 status sync
 
 Task ID: Analysis-P12-development-entry-review
 
@@ -43,6 +43,14 @@ merge. Sandbox `main` stayed at
 `4438b7a905d12fead4f539e6faf349b8a2464f60`, both disposable branches were
 deleted, and the `protect-main` ruleset remained active. The current Runtime
 GitHub PR path is still `packages/github-adapter` fake/contract-only.
+
+MCR-1020 has merged into `main`, and MCR-1030 completed the docs-only readiness
+audit for the GitHub adapter refusal matrix. GH-REF-001 through GH-REF-026 are
+all local executable refusal fixtures, no fixture is deferred, and every case
+asserts no runner calls. This closes the local refusal matrix only. It does not
+authorize production GitHub PR/API, Octokit, `gh pr create`, `gh api`, fetch
+calls, push, merge, deploy, production `main` writes, token/env dumps, secret
+reads, or live memory writes.
 
 MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id
 `mcr-850-20260629t170000z-vertical-smoke-01`. Evidence is retained locally at
@@ -119,6 +127,9 @@ Evidence:
 - Fixture coverage exists across `fixtures/matrix-events`,
   `fixtures/matrix-transactions`, `fixtures/runtime`, `fixtures/codex`,
   `fixtures/proof`, `fixtures/capabilities`, and `fixtures/policy`.
+- GitHub adapter refusal fixtures exist for GH-REF-001 through GH-REF-026, all
+  execute locally with `no_runner_calls=true`, and package tests cover the
+  non-consuming approval preview plus local-refusal non-consumption behavior.
 - Baseline validation before this review: `pnpm test:contracts` passed 78 tests;
   `pnpm schemas:validate` passed 78 tests.
 

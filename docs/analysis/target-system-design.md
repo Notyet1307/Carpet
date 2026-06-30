@@ -1,6 +1,6 @@
 # Target System Design Alignment
 
-Version: 2026-06-29
+Version: 2026-06-30
 
 Task ID: Analysis-target-system-design-alignment
 
@@ -78,7 +78,7 @@ a reviewed human or PR path, not an automatic live memory write.
 | Codex exec smoke runner | guarded scaffold; passed once manually | `apps/worker-runner/src/codex-exec-runner.ts`; `fixtures/codex-smoke/MCR-310.real-codex-exec-smoke.txt` in commit `8e17fafe3ae893bdd04cca7f4ac4d2a63cdb91f2` | Further runs still require explicit smoke flag, run-scoped human approval, scoped credentials, explicit env, and injected process runner. |
 | Proof ledger and verifier | implemented fake | `packages/proof-ledger/**` | No object store, durable proof ledger, or verifier worker service. |
 | Approval gate | implemented fake | `packages/approval-gate/**` | No durable approval service, Matrix identity binding, or production authorization store. |
-| GitHub PR adapter | fake default plus disabled scaffold | `packages/github-adapter/src/fake-github-adapter.ts`; `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts` | No production GitHub adapter, Octokit path, default real GitHub write, merge, deploy, production main write, branch deletion, or broad-token path. |
+| GitHub PR adapter | fake default plus disabled scaffold; local refusal matrix complete | `packages/github-adapter/src/fake-github-adapter.ts`; `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`; `fixtures/github-adapter/refusals/GH-REF-001` through `GH-REF-026`; package tests assert no runner calls | No production GitHub adapter, Octokit path, default real GitHub write, merge, deploy, production main write, branch deletion, fetch-capable path, or broad-token path. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
 | Real-service smoke runbook and tests | guarded scaffold; MCR-720 and MCR-850 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; MCR-720 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`; MCR-850 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01` | Default path remains skipped; proof is disposable compatibility only, not production readiness. |
@@ -360,6 +360,28 @@ evidence.
 This is not GitHub implementation, Octokit authorization, real smoke
 authorization, PR creation, branch deletion, merge, deploy, production main
 write, broad token use, or live memory authorization.
+
+## MCR-1030 GitHub Adapter Refusal Matrix Readiness Boundary
+
+MCR-1030 confirms the local GitHub adapter refusal matrix is readiness GO for
+the current fake/guarded adapter boundary only. GH-REF-001 through GH-REF-026 all
+exist under `fixtures/github-adapter/refusals/`, all are supported local
+fixtures, and package tests assert each refusal before runner execution.
+
+The accepted local semantics are:
+
+- credential gates require explicit disposable or scoped authority and no
+  ambient env fallback before execution
+- approval preview is non-consuming
+- local target, ref, protection, dirty-worktree, body, and evidence refusals do
+  not consume approval
+- runtime-orchestrator coverage keeps GitHub target, repository, and run id
+  correlated with the approved proof/approval envelope
+
+This is not production GitHub readiness. It does not authorize Octokit,
+`gh pr create`, `gh api`, fetch calls, PR creation, branch deletion, merge,
+deploy, production `main` writes, broad-token use, token/env dumps, secret
+reads, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 
