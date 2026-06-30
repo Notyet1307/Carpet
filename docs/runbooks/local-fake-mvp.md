@@ -91,6 +91,8 @@ It does not prove or authorize:
 
 ## Next Step
 
-The next recommended task is MCR-1059 Local Fake MVP Root Command Readiness
-Audit: a read-only review of this runbook and the existing command. It should
-not implement new code.
+MCR-1059 completed as a read-only GO audit of this runbook and the existing
+command. The next recommended task is MCR-1061 Local Fake MVP Root Command
+Evidence Artifact Design: a docs-only/read-only or design-only decision on
+whether `pnpm mvp:local` should directly write `summary.log`, `summary.json`, or
+a handoff evidence artifact. It should not implement new code.

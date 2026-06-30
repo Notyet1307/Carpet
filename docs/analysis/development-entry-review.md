@@ -82,8 +82,19 @@ adds the root command `pnpm mvp:local`, which writes
 path. This does not add production MVP readiness, real-service smoke coverage,
 DB persistence, real Matrix/Codex/GitHub calls, live memory writes, or
 authorization to continue GitHub adapter expansion. MCR-1058 closed the
-docs/runbook acceptance in `docs/runbooks/local-fake-mvp.md`; the next bounded
-step is MCR-1059 read-only readiness audit.
+docs/runbook acceptance in `docs/runbooks/local-fake-mvp.md`. MCR-1059 completed
+as a read-only GO audit at repository SHA
+`fc6a1c1bf4c902c0b7cfb5f4da86e2010dc62c80`: `pnpm mvp:local` matched the
+runbook Minimum Acceptance, generated the ignored
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`, and reported
+`task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
+`pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
+schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
+docs-only source-of-truth closeout for that audit. The next bounded step is
+MCR-1061 Local Fake MVP Root Command Evidence Artifact Design, docs-only or
+read-only or design-only; it should decide whether `pnpm mvp:local` should directly
+write `summary.log`, `summary.json`, or a handoff evidence artifact, not
+implement that behavior.
 
 ## Target System Design Alignment
 

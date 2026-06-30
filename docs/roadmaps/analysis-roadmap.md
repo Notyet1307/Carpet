@@ -470,12 +470,22 @@ Matrix, Codex, GitHub, DB, or live memory. It is not production MVP, not a
 real-service smoke, not database persistence, and not authorization to continue
 GitHub adapter expansion. MCR-1055 GitHub adapter backlog review is later/backlog
 for now. MCR-1058 completed as the docs/runbook closeout in
-`docs/runbooks/local-fake-mvp.md`. The First Recommended Task after MCR-1058 is
-MCR-1059 Local Fake MVP Root Command Readiness Audit, a read-only review of the
-runbook and command. Do not treat this as authorization for real GitHub
-implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source removal,
-merge, deploy, production `main` writes, branch deletion, token/env dumps, raw
-payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory writes.
+`docs/runbooks/local-fake-mvp.md`. MCR-1059 completed as a read-only GO audit at
+repository SHA `fc6a1c1bf4c902c0b7cfb5f4da86e2010dc62c80`: `pnpm mvp:local`
+matched the runbook Minimum Acceptance, generated the ignored
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`, and reported
+`task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
+`pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
+schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
+docs-only closeout for that audit result. The First Recommended Task after
+MCR-1060 is MCR-1061 Local Fake MVP Root Command Evidence Artifact Design,
+docs-only/read-only or design-only, to decide whether the root command should
+directly write `summary.log`, `summary.json`, or a handoff evidence artifact.
+Do not implement that in MCR-1060, and do not treat this as authorization for
+real GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, source
+removal, merge, deploy, production `main` writes, branch deletion, token/env
+dumps, raw payload logging, DB/Postgres, Matrix/Codex real smoke, or live memory
+writes.
 
 ---
 

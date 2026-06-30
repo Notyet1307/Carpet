@@ -107,9 +107,19 @@ root command only: it does not call real Matrix, Codex, GitHub, DB, or live
 memory. It is not production MVP, not a real-service smoke, not database
 persistence, and not authorization to continue GitHub adapter expansion. The
 one-command local experience is documented and accepted in
-`docs/runbooks/local-fake-mvp.md` by MCR-1058. The next bounded work is MCR-1059,
-a read-only readiness audit of the runbook and command before returning to any
-backlog refinement.
+`docs/runbooks/local-fake-mvp.md` by MCR-1058. MCR-1059 completed as a
+read-only GO audit at repository SHA
+`fc6a1c1bf4c902c0b7cfb5f4da86e2010dc62c80`: `pnpm mvp:local` matched the
+runbook Minimum Acceptance, generated the ignored
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`, and reported
+`task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
+`pr_count=1`, and `memory_status=proposed`; `pnpm test:contracts` and `pnpm
+schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 records
+that audit result in source-of-truth docs only. The next bounded work is
+MCR-1061 Local Fake MVP Root Command Evidence Artifact Design, docs-only or
+read-only or design-only, to decide whether the root command should directly write
+`summary.log`, `summary.json`, or a handoff evidence artifact. MCR-1060 does not
+authorize implementing that artifact.
 
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec

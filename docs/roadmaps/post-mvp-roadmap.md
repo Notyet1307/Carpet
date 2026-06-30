@@ -13,8 +13,8 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1058, the First Recommended Task is MCR-1059 Local Fake MVP Root
-Command Readiness Audit.
+After MCR-1060, the First Recommended Task is MCR-1061 Local Fake MVP Root
+Command Evidence Artifact Design.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
@@ -76,8 +76,15 @@ runtime-orchestrator flow and does not call real Matrix, Codex, GitHub, DB, or
 live memory. It is not production MVP, not a real-service smoke, not database
 persistence, and not authorization to continue GitHub adapter expansion.
 MCR-1058 added `docs/runbooks/local-fake-mvp.md` as the docs-only acceptance
-and runbook closeout for that command. Production GitHub implementation remains
-unauthorized.
+and runbook closeout for that command. MCR-1059 completed as a read-only GO
+audit at repository SHA `fc6a1c1bf4c902c0b7cfb5f4da86e2010dc62c80`: `pnpm
+mvp:local` matched the runbook Minimum Acceptance, generated the ignored
+`.mcr/runs/local-fake-mvp/runtime-store.snapshot.json`, and reported
+`task_state=completed`, `proof_status=verified`, `approval_status=consumed`,
+`pr_count=1`, and `memory_status=proposed`. `pnpm test:contracts` and `pnpm
+schemas:validate` were 84/84, and `git diff --check` exited 0. MCR-1060 is the
+docs-only closeout for that audit result. Production GitHub implementation
+remains unauthorized.
 
 ## Cards
 
@@ -1074,8 +1081,8 @@ No implementation was authorized by this card.
 
 ### MCR-1059: Local Fake MVP Root Command Readiness Audit
 
-Status: First Recommended Task after MCR-1058. Read-only audit only; no
-implementation is authorized by this card.
+Status: completed; read-only audit result GO. Historical card retained for
+source-of-truth traceability.
 
 - Problem solved: after the runbook closeout, an independent worker should
   verify the command, generated snapshot, and roadmap state without changing
@@ -1095,6 +1102,55 @@ implementation is authorized by this card.
   `git status --short --untracked-files=all`.
 - Fake/scaffold/real boundary: read-only readiness audit; no new runtime code,
   no real-service smoke, and no GitHub adapter expansion.
+
+### MCR-1060: Local Fake MVP Root Command Readiness Audit Closeout
+
+Status: completed as docs-only closeout. This card records the MCR-1059 GO
+result in roadmap/source-of-truth docs only.
+
+- Problem solved: MCR-1059 proved the root command and runbook match, but docs
+  still presented MCR-1059 as the active next task.
+- Why now: after a GO audit, source-of-truth docs should stop sending workers
+  back to the same read-only audit.
+- Allowed files: roadmap/source-of-truth docs only.
+- Forbidden files/actions: package files, runtime, apps, packages, workers,
+  schemas, fixtures, tests, `.env`, `.mcr`, real Matrix, real Codex, real
+  GitHub, DB/Postgres, live memory, commit, push, merge, PR.
+- Acceptance criteria: record MCR-1059 GO, mark MCR-1059 completed, state that
+  `pnpm mvp:local` runs the local fake MVP and writes the ignored snapshot, keep
+  real-service and production boundaries negative, and recommend MCR-1061 as a
+  design/read-only next task.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`, `git diff
+  --check`, and stale-text `rg`.
+- Fake/scaffold/real boundary: docs-only closeout; no new code or command
+  behavior.
+
+### MCR-1061: Local Fake MVP Root Command Evidence Artifact Design
+
+Status: First Recommended Task after MCR-1060. Docs-only/read-only or
+design-only; no implementation is authorized by this card.
+
+- Problem solved: MCR-1059 showed that `pnpm mvp:local` can be verified by
+  stdout plus the ignored snapshot, but the repo has not decided whether the
+  root command itself should write a stable evidence artifact such as
+  `summary.log`, `summary.json`, or a handoff evidence record.
+- Why now: decide the artifact shape before changing command behavior, so later
+  workers do not infer evidence format from one audit transcript.
+- Allowed files/actions: read-only inspection and docs/design notes only.
+- Forbidden files/actions: package files, command implementation, runtime,
+  apps, packages, workers, schemas, fixtures, tests, `.env`, `.mcr`, real
+  Matrix, real Codex, real GitHub, DB/Postgres, live memory, commit, push,
+  merge, PR.
+- Acceptance criteria: decide whether a root-command-written
+  `summary.log`/`summary.json`/handoff evidence artifact is needed; if yes,
+  define the minimum fields, location, ignore/check-in policy, and redaction
+  boundary for a later implementation task; if no, document that the current
+  stdout-plus-snapshot proof remains sufficient.
+- Validation/proof: docs diff, stale-text `rg`, `pnpm test:contracts`, `pnpm
+  schemas:validate`, and `git diff --check`.
+- Fake/scaffold/real boundary: design only; this does not authorize command
+  implementation, production MVP, real Matrix/Codex/GitHub, DB/Postgres, live
+  memory, or GitHub adapter expansion.
 
 ## Global Deny List
 
