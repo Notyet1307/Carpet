@@ -20,8 +20,8 @@ const now = "2026-06-29T10:00:00.000Z";
 const token = "fake-disposable-token";
 const target: PullRequestTarget = {
   type: "pull_request",
-  ref: "refs/heads/mcr/MCR-840/runtime-owned-github-pr-adapter",
-  base_ref: "refs/heads/mcr-840-base-run-mcr-840",
+  ref: "refs/heads/mcr/MCR-840/run_mcr_840-runtime-owned-github-pr-adapter",
+  base_ref: "refs/heads/mcr/MCR-840/base-run_mcr_840",
 };
 
 test("runtime-owned adapter builds redacted gh pr create command and records PR proof fields", async () => {
@@ -52,9 +52,9 @@ test("runtime-owned adapter builds redacted gh pr create command and records PR 
       "--repo",
       "Notyet1307/github-pr-smoke-sandbox",
       "--head",
-      "mcr/MCR-840/runtime-owned-github-pr-adapter",
+      "mcr/MCR-840/run_mcr_840-runtime-owned-github-pr-adapter",
       "--base",
-      "mcr-840-base-run-mcr-840",
+      "mcr/MCR-840/base-run_mcr_840",
       "--title",
       "MCR-840 Runtime-Owned GitHub PR Adapter",
       "--body-file",
@@ -101,17 +101,25 @@ test("runtime-owned adapter blocks unsafe inputs before runner execution", async
     [
       "missing disposable target",
       createRequest({ disposable_target: undefined }),
-      "non_disposable_target",
+      "unsafe_target",
       { enabled: true, approvalGate: approvedGate() },
     ],
     [
       "production main",
       createRequest({
         target: { ...target, base_ref: "refs/heads/main" },
-        disposable_target: { kind: "branch_policy" },
+        disposable_target: {
+          kind: "branch_policy",
+          disposable_policy_ref: "artifact://mcr-840/target-policy.json",
+        },
       }),
       "production_main_rejected",
-      { enabled: true, approvalGate: approvedGate() },
+      {
+        enabled: true,
+        approvalGate: approvedGate({
+          target: authorizationTarget({ base_ref: "refs/heads/main" }),
+        }),
+      },
     ],
     [
       "main-to-main",
@@ -180,6 +188,130 @@ test("runtime-owned adapter blocks unsafe inputs before runner execution", async
     }
     assert.equal(calls, 0, name);
   }
+});
+
+test("runtime-owned adapter checks explicit env before missing approval", async () => {
+  let calls = 0;
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: unapprovedGate(),
+    runner: async () => {
+      calls += 1;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  });
+
+  const result = await adapter.createPullRequest(createRequest({ env: undefined }));
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "scoped_env_required");
+  }
+  assert.equal(calls, 0);
+});
+
+test("runtime-owned adapter checks explicit env before missing proof", async () => {
+  let calls = 0;
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: unapprovedGate(),
+    runner: async () => {
+      calls += 1;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  });
+
+  const result = await adapter.createPullRequest(
+    createRequest({ env: undefined, proof: null }),
+  );
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "scoped_env_required");
+  }
+  assert.equal(calls, 0);
+});
+
+test("runtime-owned adapter checks missing approval before unsafe target", async () => {
+  let calls = 0;
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: unapprovedGate(),
+    runner: async () => {
+      calls += 1;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  });
+
+  const result = await adapter.createPullRequest(
+    createRequest({ disposable_target: undefined }),
+  );
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "approval_required");
+  }
+  assert.equal(calls, 0);
+});
+
+test("runtime-owned adapter checks selected approval mismatch before unsafe ref", async () => {
+  let calls = 0;
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async () => {
+      calls += 1;
+      return { exit_code: 0, stdout: "", stderr: "" };
+    },
+  });
+
+  const result = await adapter.createPullRequest(
+    createRequest({
+      approval_id: approvalId,
+      target: {
+        type: "pull_request",
+        ref: "refs/heads/mcr/MCR-1020/head-without-run",
+        base_ref: target.base_ref,
+      },
+    }),
+  );
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "approval_mismatch");
+  }
+  assert.equal(calls, 0);
+});
+
+test("runtime-owned adapter does not consume approval on unsafe target refusal", async () => {
+  const calls: RuntimeOwnedGitHubPrCommand[] = [];
+  const adapter = createRuntimeOwnedGitHubPrAdapter({
+    enabled: true,
+    approvalGate: approvedGate(),
+    runner: async (command) => {
+      calls.push(command);
+      return {
+        exit_code: 0,
+        stdout: "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/2\n",
+        stderr: "",
+      };
+    },
+  });
+
+  const unsafe = await adapter.createPullRequest(
+    createRequest({ disposable_target: undefined }),
+  );
+
+  assert.equal(unsafe.ok, false);
+  if (!unsafe.ok) {
+    assert.equal(unsafe.code, "unsafe_target");
+  }
+  assert.equal(calls.length, 0);
+
+  const safe = await adapter.createPullRequest(createRequest());
+
+  assert.equal(safe.ok, true);
+  assert.equal(calls.length, 1);
 });
 
 test("runtime-owned adapter ignores ambient gh auth and process env", async () => {
@@ -259,6 +391,7 @@ for (const fixture of loadRefusalFixtures().filter((fixture) => fixture.support 
       assert.equal(refusalCategoryFor(result.code), fixture.expected.refusal_category);
       assert.equal(result.code, fixture.expected.adapter_code);
     }
+    assert.equal(fixture.expected.no_runner_calls, true);
     assert.equal(calls.length, 0);
   });
 }
@@ -275,7 +408,15 @@ function createRequest(overrides: Record<string, unknown> = {}) {
     base_sha: "b".repeat(40),
     head_sha: "c".repeat(40),
     cleanup_status: "not_started",
-    disposable_target: { kind: "repository" },
+    disposable_target: {
+      kind: "repository",
+      disposable_policy_ref: "artifact://mcr-840/target-policy.json",
+    },
+    target_protection: {
+      ruleset_enforcement: "active",
+      branch_protection_summary: "protect-main active",
+      checked_at: "2026-06-29T10:04:00.000Z",
+    },
     credential_scope: "disposable",
     env: { GH_TOKEN: token },
     evidence_dir: "artifact://mcr-840/github-pr-create",
@@ -301,6 +442,7 @@ type RefusalFixture = {
   expected: {
     refusal_category: string;
     adapter_code: string;
+    no_runner_calls: boolean;
   };
 };
 
@@ -390,13 +532,13 @@ function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-function approvedGate() {
+function approvedGate(approvalOverrides: Record<string, unknown> = {}) {
   const approvalGate = createInMemoryApprovalGate({
     now: () => new Date("2026-06-29T10:05:00.000Z"),
     verified_proof_ids: new Set([proofId]),
   });
 
-  assert.equal(approvalGate.grant(approval()).ok, true);
+  assert.equal(approvalGate.grant(approval(approvalOverrides)).ok, true);
 
   return approvalGate;
 }

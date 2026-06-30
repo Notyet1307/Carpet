@@ -88,6 +88,41 @@ test("accepts one human action-scoped approval and rejects replay", () => {
   }
 });
 
+test("previewAuthorize does not consume a matching approval", () => {
+  const approvalGate = gate();
+
+  deepEqual(approvalGate.grant(approval()), {
+    ok: true,
+    approval_id: "approval_mcr_500",
+  });
+
+  const preview = approvalGate.previewAuthorize(createPrRequest());
+
+  equal(preview.ok, true);
+  if (preview.ok) {
+    deepEqual(preview, {
+      ok: true,
+      approval_id: "approval_mcr_500",
+      action: "create_pr",
+      target: prTarget,
+    });
+  }
+
+  const authorize = approvalGate.authorize(createPrRequest());
+
+  equal(authorize.ok, true);
+  if (authorize.ok) {
+    equal(authorize.approval_id, "approval_mcr_500");
+  }
+
+  const replay = approvalGate.authorize(createPrRequest());
+
+  equal(replay.ok, false);
+  if (!replay.ok) {
+    equal(replay.code, "approval_replayed");
+  }
+});
+
 test("requires task id, proof id, action, and target to match", () => {
   const approvalGate = gate();
 

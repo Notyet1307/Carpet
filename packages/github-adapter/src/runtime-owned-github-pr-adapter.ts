@@ -12,8 +12,8 @@ import {
 import type { PullRequestTarget } from "./fake-github-adapter.ts";
 
 export type DisposableGitHubPrTarget =
-  | { kind: "repository" }
-  | { kind: "branch_policy" };
+  | { kind: "repository"; disposable_policy_ref?: string }
+  | { kind: "branch_policy"; disposable_policy_ref?: string };
 
 export type RuntimeOwnedGitHubPrCommand = {
   executable: "gh";
@@ -57,6 +57,18 @@ export type RuntimeOwnedGitHubEvidenceSafety = {
   summary?: string;
 };
 
+export type RuntimeOwnedGitHubTargetProtection = {
+  ruleset_enforcement?: string;
+  branch_protection_summary?: string;
+  checked_at?: string;
+};
+
+export type RuntimeOwnedGitHubGitStatusSummary = {
+  is_clean?: boolean;
+  status_short?: string;
+  summary_ref?: string;
+};
+
 export type RuntimeOwnedGitHubPullRequest = {
   url: string;
   task_id: string;
@@ -88,6 +100,9 @@ export type RuntimeOwnedGitHubPrInput = {
   head_sha: string;
   cleanup_status: RuntimeOwnedGitHubPullRequest["cleanup_status"];
   disposable_target?: DisposableGitHubPrTarget;
+  target_protection?: RuntimeOwnedGitHubTargetProtection;
+  content_source?: "artifact" | "local_branch";
+  git_status_summary?: RuntimeOwnedGitHubGitStatusSummary;
   credential_scope?: "disposable" | "scoped";
   env?: Record<string, string>;
   evidence_dir: string;
@@ -107,8 +122,11 @@ export type RuntimeOwnedGitHubPrResult =
         | "target_confusion"
         | "missing_proof"
         | "proof_verification_failed"
-        | "non_disposable_target"
+        | "unsafe_target"
         | "production_main_rejected"
+        | "unsafe_ref"
+        | "unknown_protection"
+        | "dirty_worktree"
         | "credential_scope_required"
         | "scoped_env_required"
         | "unsafe_body"
@@ -127,6 +145,7 @@ export type RuntimeOwnedGitHubPrResult =
 export type RuntimeOwnedGitHubPrAdapterOptions = {
   enabled?: boolean;
   approvalGate: {
+    previewAuthorize(request: ApprovalRequest): ApprovalGateResult;
     authorize(request: ApprovalRequest): ApprovalGateResult;
   };
   runner?: RuntimeOwnedGitHubPrRunner;
@@ -157,6 +176,16 @@ export function createRuntimeOwnedGitHubPrAdapter(
         return targetError;
       }
 
+      if (!isAllowedCredentialScope(input.credential_scope)) {
+        return fail("credential_scope_required", "A disposable or scoped credential is required.");
+      }
+
+      const token = explicitGitHubToken(input.env);
+
+      if (!token) {
+        return fail("scoped_env_required", "Pass exactly GH_TOKEN in explicit env.");
+      }
+
       if (!input.proof) {
         return fail("missing_proof", "Runtime proof is required before GitHub PR creation.");
       }
@@ -175,10 +204,48 @@ export function createRuntimeOwnedGitHubPrAdapter(
         };
       }
 
+      const approvalRequest = {
+        task_id: input.task_id,
+        proof_id: input.proof.proof_id,
+        ...(input.approval_id ? { approval_id: input.approval_id } : {}),
+        run_id: input.proof.run_id,
+        action: "create_pr",
+        target: { ...input.target, repository: input.repository },
+        requested_at: input.requested_at ?? now().toISOString(),
+      };
+      const approvalPreview = options.approvalGate.previewAuthorize(approvalRequest);
+
+      if (!approvalPreview.ok) {
+        return {
+          ok: false,
+          code: approvalPreview.code,
+          reason: approvalPreview.reason,
+          ...(approvalPreview.errors ? { errors: approvalPreview.errors } : {}),
+        };
+      }
+
       const disposableError = disposableTargetError(input);
 
       if (disposableError) {
         return disposableError;
+      }
+
+      const refError = refSafetyError(input);
+
+      if (refError) {
+        return refError;
+      }
+
+      const protectionError = protectionSafetyError(input);
+
+      if (protectionError) {
+        return protectionError;
+      }
+
+      const dirtyWorktreeError = dirtyWorktreeRefusal(input);
+
+      if (dirtyWorktreeError) {
+        return dirtyWorktreeError;
       }
 
       const evidenceError = evidenceValidationError(input);
@@ -197,25 +264,7 @@ export function createRuntimeOwnedGitHubPrAdapter(
         return fail("process_runner_required", "A process runner must be injected.");
       }
 
-      if (!isAllowedCredentialScope(input.credential_scope)) {
-        return fail("credential_scope_required", "A disposable or scoped credential is required.");
-      }
-
-      const token = explicitGitHubToken(input.env);
-
-      if (!token) {
-        return fail("scoped_env_required", "Pass exactly GH_TOKEN in explicit env.");
-      }
-
-      const authorization = options.approvalGate.authorize({
-        task_id: input.task_id,
-        proof_id: input.proof.proof_id,
-        ...(input.approval_id ? { approval_id: input.approval_id } : {}),
-        run_id: input.proof.run_id,
-        action: "create_pr",
-        target: { ...input.target, repository: input.repository },
-        requested_at: input.requested_at ?? now().toISOString(),
-      });
+      const authorization = options.approvalGate.authorize(approvalRequest);
 
       if (!authorization.ok) {
         return {
@@ -333,15 +382,58 @@ function targetValidationError(
 function disposableTargetError(
   input: RuntimeOwnedGitHubPrInput,
 ): RuntimeOwnedGitHubPrResult | null {
-  if (!input.disposable_target || !input.repository) {
-    return fail("non_disposable_target", "Target must be explicitly disposable.");
+  if (
+    !input.disposable_target ||
+    !input.repository ||
+    !input.disposable_target.disposable_policy_ref
+  ) {
+    return fail("unsafe_target", "Target must be explicitly disposable with policy proof.");
+  }
+
+  return null;
+}
+
+function refSafetyError(input: RuntimeOwnedGitHubPrInput): RuntimeOwnedGitHubPrResult | null {
+  if (isMainRef(input.target.base_ref) || isMainRef(input.target.ref)) {
+    return fail("production_main_rejected", "Pull request refs cannot target main or master.");
   }
 
   if (
-    input.disposable_target.kind === "branch_policy" &&
-    isMainRef(input.target.base_ref)
+    !refIncludesRunId(input.target.base_ref, input.proof?.run_id) ||
+    !refIncludesRunId(input.target.ref, input.proof?.run_id)
   ) {
-    return fail("production_main_rejected", "Disposable branch policy cannot target main.");
+    return fail("unsafe_ref", "Pull request refs must include the current run id.");
+  }
+
+  return null;
+}
+
+function protectionSafetyError(
+  input: RuntimeOwnedGitHubPrInput,
+): RuntimeOwnedGitHubPrResult | null {
+  if (
+    !input.target_protection?.ruleset_enforcement ||
+    !input.target_protection.branch_protection_summary ||
+    !input.target_protection.checked_at
+  ) {
+    return fail("unknown_protection", "Target ruleset and branch protection proof is required.");
+  }
+
+  return null;
+}
+
+function dirtyWorktreeRefusal(
+  input: RuntimeOwnedGitHubPrInput,
+): RuntimeOwnedGitHubPrResult | null {
+  if (input.content_source !== "local_branch") {
+    return null;
+  }
+
+  if (
+    input.git_status_summary?.is_clean !== true ||
+    Boolean(input.git_status_summary.status_short?.trim())
+  ) {
+    return fail("dirty_worktree", "Local branch content source requires a clean worktree.");
   }
 
   return null;
@@ -424,6 +516,10 @@ function isMainRef(ref: string) {
     ref === "refs/heads/main" ||
     ref === "refs/heads/master"
   );
+}
+
+function refIncludesRunId(ref: string, runId: string | undefined) {
+  return typeof runId === "string" && runId.length > 0 && ref.includes(runId);
 }
 
 function firstGitHubPullRequestUrl(stdout: string) {

@@ -94,6 +94,11 @@ type RuntimeGitHubPrAdapter = {
   enabled?: boolean;
   repository: string;
   disposable_target: DisposableGitHubPrTarget;
+  target_protection?: {
+    ruleset_enforcement?: string;
+    branch_protection_summary?: string;
+    checked_at?: string;
+  };
   credential_scope?: "disposable" | "scoped";
   env?: Record<string, string>;
   evidence_dir: string;
@@ -118,6 +123,7 @@ const prTarget = {
   ref: "refs/heads/mcr/MCR-800/runtime-orchestrator-cli",
   base_ref: "refs/heads/main",
 };
+type RuntimeApprovalTarget = typeof prTarget & { repository?: string };
 
 type RuntimeOrchestratorContext = {
   now: string;
@@ -508,6 +514,9 @@ export async function runRuntimeOrchestrator(
     { proof_ref: context.proofId },
   );
 
+  const approvalTarget = input.github_pr_adapter
+    ? runtimeOwnedApprovalTarget(context, input.github_pr_adapter)
+    : prTarget;
   const approvalProjectionResult = createRuntimeApprovalProjection({
     approval_id: context.approvalId,
     task_id: context.taskId,
@@ -515,7 +524,7 @@ export async function runRuntimeOrchestrator(
     run_id: context.runId,
     trace_id: context.traceId,
     action: "create_pr",
-    target: prTarget,
+    target: approvalTarget,
     requested_at: "2026-06-29T10:03:00.000Z",
     expires_at: "2026-06-29T11:00:00.000Z",
     risk_notes: proofBuild.proof.risk_notes,
@@ -564,7 +573,7 @@ export async function runRuntimeOrchestrator(
     run_id: context.runId,
     action: "create_pr",
     actor: { type: "human" as const, id: "@lead:carpet.test" },
-    target: prTarget,
+    target: approvalTarget,
     approved_at: "2026-06-29T10:04:00.000Z",
   });
   const approvalGrant = approvalIntakeResult.ok
@@ -640,7 +649,7 @@ export async function runRuntimeOrchestrator(
         proofArtifactRecords.map((artifact) => artifact.artifact_id),
       ),
     ],
-    approval_refs: [approvalRef(context)],
+    approval_refs: [approvalRef(context, approvalTarget)],
     artifact_refs: artifacts.records(),
   });
 
@@ -746,11 +755,13 @@ function runtimeOwnedGitHubPrRequest(
   proof: ProofLedgerEntry,
   adapter: RuntimeGitHubPrAdapter,
 ) {
+  const target = runtimeOwnedPullRequestTarget(context);
+
   return {
     action: "create_pr",
     task_id: context.taskId,
     proof,
-    target: prTarget,
+    target,
     repository: adapter.repository,
     title: context.title,
     body_file: adapter.body_file,
@@ -758,10 +769,31 @@ function runtimeOwnedGitHubPrRequest(
     head_sha: adapter.head_sha,
     cleanup_status: adapter.cleanup_status,
     disposable_target: adapter.disposable_target,
+    target_protection: adapter.target_protection,
     credential_scope: adapter.credential_scope,
     env: adapter.env,
     evidence_dir: adapter.evidence_dir,
     requested_at: "2026-06-29T10:05:00.000Z",
+  };
+}
+
+function runtimeOwnedApprovalTarget(
+  context: RuntimeOrchestratorContext,
+  adapter: RuntimeGitHubPrAdapter,
+) {
+  return {
+    ...runtimeOwnedPullRequestTarget(context),
+    repository: adapter.repository,
+  };
+}
+
+function runtimeOwnedPullRequestTarget(context: RuntimeOrchestratorContext) {
+  const targetPrefix = `refs/heads/mcr/${context.taskCardId}/${context.slug}/${context.runId}`;
+
+  return {
+    type: "pull_request" as const,
+    ref: `${targetPrefix}/head`,
+    base_ref: `${targetPrefix}/base`,
   };
 }
 
@@ -989,7 +1021,7 @@ function proofRef(
   };
 }
 
-function approvalRef(context: RuntimeOrchestratorContext) {
+function approvalRef(context: RuntimeOrchestratorContext, target: RuntimeApprovalTarget) {
   return {
     record_type: "approval_ref" as const,
     approval_id: context.approvalId,
@@ -998,10 +1030,17 @@ function approvalRef(context: RuntimeOrchestratorContext) {
     action: "create_pr" as const,
     status: "consumed" as const,
     actor: { type: "human" as const, id: "@lead:carpet.test" },
-    target: prTarget,
+    target,
     conditions: ["Create only the simulated PR record."],
     replay_key_hash: createHash("sha256")
-      .update([context.taskId, context.runId, "create_pr", prTarget.ref, context.proofId].join(":"))
+      .update([
+        context.taskId,
+        context.runId,
+        "create_pr",
+        target.ref,
+        "repository" in target ? target.repository : "",
+        context.proofId,
+      ].join(":"))
       .digest("hex"),
     created_at: "2026-06-29T10:04:00.000Z",
     expires_at: "2026-06-29T11:00:00.000Z",

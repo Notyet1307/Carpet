@@ -88,6 +88,10 @@ selected mismatched approval record per fixture, and the adapter returns the
 approval gate's real `approval_mismatch` code instead of remapping
 `approval_required`.
 
+MCR-1020 closes the remaining local target/ref/protection/dirty-worktree rows.
+The adapter now has pre-run gates for disposable policy proof, exact run-id ref
+correlation, target protection proof, and dirty local branch content.
+
 Supported by the current adapter API and local fixture runner:
 
 - `GH-REF-001` uses missing proof input and maps `missing_proof`.
@@ -110,7 +114,11 @@ Supported by the current adapter API and local fixture runner:
 - `GH-REF-011` maps current `credential_scope_required` to
   `unsafe_credential`.
 - `GH-REF-012` maps current `scoped_env_required` to `unsafe_credential`.
+- `GH-REF-013` maps current `unsafe_target` directly.
 - `GH-REF-014` maps current `production_main_rejected` to `unsafe_ref`.
+- `GH-REF-015` maps current `unsafe_ref` directly.
+- `GH-REF-016` maps current `unknown_protection` directly.
+- `GH-REF-017` maps current `dirty_worktree` directly.
 - `GH-REF-018` uses PR body safety input and maps `unsafe_body`.
 - `GH-REF-019` uses evidence safety input and maps `unsafe_evidence`.
 - `GH-REF-020` uses current `forbidden_action` directly.
@@ -181,9 +189,9 @@ ordering, not to replace the one-denial-cause-per-fixture matrix.
 
 ## Later Implementation Guardrail
 
-The next recommended implementation task is MCR-1020 for remaining uncovered
-GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017 target/ref/protection/
-dirty-worktree refusals. It must still refuse real GitHub writes by default and
-must not introduce Octokit, `gh pr create`, `gh api` writes, fetch calls, merge,
-deploy, production `main` writes, broad credential use, secret reads, token
-value logging, env dumps, raw approval payload logging, or live memory writes.
+No MCR-950 local refusal rows remain uncovered after MCR-1020. The next
+recommended step is verifier review and a docs-only readiness audit before any
+later adapter expansion. This plan still does not authorize real GitHub writes,
+Octokit, `gh pr create`, `gh api` writes, fetch calls, merge, deploy, production
+`main` writes, broad credential use, secret reads, token value logging, env
+dumps, raw approval payload logging, or live memory writes.

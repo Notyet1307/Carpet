@@ -1,6 +1,6 @@
 {
-  "case_id": "GH-REF-014",
-  "scenario_id": "GH-REF-TC-014",
+  "case_id": "GH-REF-015",
+  "scenario_id": "GH-REF-TC-015",
   "support": "supported",
   "adapter": {
     "enabled": true,
@@ -8,8 +8,8 @@
     "approval_overrides": {
       "target": {
         "type": "pull_request",
-        "ref": "refs/heads/mcr/MCR-970/run-mcr-970-head",
-        "base_ref": "refs/heads/main",
+        "ref": "refs/heads/mcr/MCR-1020/head-without-run",
+        "base_ref": "refs/heads/mcr/MCR-1020/base-run_mcr_840",
         "repository": "Notyet1307/github-pr-smoke-sandbox"
       }
     },
@@ -20,20 +20,16 @@
     "overrides": {
       "target": {
         "type": "pull_request",
-        "ref": "refs/heads/mcr/MCR-970/run-mcr-970-head",
-        "base_ref": "refs/heads/main"
-      },
-      "disposable_target": {
-        "kind": "branch_policy",
-        "disposable_policy_ref": "artifact://mcr-970/github-adapter-refusals/GH-REF-014/target-policy.json"
+        "ref": "refs/heads/mcr/MCR-1020/head-without-run",
+        "base_ref": "refs/heads/mcr/MCR-1020/base-run_mcr_840"
       }
     }
   },
   "expected": {
     "refusal_category": "unsafe_ref",
-    "adapter_code": "production_main_rejected",
+    "adapter_code": "unsafe_ref",
     "evidence_refs": [
-      "ref_classification_ref"
+      "request_ref_summary_ref"
     ],
     "no_runner_calls": true
   }

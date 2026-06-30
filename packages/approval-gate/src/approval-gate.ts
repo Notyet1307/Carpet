@@ -125,7 +125,15 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
 
       return { ok: true };
     },
+    previewAuthorize(request: unknown): ApprovalGateResult {
+      return checkAuthorization(request, false);
+    },
     authorize(request: unknown): ApprovalGateResult {
+      return checkAuthorization(request, true);
+    },
+  };
+
+  function checkAuthorization(request: unknown, consume: boolean): ApprovalGateResult {
       const parsed = parseRequest(request);
 
       if (!parsed.ok) {
@@ -159,7 +167,9 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
         return fail("approval_mismatch", "selected approval does not match request");
       }
 
-      usedApprovalIds.add(match.approval_id);
+      if (consume) {
+        usedApprovalIds.add(match.approval_id);
+      }
 
       return {
         ok: true,
@@ -167,8 +177,7 @@ export function createInMemoryApprovalGate(options: ApprovalGateOptions = {}) {
         action: parsed.request.action,
         target: parsed.request.target,
       };
-    },
-  };
+  }
 }
 
 function parseRequest(value: unknown):

@@ -402,6 +402,11 @@ test("runtime orchestrator opt-in Codex smoke adapter uses injected runner and p
 test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after proof and approval", async () => {
   const snapshotPath = tempSnapshotPath();
   const token = "fake-runtime-disposable-token";
+  const runtimeOwnedTarget = {
+    type: "pull_request",
+    ref: `refs/heads/mcr/MCR-800/runtime-orchestrator-cli/${runId}/head`,
+    base_ref: `refs/heads/mcr/MCR-800/runtime-orchestrator-cli/${runId}/base`,
+  };
   const calls: unknown[] = [];
   const result = await runRuntimeOrchestrator({
     repoRoot: root,
@@ -409,7 +414,15 @@ test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after p
     github_pr_adapter: {
       enabled: true,
       repository: "Notyet1307/github-pr-smoke-sandbox",
-      disposable_target: { kind: "repository" },
+      disposable_target: {
+        kind: "repository",
+        disposable_policy_ref: "artifact://mcr-1020/runtime-github-target-policy.json",
+      },
+      target_protection: {
+        ruleset_enforcement: "active",
+        branch_protection_summary: "protect-main active",
+        checked_at: "2026-06-29T10:04:00.000Z",
+      },
       credential_scope: "disposable",
       env: { GH_TOKEN: token },
       evidence_dir: "artifact://mcr-840/runtime-github-pr",
@@ -433,14 +446,33 @@ test("runtime orchestrator opt-in GitHub PR adapter uses injected runner after p
   if (!result.approval_before_grant.ok) {
     assert.equal(result.approval_before_grant.code, "approval_required");
   }
+  assert.deepEqual(result.approval_projection.target, {
+    ...runtimeOwnedTarget,
+    repository: "Notyet1307/github-pr-smoke-sandbox",
+  });
   assert.equal(result.approval_grant.ok, true);
   assert.equal(result.approval_after_grant.ok, true);
   assert.equal(result.prs.length, 1);
+  assert.deepEqual(result.prs[0]?.target, runtimeOwnedTarget);
   assert.equal(result.prs[0]?.url, "https://github.com/Notyet1307/github-pr-smoke-sandbox/pull/3");
   assert.equal(result.prs[0]?.approval_id, "approval_mcr_800_runtime_orchestrator_cli");
   assert.equal(result.prs[0]?.base_sha, "b".repeat(40));
   assert.equal(result.prs[0]?.head_sha, "c".repeat(40));
   assert.equal(result.prs[0]?.cleanup_status, "not_started");
+  assert.deepEqual((calls[0] as { args: string[] }).args, [
+    "pr",
+    "create",
+    "--repo",
+    "Notyet1307/github-pr-smoke-sandbox",
+    "--head",
+    `mcr/MCR-800/runtime-orchestrator-cli/${runId}/head`,
+    "--base",
+    `mcr/MCR-800/runtime-orchestrator-cli/${runId}/base`,
+    "--title",
+    "MCR-800 Runtime Orchestrator CLI",
+    "--body-file",
+    ".mcr/runs/run_mcr_800_runtime_orchestrator_cli/pr-body.md",
+  ]);
   assert.equal(JSON.stringify(result).includes(token), false);
 });
 

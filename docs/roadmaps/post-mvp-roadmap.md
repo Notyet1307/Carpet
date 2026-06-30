@@ -13,18 +13,23 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After MCR-1010 review, start with **MCR-1020 remaining GitHub adapter local
-refusal hardening** for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
+MCR-1020 remaining GitHub adapter local refusal hardening is completed and
+pending review. It adds local executable coverage for GH-REF-013, GH-REF-015,
+GH-REF-016, and GH-REF-017.
 MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
 policy artifact for evidence retention and cleanup, MCR-940 has a hardening
 plan artifact, MCR-950 has a refusal matrix artifact, MCR-960 has a docs-only
 test-plan artifact, MCR-970 adds the first local refusal fixtures and tests,
 MCR-980 hardens the deferred local refusal source boundary, MCR-990 adds the
 local forbidden-action fixture slice for GH-REF-021 through GH-REF-026,
-MCR-1000 documents the approval mismatch source/harness gap, and MCR-1010
-closes GH-REF-004 through GH-REF-009 as executable local `approval_mismatch`
-fixtures. The remaining uncovered MCR-950 rows are GH-REF-013, GH-REF-015,
-GH-REF-016, and GH-REF-017.
+MCR-1000 documents the approval mismatch source/harness gap, MCR-1010 closes
+GH-REF-004 through GH-REF-009 as executable local `approval_mismatch` fixtures,
+and MCR-1020 closes GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017 as local
+target/ref/protection/dirty-worktree refusals. No MCR-950 local refusal rows
+remain uncovered. The next recommended step is verifier review of MCR-1020 and
+a docs-only readiness audit before any later GitHub adapter expansion; this
+does not authorize real GitHub, production automation, merge, deploy, or live
+memory work.
 
 ## Cards
 
@@ -365,11 +370,17 @@ Status: completed; pending review.
 
 ### MCR-1020: Remaining GitHub Adapter Local Refusal Hardening
 
-Status: proposed next after MCR-1010 review.
+Status: completed; pending review.
 
 - Problem solved: remaining uncovered MCR-950 rows GH-REF-013, GH-REF-015,
   GH-REF-016, and GH-REF-017 need local target/ref/protection/dirty-worktree
   refusals before any broader GitHub adapter work.
+- Coverage added: GH-REF-013 maps to `unsafe_target`, GH-REF-015 maps to
+  `unsafe_ref`, GH-REF-016 maps to `unknown_protection`, and GH-REF-017 maps to
+  `dirty_worktree`; every case refuses before runner execution.
+- Next step: verifier review and, after merge, a docs-only readiness audit for
+  the GitHub adapter refusal matrix. Do not start real GitHub or production
+  automation from this completion.
 - Fake/scaffold/real boundary: local source/harness and fixture hardening only;
   no real GitHub, no Octokit, no `gh pr create`, no `gh api`, no push, no merge,
   no deploy, no secret reads, and no live memory writes.

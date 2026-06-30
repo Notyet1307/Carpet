@@ -1,0 +1,27 @@
+{
+  "case_id": "GH-REF-016",
+  "scenario_id": "GH-REF-TC-016",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "target_protection": {
+        "ruleset_enforcement": "active",
+        "branch_protection_summary": "protect-main active"
+      }
+    }
+  },
+  "expected": {
+    "refusal_category": "unknown_protection",
+    "adapter_code": "unknown_protection",
+    "evidence_refs": [
+      "ruleset_protection_summary_ref"
+    ],
+    "no_runner_calls": true
+  }
+}

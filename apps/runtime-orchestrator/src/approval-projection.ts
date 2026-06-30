@@ -60,6 +60,7 @@ type PullRequestProjectionTarget = {
   type: "pull_request";
   ref: string;
   base_ref: string;
+  repository?: string;
 };
 
 type RuntimeApprovalResponse = {
@@ -188,6 +189,7 @@ export function createRuntimeApprovalIntake(options: RuntimeApprovalIntakeOption
           approval_id: parsed.approval.approval_id,
           task_id: projection.task_id,
           proof_id: projection.proof_id,
+          ...(projection.target.repository ? { run_id: projection.run_id } : {}),
           action: projection.action,
           actor: {
             type: "human",
@@ -281,12 +283,15 @@ function parsePullRequestTarget(value: unknown): PullRequestProjectionTarget | n
   const type = stringValue(value.type);
   const ref = stringValue(value.ref);
   const baseRef = stringValue(value.base_ref);
+  const repository = stringValue(value.repository);
 
   if (type !== "pull_request" || !ref || !baseRef) {
     return null;
   }
 
-  return { type, ref, base_ref: baseRef };
+  return repository
+    ? { type, ref, base_ref: baseRef, repository }
+    : { type, ref, base_ref: baseRef };
 }
 
 function isExpired(expiresAt: string, now: Date): boolean {

@@ -1,0 +1,29 @@
+{
+  "case_id": "GH-REF-017",
+  "scenario_id": "GH-REF-TC-017",
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
+  },
+  "request": {
+    "overrides": {
+      "content_source": "local_branch",
+      "git_status_summary": {
+        "is_clean": false,
+        "status_short": " M packages/github-adapter/src/runtime-owned-github-pr-adapter.ts",
+        "summary_ref": "artifact://mcr-1020/github-adapter-refusals/GH-REF-017/git-status.txt"
+      }
+    }
+  },
+  "expected": {
+    "refusal_category": "dirty_worktree",
+    "adapter_code": "dirty_worktree",
+    "evidence_refs": [
+      "git_status_summary_ref"
+    ],
+    "no_runner_calls": true
+  }
+}
