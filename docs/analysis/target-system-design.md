@@ -383,6 +383,24 @@ This is not production GitHub readiness. It does not authorize Octokit,
 deploy, production `main` writes, broad-token use, token/env dumps, secret
 reads, or live memory writes.
 
+## MCR-1040 GitHub Adapter Bounded Expansion Planning Boundary
+
+MCR-1040 adds
+`docs/analysis/github-adapter-bounded-expansion-plan.md` as a planning-only
+boundary after the MCR-1030 refusal matrix readiness audit.
+
+The target system may next design the smallest local-only adapter expansion
+slice, such as an injected client/runner interface shape or command/API
+redaction contract. That future design must preserve explicit scoped or
+disposable credential input, action-scoped approval, verified proof, run id,
+target, base ref, head ref, no ambient auth, no runner call on refusals, and
+redacted evidence refs.
+
+This is not implementation permission. It does not permit real GitHub calls,
+Octokit, `fetch`, `gh api`, `gh pr create`, PR creation, branch deletion, merge,
+deploy, production `main` writes, token reads, secret reads, env dumps, raw
+payload logging, or live memory writes.
+
 ## MCR-850 Real Vertical Smoke Boundary
 
 MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id

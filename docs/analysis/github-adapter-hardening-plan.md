@@ -130,8 +130,11 @@ current local matrix is readiness GO: all GH-REF-001 through GH-REF-026 fixtures
 are supported, every refusal case asserts no runner calls, credential gates keep
 explicit disposable or scoped authority ahead of execution, approval preview is
 non-consuming, local refusals do not consume approval, and runtime-orchestrator
-coverage keeps target, repository, and run id correlated. The smallest next step
-is later planning for any bounded adapter expansion. This does not authorize
-Runtime GitHub writes, Octokit, `gh pr create`, `gh api` writes, fetch calls,
-merge, deploy, production `main` writes, token reads, env dumps, or live memory
-writes.
+coverage keeps target, repository, and run id correlated.
+
+MCR-1040 is the next planning artifact for bounded adapter expansion. It should
+answer what a future local-only slice would design first, such as an injected
+client/runner interface shape or a command/API redaction contract. MCR-1040
+does not permit implementation, Runtime GitHub writes, Octokit, `gh pr create`,
+`gh api` writes, fetch calls, merge, deploy, production `main` writes, token
+reads, env dumps, or live memory writes.

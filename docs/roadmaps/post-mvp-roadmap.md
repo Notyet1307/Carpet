@@ -13,8 +13,10 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
+MCR-1041 GitHub Adapter Local Interface/Redaction Design is the first
+recommended task.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
-and accepted by the MCR-1030 docs-only readiness audit. It adds local executable
+and accepted by the MCR-1030 docs-only readiness audit. It added local executable
 coverage for GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017.
 MCR-901 is complete, MCR-910 and MCR-920 have design artifacts, MCR-930 has a
 policy artifact for evidence retention and cleanup, MCR-940 has a hardening
@@ -27,9 +29,12 @@ GH-REF-004 through GH-REF-009 as executable local `approval_mismatch` fixtures,
 and MCR-1020 closes GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017 as local
 target/ref/protection/dirty-worktree refusals. MCR-1030 confirms all GH-REF-001
 through GH-REF-026 local refusal fixtures are supported and assert no runner
-calls. The next recommended step is later planning for any bounded adapter
-expansion, not implementation; this does not authorize real GitHub, production
-automation, merge, deploy, or live memory work.
+calls. MCR-1040 turned the generic "later planning" instruction into a concrete
+planning-only card for bounded adapter expansion. MCR-1041 should now design
+the local-only injected client/runner interface or command/API redaction
+contract that could precede any later implementation. It must not authorize
+implementation, real GitHub, production automation, merge, deploy, or live
+memory work.
 
 ## Cards
 
@@ -131,7 +136,7 @@ service run, cleanup automation, or raw evidence check-in is authorized.
 Status: plan artifact added in
 `docs/analysis/github-adapter-hardening-plan.md`; no adapter implementation,
 real smoke, PR creation, cleanup command, merge, deploy, production main write,
-branch deletion, broad-token path, or live memory path is authorized.
+branch deletion, broad-token path, or live memory path is permitted.
 
 - Problem solved: MCR-730 and MCR-850 proved sandbox PR creation, but production
   GitHub automation and merge paths remain forbidden and need a hardening plan
@@ -410,6 +415,70 @@ Status: completed docs-only readiness audit; result GO.
 - Fake/scaffold/real boundary: docs-only readiness result; no runtime code,
   schema, fixture, package, app, test, real GitHub, or production automation
   change.
+
+### MCR-1040: GitHub Adapter Bounded Expansion Plan
+
+Status: completed planning artifact added in
+`docs/analysis/github-adapter-bounded-expansion-plan.md`; implementation remains
+unauthorized.
+
+- Problem solved: MCR-1030 leaves the next step as generic later planning,
+  which could let a future worker jump from a complete refusal matrix to real
+  GitHub adapter work.
+- Why now: the refusal matrix is complete locally, so the next durable artifact
+  should define the smallest safe expansion boundary before any code task is
+  considered.
+- Allowed files: `docs/roadmaps/post-mvp-roadmap.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`,
+  `docs/analysis/github-adapter-refusal-test-plan.md`,
+  `docs/analysis/target-system-design.md`, and
+  `docs/analysis/github-adapter-bounded-expansion-plan.md`.
+- Forbidden files/actions: runtime, app, package, source, test, schema, fixture,
+  package-manager files, `.codex.local.env`, real GitHub writes, Octokit,
+  `fetch`, `gh api`, `gh pr create`, merge, deploy, branch deletion,
+  production `main` write, token reads, secret reads, env dumps, raw payload
+  logging, live memory writes, commit, push, PR.
+- Acceptance criteria: plan states that the next phase is planning/design only;
+  it names the future minimal local-only code slice as injected client/runner
+  interface shape or command/API redaction contract; it preserves explicit
+  scoped/disposable credential input, approval/proof/run_id/target/ref binding,
+  no ambient auth, no runner call on refusals, and redacted evidence refs; it
+  includes a next worker prompt seed with allowlist and validation.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and `rg` evidence for GitHub authorization drift.
+- Fake/scaffold/real boundary: docs-only planning; no adapter implementation,
+  no new tests or fixtures, and no real GitHub write path.
+
+### MCR-1041: GitHub Adapter Local Interface/Redaction Design
+
+Status: recommended next docs-only planning/design task.
+
+- Problem solved: MCR-1040 defines the bounded expansion boundary, but the exact
+  local-only interface or redaction contract is still undecided.
+- Why now: before any code slice is considered, the repo needs one reviewable
+  design that chooses between an injected client/runner interface shape and a
+  command/API redaction contract, or explains why one must precede the other.
+- Allowed files: `docs/analysis/github-adapter-bounded-expansion-plan.md`,
+  `docs/analysis/github-adapter-hardening-plan.md`,
+  `docs/analysis/github-adapter-refusal-test-plan.md`, and
+  `docs/roadmaps/post-mvp-roadmap.md`.
+- Forbidden files/actions: `packages/**`, `apps/**`, `workers/**`,
+  `runtime/**`, `schemas/**`, `fixtures/**`, `tests/**`, package files,
+  lockfiles, `.codex.local.env`, implementation, real GitHub writes, Octokit,
+  `fetch`, `gh api`, `gh pr create`, merge, deploy, branch deletion,
+  production `main` write, token/env dump, secret read, live memory write,
+  commit, push, PR.
+- Acceptance criteria: state that the next phase still cannot implement; choose
+  or sequence the local-only interface/redaction design; name the smallest
+  future local-only code allowlist only if later approved; preserve explicit
+  scoped/disposable credential input, approval/proof/run_id/target/ref binding,
+  no ambient auth, no runner call on refusals, and redacted evidence refs;
+  include a verifier checklist and validation commands.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and `rg` evidence for GitHub authorization drift.
+- Fake/scaffold/real boundary: docs-only local interface/redaction design; no
+  adapter implementation, no new tests or fixtures, no network-capable client,
+  and no real GitHub write path.
 
 ## Global Deny List
 
