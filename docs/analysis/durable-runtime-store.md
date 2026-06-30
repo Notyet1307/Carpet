@@ -18,6 +18,11 @@ writes and reads schema-valid `RuntimeStoreSnapshot` JSON files using a temp
 file plus rename, and validates snapshots on write and read. It is a local
 single-writer file adapter only, not a production durable Runtime Store.
 
+MCR-910 records the pre-DB production store design in
+`docs/analysis/runtime-store-db-design.md`. That design defines future DB record
+shape, transaction boundary, replay/recovery, locking, retention/redaction, and
+migration gates only. It does not authorize DB implementation.
+
 The Runtime Store is the source of truth for task state, transition history,
 idempotency, artifact references, proof references, and action-scoped approval
 references. Matrix and GitHub are input, projection, and external artifact
@@ -94,6 +99,22 @@ This is a single-writer local adapter. Concurrent writers need a later design
 with unique temp names or locking. MCR-106 does not complete production durable
 Runtime Store behavior, DB persistence, migrations, replay recovery, backup
 semantics, or a persistent Runtime service.
+
+## MCR-910 DB Design Boundary
+
+`docs/analysis/runtime-store-db-design.md` is the bounded design for a future DB
+store. It keeps MCR-106 as the only implemented persistence path and keeps
+Runtime, not Matrix, GitHub, or memory, as the source of truth.
+
+The design permits only this future record shape at the planning level: tasks,
+append-only transitions, idempotency keys, proof refs, approval refs, artifact
+refs, and optional run/evidence refs. It explicitly excludes raw Matrix event
+bodies, raw logs, raw diffs, token/env material, PR bodies, external API
+payloads, and live memory bodies.
+
+No code, migration, DB service, Runtime service, or production integration is
+authorized until a later implementation task satisfies the migration gate in
+that design.
 
 ## Durable Records
 

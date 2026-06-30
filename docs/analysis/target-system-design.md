@@ -162,6 +162,23 @@ Runtime service, Matrix/GitHub/Codex calls, live memory writes, production
 durable Runtime Store semantics, or replay recovery. It is single-writer only;
 concurrent writers need later unique temp names or locking.
 
+## MCR-910 Runtime Store DB Design Boundary
+
+MCR-910 adds `docs/analysis/runtime-store-db-design.md` as a design-only gate
+before any DB/Postgres work. It defines the future minimal record set as tasks,
+append-only transitions, idempotency keys, proof refs, approval refs, artifact
+refs, and optional run/evidence refs.
+
+The future DB transition boundary must atomically validate expected state,
+dedupe idempotency, append the transition, update the task, and record supplied
+refs. Replay must come from Runtime-owned transitions or snapshot plus
+transition log, not from Matrix, GitHub, memory, logs, or PR history. Raw Matrix
+events, raw logs, raw diffs, token/env material, and live memory bodies remain
+excluded.
+
+This is not DB implementation, migration authorization, production Runtime
+readiness, or a persistent service.
+
 ## MCR-310 Closeout Boundary
 
 MCR-310 has produced one manual real Codex exec smoke proof on 2026-06-29:

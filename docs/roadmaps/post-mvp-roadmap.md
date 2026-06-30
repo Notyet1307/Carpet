@@ -39,6 +39,9 @@ adapter or DB design work starts.
 
 ### MCR-910: Production Runtime Store Design Before DB
 
+Status: design artifact added in `docs/analysis/runtime-store-db-design.md`;
+implementation remains unauthorized.
+
 - Problem solved: the repo has local file snapshot persistence, but no bounded
   design for DB transactions, replay, locking, retention, and proof refs.
 - Why now: DB/Postgres implementation would otherwise be guessed from the file
