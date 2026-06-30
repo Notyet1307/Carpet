@@ -85,12 +85,29 @@ merge. Sandbox `main` stayed at
 longer exist; `protect-main` remained active. The Runtime GitHub PR path remains
 fake/contract-only.
 
+MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id
+`mcr-850-20260629t170000z-vertical-smoke-01`. Evidence is retained locally at
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+The run used the Matrix local fixture/runtime path, not a real Synapse or
+AppService service. Codex exec ran exactly once with exit code 0 using
+`codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json -`
+and explicit env keys `PATH` and `CODEX_HOME` only. GitHub used disposable
+sandbox PR #2 in `Notyet1307/github-pr-smoke-sandbox`; cleanup closed PR #2
+with `merged=false`, deleted disposable base/head branches, and left open PR
+count for that head at 0. Sandbox `main` stayed at
+`4438b7a905d12fead4f539e6faf349b8a2464f60`; generated smoke files were removed
+after commander review while the evidence directory was kept. This is
+compatibility proof only, not production readiness.
+
 Target system alignment now lives in
 `docs/analysis/target-system-design.md`. The MCR-310 smoke closes one Codex exec
 compatibility proof only; MCR-720 closes one Matrix-only local disposable proof;
-MCR-730 closes one sandbox GitHub PR create/cleanup proof. Runtime GitHub remains
-fake, and memory stays proposal-only. Do not add an automatic commander loop or
-independent review lane.
+MCR-730 closes one sandbox GitHub PR create/cleanup proof; MCR-850 closes one
+approved disposable vertical smoke proof over local fixture/runtime Matrix,
+Codex exec, proof/approval, sandbox GitHub PR create, and cleanup boundaries.
+Runtime GitHub remains fake outside approved smoke paths, and memory stays
+proposal-only. Do not add an automatic commander loop or independent review
+lane.
 
 ---
 
@@ -189,6 +206,8 @@ Exit criteria:
   disposable smoke pass on 2026-06-29
 - [x] MCR-730 GitHub Disposable PR Smoke Run, including one sandbox PR create
   pass and close/delete cleanup proof on 2026-06-29
+- [x] MCR-850 One Real-Service MVP Vertical Smoke, including one approved
+  compatibility pass and cleanup proof on 2026-06-29
 
 Satisfied scaffold prerequisites:
 
@@ -210,6 +229,14 @@ Satisfied scaffold prerequisites:
   SHA before/after cleanup
   `4438b7a905d12fead4f539e6faf349b8a2464f60`; PR closed unmerged; both
   disposable branches deleted; `protect-main` ruleset active.
+- MCR-850 proof exists at
+  `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+  The passed scope was Matrix local fixture/runtime path, exactly one approved
+  Codex exec attempt with exit code 0, proof verification, approval, disposable
+  sandbox GitHub PR #2 create, and cleanup. No real Synapse/AppService service
+  was started; ports `8008`, `8448`, and `9009` had no listeners after cleanup.
+  Generated smoke files were deleted after commander review and evidence was
+  retained locally.
 
 Remaining manual smoke entry criteria for any further run:
 
@@ -234,6 +261,9 @@ Manual smoke exit criteria:
 - MCR-310 Codex proof remains separate and does not authorize Matrix smoke.
 - Disposable Synapse compose has no default service start and is not
   production-ready by itself.
+- MCR-850 is compatibility proof only. It does not authorize merge, deploy,
+  DB/Postgres migration, live memory write, production main push, secret dump,
+  production Matrix integration, or persistent Runtime service operation.
 
 ## Next Real-Service MVP Vertical Slices
 
@@ -414,6 +444,9 @@ write. Matrix may be local/disposable only.
 
 ### MCR-850: One Real-Service MVP Vertical Smoke
 
+Status: passed once on 2026-06-29 for run id
+`mcr-850-20260629t170000z-vertical-smoke-01`; keep as compatibility proof only.
+
 Problem solved: the repo has separate proofs for Codex, Matrix, and GitHub, but
 not one Runtime-owned vertical proof that preserves all boundaries end to end.
 
@@ -442,9 +475,22 @@ the approved manual smoke command only if requested, `pnpm test:contracts`,
 Risk notes: this is compatibility evidence, not production readiness. Any
 failure should become the next narrow card rather than broad service redesign.
 
+Passed proof: Matrix used a local fixture/runtime path rather than real
+Synapse/AppService. Codex exec ran exactly once with exit code 0 using
+`codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json -`
+and explicit env keys `PATH` and `CODEX_HOME`. GitHub created disposable sandbox
+PR #2 in `Notyet1307/github-pr-smoke-sandbox`; cleanup closed it unmerged,
+deleted disposable base/head branches, left open PR count for that head at 0,
+and kept sandbox `main` unchanged at
+`4438b7a905d12fead4f539e6faf349b8a2464f60`. Generated smoke files were deleted;
+evidence remains at
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+
 Fake/scaffold/real boundary: one real disposable vertical proof under manual
-approval; Runtime file snapshot remains source of truth; Matrix is input and
-projection only; memory remains proposal-only.
+approval; Matrix local fixture/runtime path remains distinct from real Synapse;
+Runtime file snapshot remains source of truth; memory remains proposal-only.
+No merge, deploy, DB/Postgres migration, live memory write, production main
+push, or secret dump was authorized or performed.
 
 ## Operating Cadence
 

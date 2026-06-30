@@ -44,6 +44,16 @@ merge. Sandbox `main` stayed at
 deleted, and the `protect-main` ruleset remained active. The current Runtime
 GitHub PR path is still `packages/github-adapter` fake/contract-only.
 
+MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id
+`mcr-850-20260629t170000z-vertical-smoke-01`. Evidence is retained locally at
+`/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+The Matrix leg used the local fixture/runtime path, not a real Synapse or
+AppService service. Codex exec ran exactly once, exited 0, and used only
+`PATH` and `CODEX_HOME` env keys. GitHub created disposable sandbox PR #2 in
+`Notyet1307/github-pr-smoke-sandbox`; cleanup closed it with `merged=false`,
+deleted disposable branches, and left the sandbox `main` SHA unchanged at
+`4438b7a905d12fead4f539e6faf349b8a2464f60`.
+
 MCR-105 has merged at commit `2f57b7dfa62a15ec05d7d5b3e01adc5fd54ee137`. The
 Runtime Store can now export schema-valid durable snapshots from the in-memory
 task store. That export remains ref-only and does not add DB persistence,
@@ -79,10 +89,12 @@ explicit:
 
 The guarded MCR-310 real Codex exec smoke has produced one Codex-only proof.
 MCR-720 has produced one Matrix-only local disposable proof. MCR-730 has
-produced one sandbox GitHub PR create/cleanup proof. These do not introduce an
-automatic commander loop, a separate review lane, default real Codex execution,
-production Matrix integration, production GitHub PR/API calls, deploy, or live
-memory writes.
+produced one sandbox GitHub PR create/cleanup proof. MCR-850 has produced one
+approved disposable vertical compatibility proof across local fixture/runtime
+Matrix, Codex exec, proof/approval, sandbox GitHub PR create, and cleanup. These
+do not introduce an automatic commander loop, a separate review lane, default
+real Codex execution, production Matrix integration, production GitHub PR/API
+calls, deploy, DB/Postgres migration, or live memory writes.
 
 ## Original Entry Verdict
 
@@ -219,9 +231,10 @@ allowed/forbidden files plus tests-first requirements.
 
 ## Real-Service Smoke Gate
 
-Status: partially satisfied for MCR-310 Codex exec smoke and MCR-720
-Matrix-only local disposable smoke only; manual execution still gated for every
-further real-service smoke.
+Status: partially satisfied for MCR-310 Codex exec smoke, MCR-720 Matrix-only
+local disposable smoke, MCR-730 disposable GitHub PR create smoke, and one
+MCR-850 approved vertical compatibility smoke only; manual execution still
+gated for every further real-service smoke.
 
 Evidence now present:
 
@@ -246,6 +259,20 @@ Evidence now present:
 - Non-blocking note: the first run failed because the listener process was not
   alive when Synapse submitted the transaction. The second run used a durable
   listener and direct transaction exit-code capture.
+- MCR-730 disposable GitHub PR create smoke passed once on 2026-06-29. PR #1 in
+  `Notyet1307/github-pr-smoke-sandbox` was created, closed unmerged, and its
+  disposable base/head branches were deleted while sandbox `main` stayed at
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
+- MCR-850 approved vertical smoke passed once on 2026-06-29 for run id
+  `mcr-850-20260629t170000z-vertical-smoke-01`. Evidence is retained at
+  `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+  The Matrix path was local fixture/runtime only; no Synapse/AppService service
+  started. Codex exec was exactly one attempt with exit code 0 using
+  `codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json -`
+  and env keys `PATH`, `CODEX_HOME`. GitHub used disposable sandbox PR #2; PR
+  #2 was closed with `merged=false`, disposable branches were deleted, open PR
+  count for that head was 0, and sandbox `main` remained
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
 
 Not yet complete:
 
@@ -255,12 +282,16 @@ Not yet complete:
   migrations, multi-writer locking, and replay recovery.
 - Real room/user lifecycle automation.
 - Production GitHub integration and any Runtime-owned real GitHub write path.
-- Additional GitHub PR smoke beyond the completed MCR-730 disposable sandbox
-  run.
+- Additional GitHub PR smoke beyond the completed MCR-730 and MCR-850
+  disposable sandbox runs.
 - Any production-like Codex worker execution.
 - GitHub PR/API, deploy, and live memory paths.
 - Disposable Synapse compose remains manual-only and no-default-start; the
   passed MCR-720 proof does not make it production-ready.
+- MCR-850 does not make the vertical path production-ready and does not add
+  persistent Runtime service operation, production Matrix, DB/Postgres
+  migration, merge, deploy, live memory write, production main push, or secret
+  dump.
 
 Manual gate for any real smoke:
 
@@ -281,4 +312,7 @@ real Matrix, production GitHub, deploy, or live memory validation. Do not treat
 the MCR-720 proof as production Matrix readiness, persistent Runtime validation,
 room/user lifecycle automation, production GitHub, deploy, or live memory
 validation. Do not treat the MCR-730 proof as Runtime GitHub adapter
-implementation, merge approval, deploy approval, or live memory validation.
+implementation, merge approval, deploy approval, or live memory validation. Do
+not treat the MCR-850 proof as production readiness, default automation,
+persistent Runtime validation, production Matrix/GitHub readiness, DB/Postgres
+migration approval, merge approval, deploy approval, or live memory validation.

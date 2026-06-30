@@ -13,6 +13,11 @@ MCR-720 has one approved Matrix-only real smoke pass on 2026-06-29. That pass
 does not change the default path: future real-service runs remain manual,
 opt-in, action-scoped, and disabled by default.
 
+MCR-850 has one approved real vertical smoke pass on 2026-06-29. That pass is
+compatibility proof only. It does not make the smoke default-on and does not
+authorize production Matrix, production GitHub, merge, deploy, DB/Postgres
+migration, live memory write, production main push, or secret dump.
+
 ## Purpose
 
 MCR-720 exists to preflight whether the local Matrix contracts can later be
@@ -25,6 +30,9 @@ verification, and human review.
 
 MCR-310 Codex proof remains separate and does not authorize Matrix smoke,
 GitHub smoke, deploy, live memory writes, or any further real Codex execution.
+
+MCR-850 combines already-gated paths for one approved disposable vertical run.
+It is still not a correctness source or production readiness signal.
 
 ## Passed Run Record
 
@@ -66,6 +74,54 @@ listener and direct transaction exit-code capture.
 This is compatibility proof only. Production Matrix integration, persistent
 Runtime service, real room/user lifecycle automation, GitHub/deploy/live memory,
 and production readiness remain not done.
+
+## MCR-850 Passed Vertical Smoke Record
+
+Run id: `mcr-850-20260629t170000z-vertical-smoke-01`.
+
+Evidence dir:
+
+```text
+/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01
+```
+
+Scope:
+
+- Matrix local fixture/runtime path only; no Synapse or AppService service was
+  started for this run.
+- Codex exec exactly one attempt, exit code 0.
+- GitHub disposable sandbox PR create and cleanup.
+
+Codex command shape:
+
+```bash
+codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json -
+```
+
+Codex env keys were `PATH` and `CODEX_HOME` only. Evidence must not include a
+token value or full environment dump.
+
+GitHub proof:
+
+- Target repo: `Notyet1307/github-pr-smoke-sandbox`.
+- PR: #2.
+- Cleanup: PR #2 closed with `merged=false`.
+- Disposable base/head branches deleted.
+- Open PR count for that head after cleanup: 0.
+- Sandbox `main` SHA before and after cleanup:
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
+
+Cleanup proof:
+
+- Ports `8008`, `8448`, and `9009` had no listeners after cleanup.
+- Generated smoke file was deleted after commander review.
+- Evidence directory was retained locally.
+- Commander validation re-run: `pnpm test:contracts` 84/84 pass,
+  `pnpm schemas:validate` 84/84 pass, and `git diff --check` pass.
+
+Boundary: no Carpet commit, push, merge, or PR; no merge, deploy, DB/Postgres
+migration, live memory write, production main push, or secret dump. This is
+compatibility proof only, not production readiness.
 
 ## Required Gate
 

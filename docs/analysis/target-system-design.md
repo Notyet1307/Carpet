@@ -81,9 +81,10 @@ a reviewed human or PR path, not an automatic live memory write.
 | GitHub PR adapter | implemented fake | `packages/github-adapter/src/fake-github-adapter.ts` | No Octokit or Runtime-owned GitHub API write path. |
 | Memory proposal flow | implemented fake | `workers/memory-curator-worker/**` | No reviewed PR/human application path for memory proposals. Runtime must still not write live memory. |
 | Local fake E2E harness | implemented fake | `tests/e2e/local-fake-mvp.test.ts` | Proves contract flow only, not service compatibility. |
-| Real-service smoke runbook and tests | guarded scaffold; MCR-720 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02` | Default path remains skipped; proof is local disposable compatibility only. |
+| Real-service smoke runbook and tests | guarded scaffold; MCR-720 and MCR-850 passed once manually | `docs/runbooks/real-service-smoke-tests.md`, `tests/e2e/real-service-smoke.skip.ts`; MCR-720 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-720-matrix-real-smoke-02/.mcr/runs/mcr-720-20260629t130000z-matrix-smoke-02`; MCR-850 evidence dir `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01` | Default path remains skipped; proof is disposable compatibility only, not production readiness. |
 | Real Matrix integration | local disposable smoke proof only | MCR-720 run id `mcr-720-20260629t130000z-matrix-smoke-02`: local Synapse, local AppService listener, one transaction | Production Matrix integration, persistent Runtime service, and room/user lifecycle automation remain not implemented. |
 | Real GitHub PR integration | disposable PR create smoke passed once | MCR-730 created PR #1 in `Notyet1307/github-pr-smoke-sandbox`, then closed it unmerged and deleted both disposable branches | Runtime adapter remains fake/in-memory; this proves one manual sandbox `gh` create/cleanup path only, not production GitHub integration. |
+| Real vertical smoke | disposable vertical smoke passed once | MCR-850 run id `mcr-850-20260629t170000z-vertical-smoke-01`: local fixture/runtime Matrix path, one approved Codex exec attempt exit 0, disposable sandbox PR #2 create, cleanup completed | Compatibility proof only; no real Synapse/AppService service, production GitHub, merge, deploy, DB/Postgres migration, live memory write, production main push, or secret dump. |
 | Production database, queue, and object storage | not implemented real integration | In-memory and fake stores only; Runtime Store can export a schema-valid ref-only snapshot and persist it to a local JSON file | Needs separate DB persistence, replay recovery, and production Runtime service slices. |
 | Commander automation or separate review lane | not implemented real integration | Out of scope by design | Do not add in the next phase. |
 
@@ -101,7 +102,9 @@ Replace one fake boundary at a time:
    proof, not a production Matrix path.
 3. Keep the MCR-730 disposable GitHub PR create smoke proof as one sandbox
    compatibility proof, not a Runtime GitHub adapter implementation.
-4. Treat MCR-105 Runtime Store snapshot export and MCR-106 file snapshot
+4. Keep the MCR-850 approved vertical smoke proof as one disposable
+   compatibility proof, not production readiness or default automation.
+5. Treat MCR-105 Runtime Store snapshot export and MCR-106 file snapshot
    persistence as local ref-only bridges from the in-memory store to the durable
    schema contract. Add DB persistence, replay recovery, or service integration
    only as later vertical slices after the adapter gates still preserve the same
@@ -303,3 +306,42 @@ Forbidden actions:
 - deploy
 - dump secrets or token values
 - write live memory
+
+## MCR-850 Real Vertical Smoke Boundary
+
+MCR-850 has one approved real vertical smoke pass on 2026-06-29 for run id
+`mcr-850-20260629t170000z-vertical-smoke-01`.
+
+Current status: GO for the completed disposable vertical compatibility smoke
+only. Production readiness remains not proven.
+
+Proof:
+
+- Evidence dir:
+  `/Users/yet/Test_drive_sales/.worktrees/Carpet/MCR-850-real-vertical-smoke-01/.mcr/runs/mcr-850-20260629t170000z-vertical-smoke-01`.
+- Matrix path: local fixture/runtime path only; no Synapse or AppService service
+  started for this run.
+- Codex exec: exactly one attempt, exit code 0.
+- Codex command shape:
+  `codex exec --json --sandbox workspace-write --output-schema ./schemas/codex/codex-exec-smoke-result.schema.json -`.
+- Codex env keys: `PATH` and `CODEX_HOME`; no token or full env dump.
+- GitHub target: `Notyet1307/github-pr-smoke-sandbox`.
+- PR: #2.
+- Cleanup result: PR #2 closed with `merged=false`; disposable base/head
+  branches deleted; open PR count for that head was 0.
+- Sandbox `main` SHA before and after cleanup:
+  `4438b7a905d12fead4f539e6faf349b8a2464f60`.
+- Ports `8008`, `8448`, and `9009` had no listeners after cleanup.
+- Generated smoke file was deleted after commander review; evidence directory
+  was retained locally.
+- Commander validation re-run: `pnpm test:contracts` 84/84 pass,
+  `pnpm schemas:validate` 84/84 pass, and `git diff --check` pass.
+
+Boundary:
+
+- No Carpet commit, push, merge, or PR.
+- No merge, deploy, DB/Postgres migration, live memory write, production main
+  push, or secret dump.
+- No production Matrix integration, persistent Runtime service, real room/user
+  lifecycle automation, production GitHub integration, or production automation
+  is claimed.
