@@ -568,6 +568,7 @@ test("runtime orchestrator Codex smoke adapter blocks unsafe cwd or secret env b
 
 test("runtime orchestrator CLI writes a caller-provided snapshot path", async () => {
   const snapshotPath = tempSnapshotPath();
+  const summaryPath = path.join(path.dirname(snapshotPath), "summary.json");
   const cli = spawnSync(
     process.execPath,
     [
@@ -581,6 +582,8 @@ test("runtime orchestrator CLI writes a caller-provided snapshot path", async ()
 
   assert.equal(cli.status, 0, cli.stderr);
   const summary = JSON.parse(cli.stdout) as {
+    command: string;
+    generated_at: string;
     snapshot_path: string;
     task_id: string;
     task_state: string;
@@ -589,9 +592,15 @@ test("runtime orchestrator CLI writes a caller-provided snapshot path", async ()
     approval_status: string;
     pr_count: number;
     memory_status: string;
+    fake_only: boolean;
+    validation_notes: string[];
   };
   const written = await readRuntimeStoreSnapshotFile(snapshotPath);
+  const artifactSummary = JSON.parse(await readFile(summaryPath, "utf8")) as typeof summary;
 
+  assert.deepEqual(artifactSummary, summary);
+  assert.equal(summary.command, "pnpm mvp:local");
+  assert.match(summary.generated_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.equal(summary.snapshot_path, snapshotPath);
   assert.equal(summary.task_state, "completed");
   assert.equal(summary.transition_count, 14);
@@ -599,6 +608,11 @@ test("runtime orchestrator CLI writes a caller-provided snapshot path", async ()
   assert.equal(summary.approval_status, "consumed");
   assert.equal(summary.pr_count, 1);
   assert.equal(summary.memory_status, "proposed");
+  assert.equal(summary.fake_only, true);
+  assert.deepEqual(summary.validation_notes, [
+    "runtime snapshot written",
+    "local fake adapters only",
+  ]);
   assert.equal(written.tasks[0]?.task_id, summary.task_id);
 });
 
