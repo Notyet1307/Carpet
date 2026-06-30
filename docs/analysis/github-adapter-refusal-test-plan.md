@@ -244,9 +244,17 @@ MCR-1050 completed that local github-adapter restriction and merged at commit
 succeeds only when `api_summary` is absent and stdout has a repo-scoped PR URL,
 and present-but-invalid or mismatched `api_summary` rejects with
 `pr_url_missing` even when stdout has a valid repo-scoped PR URL.
-Runtime-orchestrator still uses public `api_summary`. MCR-1052 is the next
-read-only post-restriction readiness audit. This plan still does not permit real
-GitHub, network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
-external process runner execution, merge, deploy, production `main` writes,
-broad credential use, secret reads, token/env dumps, raw payload logging, or live
-memory writes.
+Runtime-orchestrator still uses public `api_summary`. MCR-1052 completed as a
+GO read-only post-restriction audit at repository SHA
+`621b3b660384a7fb11c2f0827c569a8ca1f3248b`: `pnpm --filter github-adapter test`
+46/46, `pnpm --filter runtime-orchestrator test` 13/13,
+`pnpm test:contracts` 84/84, `pnpm schemas:validate` 84/84, `pnpm test` 233/233,
+and `git diff --check` passed; no real GitHub, network-capable client, or
+external process execution path was found. MCR-1053 is the docs-only closeout for
+that audit. MCR-1054 is the next read-only/design-only decision on whether to
+keep the bounded internal fallback, propose a later removal slice, or require
+more local evidence first. This plan still does not permit real GitHub,
+network-capable clients, Octokit, `gh pr create`, `gh api`, fetch calls,
+external process runner execution, source removal, merge, deploy, production
+`main` writes, broad credential use, secret reads, token/env dumps, raw payload
+logging, or live memory writes.

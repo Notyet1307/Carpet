@@ -447,11 +447,19 @@ omit `api_summary`; present-but-invalid or mismatched `api_summary` rejects with
 `pr_url_missing` instead of recovering from stdout; runtime-orchestrator remains
 on the public `api_summary`; no real GitHub, network-capable client, external
 process execution path, Octokit, `fetch`, `gh api`, or `gh pr create` path was
-added. The next active task is MCR-1052 GitHub Adapter Post-Restriction
-Readiness Audit, a read-only audit. This boundary still does not authorize real
-GitHub calls, Octokit, `fetch`, `gh api`, `gh pr create`, PR creation, branch
-deletion, merge, deploy, production `main` writes, token reads, secret reads,
-env dumps, raw payload logging, a network-capable client, or live memory writes.
+added. MCR-1052 then completed as a GO read-only audit at repository SHA
+`621b3b660384a7fb11c2f0827c569a8ca1f3248b`: github-adapter tests were 46/46,
+runtime-orchestrator tests were 13/13, contract/schema validation was 84/84
+under both commands, top-level tests were 233/233, `git diff --check` passed, no
+real GitHub/network/process execution path was found, and runtime-orchestrator
+still used public `api_summary`. MCR-1053 is the docs-only closeout for that
+audit. The next recommended task is MCR-1054 GitHub Adapter Legacy Stdout
+Fallback Removal Decision, a read-only/design-only decision because no current
+doc authorizes a source removal slice or production GitHub implementation. This
+boundary still does not authorize real GitHub calls, Octokit, `fetch`, `gh api`,
+`gh pr create`, PR creation, branch deletion, merge, deploy, production `main`
+writes, token reads, secret reads, env dumps, raw payload logging, a
+network-capable client, or live memory writes.
 
 ## MCR-850 Real Vertical Smoke Boundary
 

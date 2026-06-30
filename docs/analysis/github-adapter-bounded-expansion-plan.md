@@ -39,10 +39,12 @@ adapter, a network-capable client, or an external process execution path.
 
 MCR-1040 itself was planning/design only and did not authorize source or test
 changes. MCR-1050 has now completed the local github-adapter restriction
-test/source guard. The next bounded slice is MCR-1052: a read-only
-post-restriction readiness audit. It may not change schemas, fixtures, package
-files, smoke runners, Matrix code, Runtime orchestration, GitHub workflows,
-deployment logic, or secret handling.
+test/source guard. MCR-1052 completed the read-only post-restriction audit as
+GO at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`. It did not
+change schemas, fixtures, package files, smoke runners, Matrix code, Runtime
+orchestration, GitHub workflows, deployment logic, or secret handling. MCR-1053
+is the docs-only closeout for that audit. The next bounded slice is MCR-1054: a
+read-only/design-only legacy stdout fallback removal decision.
 
 Any future code task must start from the current local refusal guarantees:
 
@@ -219,8 +221,7 @@ Forbidden files and actions:
 
 ## Acceptance And Validation
 
-MCR-1050 is complete. The post-restriction audit is acceptable only if it
-confirms that MCR-1050:
+MCR-1050 is complete. MCR-1052 confirmed that MCR-1050:
 
 - proves legacy stdout fallback succeeds only when `api_summary` is absent and
   stdout contains a repo-scoped PR URL
@@ -235,11 +236,23 @@ confirms that MCR-1050:
 - preserves no runner call on refusals
 - preserves redacted evidence refs
 
-Validation commands:
+MCR-1052 proof at repository SHA `621b3b660384a7fb11c2f0827c569a8ca1f3248b`:
+`pnpm --filter github-adapter test` 46/46 pass,
+`pnpm --filter runtime-orchestrator test` 13/13 pass, `pnpm test:contracts`
+84/84 pass, `pnpm schemas:validate` 84/84 pass, `pnpm test` 233/233 pass, and
+`git diff --check` pass. It also found no real GitHub, network-capable client,
+or external process execution path; docs/test mentions are forbidden or negative
+context.
+
+MCR-1054 should decide whether to keep the bounded internal fallback, propose a
+later removal slice, or require more local evidence first. It remains
+read-only/design-only because no current doc authorizes source removal, real
+GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a network-capable
+client, or external process runner execution.
+
+Validation commands for the docs closeout and decision task:
 
 ```bash
-pnpm --filter github-adapter test
-pnpm --filter runtime-orchestrator test
 pnpm test:contracts
 pnpm schemas:validate
 git diff --check
