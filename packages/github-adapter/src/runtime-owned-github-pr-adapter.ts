@@ -44,6 +44,19 @@ export type RuntimeOwnedGitHubPrEvidenceRefs = {
   stderr: string;
 };
 
+export type RuntimeOwnedGitHubPrBodySafety = {
+  redaction_status: "passed" | "failed";
+  scanner_ref: string;
+  summary?: string;
+};
+
+export type RuntimeOwnedGitHubEvidenceSafety = {
+  redaction_status: "passed" | "failed";
+  raw_material_excluded: boolean;
+  scanner_ref: string;
+  summary?: string;
+};
+
 export type RuntimeOwnedGitHubPullRequest = {
   url: string;
   task_id: string;
@@ -64,11 +77,12 @@ export type RuntimeOwnedGitHubPullRequest = {
 export type RuntimeOwnedGitHubPrInput = {
   action?: string;
   task_id: string;
-  proof: ProofLedgerEntry;
+  proof?: ProofLedgerEntry | null;
   target: PullRequestTarget;
   repository: string;
   title: string;
   body_file: string;
+  pr_body_safety?: RuntimeOwnedGitHubPrBodySafety;
   base_sha: string;
   head_sha: string;
   cleanup_status: RuntimeOwnedGitHubPullRequest["cleanup_status"];
@@ -76,6 +90,7 @@ export type RuntimeOwnedGitHubPrInput = {
   credential_scope?: "disposable" | "scoped";
   env?: Record<string, string>;
   evidence_dir: string;
+  evidence_safety?: RuntimeOwnedGitHubEvidenceSafety;
   requested_at?: string;
 };
 
@@ -89,11 +104,14 @@ export type RuntimeOwnedGitHubPrResult =
         | "forbidden_action"
         | "invalid_pr_target"
         | "target_confusion"
+        | "missing_proof"
         | "proof_verification_failed"
         | "non_disposable_target"
         | "production_main_rejected"
         | "credential_scope_required"
         | "scoped_env_required"
+        | "unsafe_body"
+        | "unsafe_evidence"
         | "invalid_pr_evidence"
         | "process_runner_required"
         | "gh_pr_create_failed"
@@ -138,6 +156,10 @@ export function createRuntimeOwnedGitHubPrAdapter(
         return targetError;
       }
 
+      if (!input.proof) {
+        return fail("missing_proof", "Runtime proof is required before GitHub PR creation.");
+      }
+
       const proofResult = verifyProof({
         proof: input.proof,
         expected: { task_id: input.task_id },
@@ -162,6 +184,12 @@ export function createRuntimeOwnedGitHubPrAdapter(
 
       if (evidenceError) {
         return evidenceError;
+      }
+
+      const unsafeContentError = unsafeContentRefusal(input);
+
+      if (unsafeContentError) {
+        return unsafeContentError;
       }
 
       if (!options.runner) {
@@ -324,6 +352,23 @@ function evidenceValidationError(
   }
   if (!isArtifactRefPrefix(input.evidence_dir)) {
     return fail("invalid_pr_evidence", "GitHub PR evidence refs must use artifact://.");
+  }
+
+  return null;
+}
+
+function unsafeContentRefusal(
+  input: RuntimeOwnedGitHubPrInput,
+): RuntimeOwnedGitHubPrResult | null {
+  if (input.pr_body_safety?.redaction_status === "failed") {
+    return fail("unsafe_body", "PR body redaction failed.");
+  }
+
+  if (
+    input.evidence_safety?.redaction_status === "failed" ||
+    input.evidence_safety?.raw_material_excluded === false
+  ) {
+    return fail("unsafe_evidence", "Evidence redaction failed or raw material was retained.");
   }
 
   return null;

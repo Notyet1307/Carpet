@@ -71,7 +71,7 @@ This task does not authorize creating those files. A later task must explicitly
 allow `packages/github-adapter/**` and `fixtures/github-adapter/**` before any
 test or fixture file is added.
 
-## MCR-970 Local Fixture Execution Status
+## Local Fixture Execution Status
 
 MCR-970 added local JSON fixtures under `fixtures/github-adapter/refusals/` and
 fixture-driven assertions in
@@ -79,8 +79,12 @@ fixture-driven assertions in
 not call an external runner for refusal cases; the injected runner only records
 whether execution would have been reached.
 
-Supported by the current adapter API:
+MCR-980 source-hardens the deferred proof/content cases so all local refusal
+fixtures now execute before runner calls.
 
+Supported by the current adapter API and local fixture runner:
+
+- `GH-REF-001` uses missing proof input and maps `missing_proof`.
 - `GH-REF-002` maps current `proof_verification_failed` to `unverified_proof`.
 - `GH-REF-003` maps current `approval_required` to `missing_approval`.
 - `GH-REF-010` maps current `approval_replayed` to
@@ -89,25 +93,11 @@ Supported by the current adapter API:
   `unsafe_credential`.
 - `GH-REF-012` maps current `scoped_env_required` to `unsafe_credential`.
 - `GH-REF-014` maps current `production_main_rejected` to `unsafe_ref`.
+- `GH-REF-018` uses PR body safety input and maps `unsafe_body`.
+- `GH-REF-019` uses evidence safety input and maps `unsafe_evidence`.
 - `GH-REF-020` uses current `forbidden_action` directly.
 
-Deferred because the current adapter input cannot represent the planned
-scenario without source changes:
-
-- `GH-REF-001` needs a request envelope shape that can omit proof before calling
-  proof verification.
-- `GH-REF-018` needs a PR-body safety summary or scanner result in the adapter
-  input.
-- `GH-REF-019` needs an evidence safety summary or scanner result in the adapter
-  input.
-
-Smallest future source allowlist for those deferred cases:
-
-- `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`
-- `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
-- `fixtures/github-adapter/refusals/**`
-- `docs/analysis/github-adapter-refusal-test-plan.md`
-- `docs/roadmaps/post-mvp-roadmap.md`
+No local refusal fixture in this directory is currently marked deferred.
 
 ## Scenario Map
 

@@ -1,14 +1,29 @@
 {
   "case_id": "GH-REF-019",
   "scenario_id": "GH-REF-TC-019",
-  "support": "deferred",
-  "expected": {
-    "refusal_category": "unsafe_evidence"
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
   },
-  "deferred": {
-    "reason": "RuntimeOwnedGitHubPrInput accepts evidence_dir as an artifact-ref prefix but does not accept an evidence redaction scanner result or raw-material exclusion summary.",
-    "future_source_allowlist": [
-      "packages/github-adapter/src/runtime-owned-github-pr-adapter.ts"
-    ]
+  "request": {
+    "overrides": {
+      "evidence_safety": {
+        "redaction_status": "failed",
+        "raw_material_excluded": false,
+        "scanner_ref": "artifact://mcr-970/github-adapter-refusals/GH-REF-019/evidence-redaction.json",
+        "summary": "evidence scanner found raw material retention"
+      }
+    }
+  },
+  "expected": {
+    "refusal_category": "unsafe_evidence",
+    "adapter_code": "unsafe_evidence",
+    "evidence_refs": [
+      "evidence_redaction_scanner_ref"
+    ],
+    "no_runner_calls": true
   }
 }

@@ -1,14 +1,24 @@
 {
   "case_id": "GH-REF-001",
   "scenario_id": "GH-REF-TC-001",
-  "support": "deferred",
-  "expected": {
-    "refusal_category": "missing_proof"
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
   },
-  "deferred": {
-    "reason": "RuntimeOwnedGitHubPrInput currently requires a proof object, and createPullRequest verifies input.proof directly. A missing-proof request cannot be represented without weakening the TypeScript contract or changing adapter input parsing.",
-    "future_source_allowlist": [
-      "packages/github-adapter/src/runtime-owned-github-pr-adapter.ts"
-    ]
+  "request": {
+    "overrides": {
+      "proof": null
+    }
+  },
+  "expected": {
+    "refusal_category": "missing_proof",
+    "adapter_code": "missing_proof",
+    "evidence_refs": [
+      "proof_lookup_ref"
+    ],
+    "no_runner_calls": true
   }
 }

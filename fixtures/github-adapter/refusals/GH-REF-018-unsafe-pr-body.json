@@ -1,14 +1,28 @@
 {
   "case_id": "GH-REF-018",
   "scenario_id": "GH-REF-TC-018",
-  "support": "deferred",
-  "expected": {
-    "refusal_category": "unsafe_body"
+  "support": "supported",
+  "adapter": {
+    "enabled": true,
+    "approval": "granted",
+    "runner": "injected",
+    "now": "2026-06-29T10:05:00.000Z"
   },
-  "deferred": {
-    "reason": "RuntimeOwnedGitHubPrInput accepts body_file as a path string and does not accept a PR body redaction scanner result or body artifact safety summary.",
-    "future_source_allowlist": [
-      "packages/github-adapter/src/runtime-owned-github-pr-adapter.ts"
-    ]
+  "request": {
+    "overrides": {
+      "pr_body_safety": {
+        "redaction_status": "failed",
+        "scanner_ref": "artifact://mcr-970/github-adapter-refusals/GH-REF-018/body-redaction.json",
+        "summary": "redaction scanner found unsafe PR body material"
+      }
+    }
+  },
+  "expected": {
+    "refusal_category": "unsafe_body",
+    "adapter_code": "unsafe_body",
+    "evidence_refs": [
+      "pr_body_redaction_scanner_ref"
+    ],
+    "no_runner_calls": true
   }
 }
