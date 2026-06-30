@@ -82,6 +82,16 @@ whether execution would have been reached.
 MCR-980 source-hardens the deferred proof/content cases so all local refusal
 fixtures now execute before runner calls.
 
+MCR-1000 documents GH-REF-004 through GH-REF-009 as an approval mismatch
+source/harness gap in
+`docs/analysis/github-adapter-approval-mismatch-plan.md`. The current local
+harness cannot honestly produce `approval_mismatch` for those rows without
+approval-gate source, adapter authorization-envelope, and fixture-harness
+changes. Do not add executable GH-REF-004 through GH-REF-009 fixtures by mapping
+the current `approval_required` result to `approval_mismatch`; that would
+conflict with GH-REF-003 and would make fixture metadata decide a category the
+source cannot emit.
+
 Supported by the current adapter API and local fixture runner:
 
 - `GH-REF-001` uses missing proof input and maps `missing_proof`.
@@ -107,6 +117,8 @@ Supported by the current adapter API and local fixture runner:
 - `GH-REF-026` uses current `forbidden_action` for live memory write requests.
 
 No local refusal fixture in this directory is currently marked deferred.
+GH-REF-004 through GH-REF-009 have no fixture files yet; they remain planned for
+MCR-1010 source/harness hardening.
 
 ## Scenario Map
 
@@ -163,8 +175,13 @@ ordering, not to replace the one-denial-cause-per-fixture matrix.
 
 ## Later Implementation Guardrail
 
-The next implementation task should be docs/test/fixture only if it explicitly
-authorizes those paths. It must still refuse real GitHub writes by default and
-must not introduce Octokit, `gh pr create`, `gh api` writes, merge, deploy,
-production `main` writes, broad credential use, secret reads, token value
-logging, env dumps, or live memory writes.
+The next recommended implementation task is MCR-1010 GitHub Adapter Approval
+Mismatch Source/Harness Hardening. It must explicitly authorize the needed
+approval-gate source, adapter authorization-envelope, schema-if-needed, fixture,
+and test harness paths before GH-REF-004 through GH-REF-009 become executable
+fixtures.
+
+It must still refuse real GitHub writes by default and must not introduce
+Octokit, `gh pr create`, `gh api` writes, fetch calls, merge, deploy, production
+`main` writes, broad credential use, secret reads, token value logging, env
+dumps, raw approval payload logging, or live memory writes.

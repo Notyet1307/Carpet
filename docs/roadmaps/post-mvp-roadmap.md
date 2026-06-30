@@ -13,16 +13,17 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-After accepting MCR-990, start with **MCR-1000 GitHub Adapter Approval Mismatch
-Refusal Fixture Plan**. MCR-901 is complete, MCR-910 and MCR-920 have design
-artifacts, MCR-930 has a policy artifact for evidence retention and cleanup,
-MCR-940 has a hardening plan artifact, MCR-950 has a refusal matrix artifact,
-MCR-960 has a docs-only test-plan artifact, MCR-970 adds the first local
-refusal fixtures and tests, MCR-980 hardens the deferred local refusal source
-boundary, and MCR-990 adds the local forbidden-action fixture slice for
-GH-REF-021 through GH-REF-026. The remaining uncovered MCR-950 rows are
-GH-REF-004 through GH-REF-009, GH-REF-013, GH-REF-015, GH-REF-016, and
-GH-REF-017.
+After accepting MCR-1000, start with **MCR-1010 GitHub Adapter Approval
+Mismatch Source/Harness Hardening**. MCR-901 is complete, MCR-910 and MCR-920
+have design artifacts, MCR-930 has a policy artifact for evidence retention and
+cleanup, MCR-940 has a hardening plan artifact, MCR-950 has a refusal matrix
+artifact, MCR-960 has a docs-only test-plan artifact, MCR-970 adds the first
+local refusal fixtures and tests, MCR-980 hardens the deferred local refusal
+source boundary, MCR-990 adds the local forbidden-action fixture slice for
+GH-REF-021 through GH-REF-026, and MCR-1000 documents the approval mismatch
+source/harness gap for GH-REF-004 through GH-REF-009. The remaining uncovered
+MCR-950 rows are GH-REF-004 through GH-REF-009, GH-REF-013, GH-REF-015,
+GH-REF-016, and GH-REF-017.
 
 ## Cards
 
@@ -287,34 +288,79 @@ Status: completed forbidden-action fixture slice; pending review.
 
 ### MCR-1000: GitHub Adapter Approval Mismatch Refusal Fixture Plan
 
-Status: proposed next after MCR-990 acceptance.
+Status: completed docs/source-gap plan; pending review.
 
 - Problem solved: MCR-950 approval mismatch rows GH-REF-004 through GH-REF-009
-  remain planned but not yet represented as executable local fixtures.
+  are locked as a source/harness gap instead of being represented by fake
+  executable fixtures.
 - Why now: approval binding is the next smallest uncovered local refusal slice
-  after forbidden actions, and it should be locked before target, ref,
-  protection, or dirty-worktree cases broaden the fixture surface.
+  after forbidden actions, and it must be distinguished from missing approval
+  before target, ref, protection, or dirty-worktree cases broaden the fixture
+  surface.
 - Allowed files: `docs/analysis/github-adapter-refusal-test-plan.md`,
-  `docs/roadmaps/post-mvp-roadmap.md`, and, only if explicitly approved by the
-  task brief, `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`
-  plus `fixtures/github-adapter/refusals/**`.
-- Conditional source/harness note: if mismatched approval records cannot be
-  represented by the current fixture harness, the future task must explicitly
-  scope any required test-harness or adapter-source change before editing those
-  files.
-- Forbidden files/actions: adapter real-write behavior, Runtime/app/package
-  files outside an explicit allowlist, schemas, Octokit, `gh pr create`,
-  `gh api` writes, push, merge, deploy, production main write, remote branch
-  deletion, token/env dump, live memory, and real GitHub smoke.
-- Acceptance criteria: GH-REF-004 through GH-REF-009 are planned or implemented
-  as one-denial-cause local refusal fixtures, each asserting
-  `approval_mismatch` before runner execution without raw approval payloads,
-  token values, env dumps, or real GitHub calls.
-- Validation/proof: `pnpm --filter github-adapter test`, `pnpm test:contracts`,
+  `docs/analysis/github-adapter-approval-mismatch-plan.md`, and
+  `docs/roadmaps/post-mvp-roadmap.md`.
+- Forbidden files/actions: `packages/**`, `apps/**`, `runtime/**`, `schemas/**`,
+  `fixtures/**`, `tests/**`, adapter source changes, approval-gate source
+  changes, new executable fixtures, new tests, Octokit, `gh pr create`,
+  `gh api` writes, fetch calls, push, merge, deploy, production main write,
+  remote branch deletion, token/env dump, live memory, and real GitHub smoke.
+- Acceptance criteria: state whether the current local harness can honestly
+  represent GH-REF-004 through GH-REF-009 as `approval_mismatch`; document the
+  exact source/harness gap if not; define MCR-1010 as the smallest future
+  source/harness hardening card; keep all approval evidence language redacted
+  and ref-only.
+- Validation/proof: `pnpm test:contracts`, `pnpm schemas:validate`,
+  `git diff --check`, and `rg` evidence for stale next-task text, GitHub
+  authorization drift, and token/env dump language.
+- Fake/scaffold/real boundary: docs/source-gap plan only; no executable fixture
+  completion, no adapter real-write behavior, and no real GitHub write path.
+
+### MCR-1010: GitHub Adapter Approval Mismatch Source/Harness Hardening
+
+Status: proposed next after MCR-1000 acceptance.
+
+- Problem solved: GH-REF-004 through GH-REF-009 need executable local refusals,
+  but current approval-gate source and the runtime-owned GitHub adapter fixture
+  harness cannot distinguish `approval_mismatch` from `missing_approval`.
+- Why now: MCR-1000 proves a docs-only fixture plan is not enough; the source
+  category and fixture harness must be hardened before adding GH-REF-004 through
+  GH-REF-009 executable fixtures.
+- Allowed files: `packages/approval-gate/src/approval-gate.ts`,
+  `packages/approval-gate/test/approval-gate.test.ts`,
+  `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`,
+  `fixtures/github-adapter/refusals/GH-REF-004-*.json`,
+  `fixtures/github-adapter/refusals/GH-REF-005-*.json`,
+  `fixtures/github-adapter/refusals/GH-REF-006-*.json`,
+  `fixtures/github-adapter/refusals/GH-REF-007-*.json`,
+  `fixtures/github-adapter/refusals/GH-REF-008-*.json`,
+  `fixtures/github-adapter/refusals/GH-REF-009-*.json`,
+  `schemas/proof/approval.schema.json` only if repository or run binding is
+  added to the approval contract, targeted proof approval fixtures and
+  `tests/contracts/proof-ledger-entry.test.mjs` only if that schema changes,
+  `docs/analysis/github-adapter-refusal-test-plan.md`,
+  `docs/analysis/github-adapter-approval-mismatch-plan.md`, and
+  `docs/roadmaps/post-mvp-roadmap.md`.
+- Forbidden files/actions: adapter real-write behavior beyond local pre-run
+  refusals, Runtime/app files outside the explicit allowlist, Octokit,
+  `gh pr create`, `gh api` writes, fetch calls, push, merge, deploy, production
+  main write, remote branch deletion, broad credential use, secret reads,
+  token/env dump, raw approval payload logging, live memory, and real GitHub
+  smoke.
+- Acceptance criteria: approval-gate source can emit `approval_mismatch` while
+  preserving `approval_required` for true missing approval; runtime-owned
+  adapter tests and fixtures cover GH-REF-004 through GH-REF-009 as
+  one-denial-cause cases; every case refuses before runner execution; no raw
+  approval payloads, token values, env dumps, raw logs, or raw API payloads are
+  checked in or printed.
+- Validation/proof: `pnpm --filter approval-gate test`,
+  `pnpm --filter github-adapter test`, `pnpm test:contracts`,
   `pnpm schemas:validate`, `git diff --check`, and `rg` evidence for stale
-  next-task text, GitHub authorization drift, and token/env dump language.
-- Fake/scaffold/real boundary: local fixture/test planning or local fixture/test
-  work only; no adapter real-write behavior and no real GitHub write path.
+  next-task text, GitHub authorization drift, raw approval payload language, and
+  token/env dump language.
+- Fake/scaffold/real boundary: local source/harness and fixture hardening only;
+  no adapter real-write behavior and no real GitHub write path.
 
 ## Global Deny List
 
