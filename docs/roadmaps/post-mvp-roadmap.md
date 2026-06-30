@@ -13,7 +13,7 @@ or default automation work from the smoke pass.
 
 ## First Recommended Task
 
-MCR-1041 GitHub Adapter Local Interface/Redaction Design is the first
+MCR-1042 GitHub Adapter Redacted Command Contract Local Slice is the first
 recommended task.
 MCR-1020 remaining GitHub adapter local refusal hardening is completed, merged,
 and accepted by the MCR-1030 docs-only readiness audit. It added local executable
@@ -30,11 +30,12 @@ and MCR-1020 closes GH-REF-013, GH-REF-015, GH-REF-016, and GH-REF-017 as local
 target/ref/protection/dirty-worktree refusals. MCR-1030 confirms all GH-REF-001
 through GH-REF-026 local refusal fixtures are supported and assert no runner
 calls. MCR-1040 turned the generic "later planning" instruction into a concrete
-planning-only card for bounded adapter expansion. MCR-1041 should now design
-the local-only injected client/runner interface or command/API redaction
-contract that could precede any later implementation. It must not authorize
-implementation, real GitHub, production automation, merge, deploy, or live
-memory work.
+planning-only card for bounded adapter expansion. MCR-1041 is now the design
+artifact for local interface/redaction ordering: both are required, but
+command/API redaction comes first and injected runner/client interface tightening
+comes second. MCR-1042 may implement only that first local redaction contract
+slice if explicitly approved. It must not add real GitHub, production
+automation, merge, deploy, live memory work, or a network-capable client.
 
 ## Cards
 
@@ -451,7 +452,9 @@ unauthorized.
 
 ### MCR-1041: GitHub Adapter Local Interface/Redaction Design
 
-Status: recommended next docs-only planning/design task.
+Status: completed design artifact in
+`docs/analysis/github-adapter-bounded-expansion-plan.md`; implementation remains
+outside MCR-1041.
 
 - Problem solved: MCR-1040 defines the bounded expansion boundary, but the exact
   local-only interface or redaction contract is still undecided.
@@ -468,9 +471,16 @@ Status: recommended next docs-only planning/design task.
   `fetch`, `gh api`, `gh pr create`, merge, deploy, branch deletion,
   production `main` write, token/env dump, secret read, live memory write,
   commit, push, PR.
-- Acceptance criteria: state that the next phase still cannot implement; choose
-  or sequence the local-only interface/redaction design; name the smallest
-  future local-only code allowlist only if later approved; preserve explicit
+- Design result: both boundaries are required, but sequenced. The command/API
+  redaction contract comes first; the injected runner/client interface shape
+  comes second after the redacted command/API boundary is stable.
+- Reason: redaction-first prevents a future runner/client interface from
+  standardizing raw token/env, raw stdout/stderr, raw GitHub API payload, raw
+  patch, raw diff, raw PR body, or raw approval payload material as acceptable
+  inputs or retained proof.
+- Acceptance criteria: state that MCR-1041 still cannot implement; choose or
+  sequence the local-only interface/redaction design; name the smallest future
+  local-only code allowlist only if later approved; preserve explicit
   scoped/disposable credential input, approval/proof/run_id/target/ref binding,
   no ambient auth, no runner call on refusals, and redacted evidence refs;
   include a verifier checklist and validation commands.
@@ -479,6 +489,43 @@ Status: recommended next docs-only planning/design task.
 - Fake/scaffold/real boundary: docs-only local interface/redaction design; no
   adapter implementation, no new tests or fixtures, no network-capable client,
   and no real GitHub write path.
+
+### MCR-1042: GitHub Adapter Redacted Command Contract Local Slice
+
+Status: recommended next local-only code slice; not yet started.
+
+- Problem solved: MCR-1041 chose redaction-first sequencing, but the current
+  adapter still keeps command building, redaction, runner execution, and proof
+  retention in one source file. The next slice should make the redacted
+  command/API contract explicit before any runner/client interface expansion.
+- Why now: a small local redaction contract is the narrowest way to reduce leak
+  risk without adding real GitHub, network authority, Runtime orchestration, or
+  broader adapter behavior.
+- Allowed files: `packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+  `packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
+  `packages/github-adapter/src/index.ts` only if exported redaction types need
+  the same narrowed boundary.
+- Forbidden files/actions: `apps/**`, `workers/**`, `runtime/**`, `schemas/**`,
+  `fixtures/**`, package files, lockfiles, `.codex.local.env`, GitHub workflows,
+  smoke runners, Matrix/Codex real smokes, Octokit, `fetch`, `gh api`,
+  `gh pr create`, real GitHub writes, a network-capable client, merge, deploy,
+  branch deletion, production `main` write, token/env dump, secret read, raw
+  API payload logging, raw approval payload logging, raw stdout/stderr
+  retention, raw patch/diff retention, raw PR body retention, live memory write,
+  commit, push, PR.
+- Acceptance criteria: define or extract a local redacted command/API summary
+  contract; keep token values and env dumps out of returned results and retained
+  proof; keep stdout/stderr/API payload evidence as refs or redacted summaries;
+  preserve verified proof, action-scoped approval, run_id, target repo,
+  base/head refs, explicit scoped/disposable credential input, no ambient auth,
+  no runner/client call on refusals, and redacted evidence refs.
+- Validation/proof: `pnpm --filter github-adapter test`,
+  `pnpm test:contracts`, `pnpm schemas:validate`, `git diff --check`, and `rg`
+  evidence for GitHub authorization drift and raw token/env/payload retention.
+- Fake/scaffold/real boundary: local redaction-contract hardening only; no real
+  GitHub write, no network-capable client, no Octokit, no `fetch`, no `gh api`,
+  no `gh pr create`, no merge, no deploy, no branch deletion, no production
+  `main` write, no secret read, and no live memory write.
 
 ## Global Deny List
 

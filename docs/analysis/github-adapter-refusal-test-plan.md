@@ -201,10 +201,16 @@ ordering, not to replace the one-denial-cause-per-fixture matrix.
 ## Later Implementation Guardrail
 
 No MCR-950 local refusal rows remain uncovered after MCR-1020, and MCR-1030
-records the docs-only readiness result as GO. MCR-1040 is the bounded expansion
-planning card that follows this test plan. It may describe a future local-only
-interface or redaction-contract slice, but it does not permit implementation or
-real GitHub writes, Octokit, `gh pr create`, `gh api` writes, fetch calls,
-merge, deploy, production `main` writes, broad credential use, secret reads,
-token value logging, env dumps, raw approval payload logging, or live memory
-writes.
+records the docs-only readiness result as GO. MCR-1040 added the bounded
+expansion planning card. MCR-1041 then chose both boundaries but sequenced them:
+redacted command/API contract first, injected runner/client interface second.
+
+MCR-1042 is the next smallest local-only code slice if explicitly approved. Its
+tests should keep every existing refusal fixture at `no_runner_calls=true`,
+prove command/API summaries are redacted before retention, and prove raw
+token/env, raw stdout/stderr, raw API payload, raw patch, raw diff, raw PR body,
+raw approval payload, and live memory material are not retained. MCR-1042 still
+does not permit real GitHub writes, Octokit, `gh pr create`, `gh api` writes,
+fetch calls, a network-capable client, merge, deploy, production `main` writes,
+broad credential use, secret reads, token value logging, env dumps, raw approval
+payload logging, or live memory writes.

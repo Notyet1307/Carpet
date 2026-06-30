@@ -132,9 +132,20 @@ explicit disposable or scoped authority ahead of execution, approval preview is
 non-consuming, local refusals do not consume approval, and runtime-orchestrator
 coverage keeps target, repository, and run id correlated.
 
-MCR-1040 is the next planning artifact for bounded adapter expansion. It should
-answer what a future local-only slice would design first, such as an injected
-client/runner interface shape or a command/API redaction contract. MCR-1040
-does not permit implementation, Runtime GitHub writes, Octokit, `gh pr create`,
-`gh api` writes, fetch calls, merge, deploy, production `main` writes, token
-reads, env dumps, or live memory writes.
+MCR-1040 completed the bounded adapter expansion plan. MCR-1041 completed the
+local interface/redaction design decision: both boundaries are required, but the
+command/API redaction contract must come first, followed by any injected
+runner/client interface tightening. That order keeps raw token/env, raw
+stdout/stderr, raw API payload, raw patch, raw diff, and raw PR body material
+out of the interface before a runner/client shape is frozen.
+
+The next smallest task is MCR-1042, if explicitly approved: a local-only
+redacted command/API contract slice. It may touch only
+`packages/github-adapter/src/runtime-owned-github-pr-adapter.ts`,
+`packages/github-adapter/test/runtime-github-pr-adapter.test.ts`, and
+`packages/github-adapter/src/index.ts` only if exported redaction types need the
+same narrowed boundary. It must not add Runtime GitHub writes, Octokit,
+`gh pr create`, `gh api`, fetch calls, a network-capable client, package
+changes, schemas, fixtures, smoke runners, merge, deploy, production `main`
+writes, token/env dumps, secret reads, raw payload logging, or live memory
+writes.
