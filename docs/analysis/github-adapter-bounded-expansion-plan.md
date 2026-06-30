@@ -20,6 +20,12 @@ commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167`. That completion tightened
 the injected runner interface but still did not add a real GitHub adapter or a
 network-capable client.
 
+MCR-1046 later completed the clean read-only readiness audit with result GO.
+MCR-1047 then merged commit `56f76f7a6354f074589fc126076ba767711689f5`, changing
+only runtime-orchestrator E2E coverage so the GitHub PR integration path uses
+the public `api_summary` runner result. Legacy stdout PR URL fallback is now
+github-adapter internal compatibility only.
+
 ## Scope Boundary
 
 The next phase may only plan or design a bounded adapter slice. It may not
@@ -142,13 +148,28 @@ Verifier checklist for a later local code slice:
 - No network-capable implementation is added; any runner/client remains
   injected and locally fakeable.
 
-## MCR-1045 Closeout Allowlist
+## MCR-1045 Through MCR-1047 Closeout Status
 
-MCR-1045 should solve one question: do the roadmap and GitHub adapter analysis
-docs consistently record MCR-1044 as completed without authorizing real GitHub
-expansion?
+MCR-1045 recorded MCR-1044 as completed without authorizing real GitHub
+expansion. MCR-1046 then completed a clean GO read-only audit. Its proof basis
+is the clean rerun only: validation was green, stale-text grep confirmed
+MCR-1044 was no longer active next, docs did not authorize real GitHub, and
+source-drift grep found no real GitHub, network, or process execution path.
 
-Allowed files for that docs-only closeout worker:
+MCR-1047 completed and merged at
+`56f76f7a6354f074589fc126076ba767711689f5`. It changed only
+`tests/e2e/runtime-orchestrator-cli.test.ts`; source changes were not needed.
+Runtime-orchestrator GitHub PR integration now uses public `api_summary`.
+Legacy stdout PR URL fallback coverage remains only inside github-adapter
+package tests and internal compatibility.
+
+## MCR-1049 Decision Boundary
+
+MCR-1049 should solve one question: should the legacy stdout PR URL fallback be
+kept as bounded internal compatibility, further restricted, or proposed for
+later removal?
+
+Allowed files for that docs/design/readiness worker:
 
 - `docs/analysis/github-adapter-bounded-expansion-plan.md`
 - `docs/analysis/github-adapter-hardening-plan.md`
@@ -169,21 +190,22 @@ Forbidden files and actions:
 - `package.json`
 - `pnpm-lock.yaml`
 - `.codex.local.env`
-- GitHub, Matrix, Codex, cloud, deploy, merge, push, PR, token, secret, or live
-  memory actions
+- real GitHub, Octokit, `fetch`, `gh api`, `gh pr create`, network-capable
+  client, GitHub, Matrix, Codex, cloud, deploy, merge, push, PR, token, secret,
+  DB/Postgres, Matrix/Codex real smoke, raw payload logging, or live memory
+  actions
 
 ## Acceptance And Validation
 
-The MCR-1045 docs-only closeout worker is acceptable only if it:
+The MCR-1049 docs/design/readiness worker is acceptable only if it:
 
 - keeps the result design-only
-- records MCR-1044 as completed and merged at
-  `367c625fe05e76e865ed2dab45f0f4d19ceb0167`
-- states that exported `RuntimeOwnedGitHubPrRunnerResult` keeps only
-  `exit_code` plus `api_summary`
-- states that exported `RuntimeOwnedGitHubPrRunner` no longer standardizes
-  stdout/stderr
-- keeps legacy stdout PR URL compatibility as internal local compatibility
+- inventories current legacy stdout fallback references without editing source
+- states that runtime-orchestrator uses public `api_summary`
+- states that legacy stdout PR URL fallback is github-adapter internal
+  compatibility only
+- chooses keep, further restrict, or propose later removal
+- defines the next MCR allowlist if code/test changes are needed
 - keeps real GitHub calls out of scope
 - keeps Octokit, `fetch`, `gh api`, and `gh pr create` out of scope
 - preserves explicit scoped/disposable credential input
@@ -191,7 +213,6 @@ The MCR-1045 docs-only closeout worker is acceptable only if it:
 - preserves no ambient auth
 - preserves no runner call on refusals
 - preserves redacted evidence refs
-- includes a verifier checklist for code-slice readiness
 
 Validation commands:
 
@@ -206,46 +227,3 @@ against the roadmap, hardening plan, refusal test plan, target-system design,
 and this plan. It should produce no positive authorization matches. If it finds
 a forbidden term in a denial sentence, the worker must quote the line and
 explain why it is denial context.
-
-## Handoff Prompt Seed
-
-This seed is for MCR-1046, the next recommended read-only audit after MCR-1045.
-It is not an implementation prompt.
-
-```text
-You are a Carpet worker for MCR-1046: GitHub Adapter Expansion Readiness Audit.
-Use the existing worktree or a dedicated read-only audit worktree. Do not commit,
-push, merge, PR, or call any external service.
-
-Goal:
-Read-only audit after MCR-1042 and MCR-1044. Verify docs, tests, GitHub adapter
-boundaries, refusal fixtures, and runtime-orchestrator integration are aligned
-before any further GitHub adapter expansion is chosen.
-
-Do not edit:
-packages, apps, workers, runtime, schemas, fixtures, tests, package files,
-lockfiles, .codex.local.env, or docs unless the task explicitly broadens scope.
-
-Forbidden:
-real GitHub, Octokit, fetch, gh api, gh pr create, network-capable client,
-merge, deploy, branch deletion, production main write, token/env dump, secret
-read, raw payload logging, DB/Postgres, Matrix/Codex real smoke, live memory,
-commit, push, PR.
-
-Acceptance:
-- Report GO/NO-GO.
-- Confirm no stale MCR-1044-as-next text.
-- Confirm docs do not authorize real GitHub.
-- Confirm local tests are green.
-- Confirm rg finds no new real GitHub, network, or process execution path.
-- If GO, recommend the next smallest bounded task.
-
-Validation:
-- pnpm --filter github-adapter test
-- pnpm --filter runtime-orchestrator test
-- pnpm test:contracts
-- pnpm schemas:validate
-- pnpm test
-- git diff --check
-- rg stale-text and authorization-drift checks
-```

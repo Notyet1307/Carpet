@@ -160,10 +160,18 @@ internal local compatibility only. Retained proof/evidence remains redacted
 `api_summary` fields and evidence refs, not raw runner output, raw API payloads,
 token/env material, raw PR body material, or raw approval payloads.
 
-MCR-1045 is the docs-only closeout for that merged status. The next recommended
-task after MCR-1045 is MCR-1046 GitHub Adapter Expansion Readiness Audit, a
-docs-only/read-only audit before any further GitHub expansion. This plan still
-does not authorize real GitHub writes, Octokit, `fetch`, `gh api`,
-`gh pr create`, a network-capable client, merge, deploy, branch deletion,
-production `main` writes, token/env dumps, secret reads, raw payload logging,
-or live memory writes.
+MCR-1045 is the docs-only closeout for that merged status. MCR-1046 completed a
+clean GO read-only audit: validation was green, MCR-1044 was no longer active
+next, docs did not authorize real GitHub, and source-drift grep found no real
+GitHub, network, or process execution path. MCR-1047 completed and merged in
+commit `56f76f7a6354f074589fc126076ba767711689f5`, changing only
+`tests/e2e/runtime-orchestrator-cli.test.ts` so runtime-orchestrator GitHub PR
+integration uses public `api_summary`. Legacy stdout PR URL compatibility is
+github-adapter internal compatibility only.
+
+The next recommended task is MCR-1049 GitHub Adapter Legacy Stdout
+Compatibility Decision, a docs/design/readiness task. This plan still does not
+authorize real GitHub writes, Octokit, `fetch`, `gh api`, `gh pr create`, a
+network-capable client, merge, deploy, branch deletion, production `main`
+writes, token/env dumps, secret reads, raw payload logging, or live memory
+writes.

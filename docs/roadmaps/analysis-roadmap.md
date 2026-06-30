@@ -428,19 +428,24 @@ opt-in、action-scoped approval 路径执行，且 production Matrix integration
 persistent Runtime service、real room/user lifecycle automation、production
 GitHub PR/API、deploy 和 live memory write 仍未完成。
 
-Post-MVP GitHub adapter local expansion through MCR-1044 is also complete:
+Post-MVP GitHub adapter local expansion through MCR-1047 is also complete:
 MCR-1044 merged at commit `367c625fe05e76e865ed2dab45f0f4d19ceb0167` as a
 local-only runner interface tightening slice. Exported
 `RuntimeOwnedGitHubPrRunnerResult` retains only `exit_code` plus `api_summary`;
-exported `RuntimeOwnedGitHubPrRunner` no longer standardizes stdout/stderr; the
-legacy stdout PR URL compatibility path is internal only. MCR-1045 is the
-docs-only closeout that syncs this roadmap and the GitHub adapter analysis docs.
-After MCR-1045, the next recommended task is MCR-1046 GitHub Adapter Expansion
-Readiness Audit: a docs-only/read-only audit before any further GitHub
-expansion. Do not treat this as authorization for real GitHub implementation,
-Octokit, `fetch`, `gh api`, `gh pr create`, merge, deploy, production `main`
-writes, branch deletion, token/env dumps, raw payload logging, DB/Postgres,
-Matrix/Codex real smoke, or live memory writes.
+exported `RuntimeOwnedGitHubPrRunner` no longer standardizes stdout/stderr.
+MCR-1046 then completed a clean GO read-only audit: local validation was green,
+MCR-1044 was no longer active next, docs did not authorize real GitHub, and
+source-drift grep found no real GitHub, network, or process execution path.
+MCR-1047 merged at commit `56f76f7a6354f074589fc126076ba767711689f5` and changed
+only `tests/e2e/runtime-orchestrator-cli.test.ts` so runtime-orchestrator GitHub
+PR integration uses the public `api_summary` runner result. Legacy stdout PR URL
+fallback coverage remains only inside github-adapter package tests and internal
+compatibility. The next recommended task is MCR-1049 GitHub Adapter Legacy
+Stdout Compatibility Decision, a docs/design/readiness task before any fallback
+removal or retention decision. Do not treat this as authorization for real
+GitHub implementation, Octokit, `fetch`, `gh api`, `gh pr create`, merge,
+deploy, production `main` writes, branch deletion, token/env dumps, raw payload
+logging, DB/Postgres, Matrix/Codex real smoke, or live memory writes.
 
 ---
 
